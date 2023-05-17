@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GameStatsApp.Interfaces\GameStatsApp.Interfaces.csproj" />
+    <ProjectReference Include="..\GameStatsApp.Model\GameStatsApp.Model.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MySql.Data" Version="8.0.32.1" />
+    <PackageReference Include="NPoco" Version="5.7.1" />
+  </ItemGroup>
+</Project>

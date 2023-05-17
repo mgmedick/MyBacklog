@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Data_Old\**" />
+    <Compile Remove="Views\**" />
+    <EmbeddedResource Remove="Data_Old\**" />
+    <EmbeddedResource Remove="Views\**" />
+    <None Remove="Data_Old\**" />
+    <None Remove="Views\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Common.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Text.Encodings.Web" Version="7.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GameStatsApp.Common\GameStatsApp.Common.csproj" />
+  </ItemGroup>
+</Project>

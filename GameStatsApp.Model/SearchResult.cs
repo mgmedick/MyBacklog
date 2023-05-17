@@ -1,0 +1,11 @@
+﻿using System.Collections.Generic;
+
+namespace SpeedRunApp.Model
+{
+    public class SearchResult
+    {
+        public string Label { get; set; }
+        public string Value { get; set; }
+        public List<SearchResult> SubItems { get; set; } 
+    }
+}
