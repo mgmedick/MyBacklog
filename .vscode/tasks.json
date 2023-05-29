@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "clean",
-                "${workspaceFolder}/SpeedRunApp/SpeedRunApp.MVC.csproj"
+                "${workspaceFolder}/GameStatsApp/GameStatsApp.csproj"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -17,7 +17,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/SpeedRunApp/SpeedRunApp.MVC.csproj"
+                "${workspaceFolder}/GameStatsApp/GameStatsApp.csproj"
             ],
             "problemMatcher": "$msCompile",
             "dependsOn":["cleanweb"]

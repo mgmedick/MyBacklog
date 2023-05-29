@@ -1,9 +1,9 @@
-﻿using SpeedRunApp.Model;
-using SpeedRunApp.Model.Data;
-using SpeedRunApp.Model.ViewModels;
+﻿using GameStatsApp.Model;
+using GameStatsApp.Model.Data;
+using GameStatsApp.Model.ViewModels;
 using System.Collections.Generic;
 
-namespace SpeedRunApp.Interfaces.Services
+namespace GameStatsApp.Interfaces.Services
 {
     public interface IMenuService
     {

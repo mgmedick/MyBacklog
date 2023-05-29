@@ -1,13 +1,13 @@
-﻿using SpeedRunApp.Interfaces.Repositories;
-using SpeedRunApp.Interfaces.Services;
-using SpeedRunApp.Model;
-using SpeedRunApp.Model.Data;
-using SpeedRunApp.Model.ViewModels;
-//using SpeedRunApp.Interfaces.Helpers;
+﻿using GameStatsApp.Interfaces.Repositories;
+using GameStatsApp.Interfaces.Services;
+using GameStatsApp.Model;
+using GameStatsApp.Model.Data;
+using GameStatsApp.Model.ViewModels;
+//using GameStatsApp.Interfaces.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SpeedRunApp.Service
+namespace GameStatsApp.Service
 {
     public class MenuService : IMenuService
     {
@@ -25,7 +25,7 @@ namespace SpeedRunApp.Service
             if (!string.IsNullOrWhiteSpace(searchText))
             {
                 searchText = searchText.Trim();
-                var users = _userService.SearchUsers(searchText);
+                var users = _userService.SearchUsers(searchText).ToList();
                 if (users.Any()){
                     var usersGroup = new SearchResult { Value = "0", Label = "Users", SubItems = users };
                     results.Add(usersGroup);

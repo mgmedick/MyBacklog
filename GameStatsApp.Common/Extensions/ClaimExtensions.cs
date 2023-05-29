@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using System.Security.Principal;
 using System.Security.Claims;
 
-namespace SpeedRunCommon.Extensions
+namespace GameStatsApp.Common.Extensions
 {
     public static class ClaimExtensions
     {

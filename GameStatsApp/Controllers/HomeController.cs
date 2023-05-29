@@ -1,10 +1,10 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
-using SpeedRunApp.Interfaces.Services;
-using SpeedRunApp.Model.Data;
-using SpeedRunApp.Model.ViewModels;
-using SpeedRunCommon.Extensions;
+using GameStatsApp.Interfaces.Services;
+using GameStatsApp.Model.Data;
+using GameStatsApp.Model.ViewModels;
+using GameStatsApp.Common.Extensions;
 using System.Security.Claims;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authentication;
@@ -14,21 +14,27 @@ using System.Linq;
 using Serilog;
 using Microsoft.AspNetCore.Authorization;
 
-namespace SpeedRunApp.MVC.Controllers
+namespace GameStatsApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IUserService _userAcctService = null;
+        private readonly IUserService _userService = null;
         private readonly ILogger _logger = null;
 
-        public HomeController(IUserService userAcctService, ILogger logger)
+        public HomeController(IUserService userService, ILogger logger)
         {
-            _userAcctService = userAcctService;
+            _userService = userService;
             _logger = logger;
         }
 
-        public ViewResult Index()
+        public ActionResult Index()
         {
+            var identity = (ClaimsIdentity)HttpContext.User.Identity;
+            if (identity == null || !identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login");
+            }
+
             return View();
         }
 
@@ -40,9 +46,7 @@ namespace SpeedRunApp.MVC.Controllers
         [HttpGet]
         public ActionResult Login()
         {
-            var loginVM = new LoginViewModel();
-
-            return PartialView("_Login", loginVM);
+            return View();
         }
 
         [HttpPost]
@@ -53,20 +57,20 @@ namespace SpeedRunApp.MVC.Controllers
 
             try
             {
-                if (!_userAcctService.UsernameExists(loginVM.Username, true))
+                if (!_userService.UsernameExists(loginVM.Username, true))
                 {
                     ModelState.AddModelError("Login", "Invalid username");
                 }
 
-                if (!_userAcctService.PasswordMatches(loginVM.Password, loginVM.Username))
+                if (!_userService.PasswordMatches(loginVM.Password, loginVM.Username))
                 {
                     ModelState.AddModelError("Login", "Invalid password");
                 }
 
                 if(ModelState.IsValid)
                 {
-                    var userAcctVW = _userAcctService.GetUserViews(i => i.Username == loginVM.Username).FirstOrDefault();
-                    LoginUser(userAcctVW);
+                    var userVW = _userService.GetUserViews(i => i.Username == loginVM.Username).FirstOrDefault();
+                    LoginUser(userVW);
                     success = true;
                 }
                 else
@@ -99,9 +103,7 @@ namespace SpeedRunApp.MVC.Controllers
         [HttpGet]
         public ActionResult SignUp()
         {
-            var signUpVM = new SignUpViewModel();
-
-            return PartialView("_SignUp", signUpVM);
+            return View();
         }
 
         [HttpPost]
@@ -112,14 +114,14 @@ namespace SpeedRunApp.MVC.Controllers
 
             try
             {
-                if (_userAcctService.EmailExists(signUpVM.Email))
+                if (_userService.EmailExists(signUpVM.Email))
                 {
                     ModelState.AddModelError("SignUp", "Email already exists for another user");
                 }
 
                 if (ModelState.IsValid)
                 {
-                    _ = _userAcctService.SendActivationEmail(signUpVM.Email).ContinueWith(t => _logger.Error(t.Exception, "SendActivationEmail"), TaskContinuationOptions.OnlyOnFaulted);
+                    _ = _userService.SendActivationEmail(signUpVM.Email).ContinueWith(t => _logger.Error(t.Exception, "SendActivationEmail"), TaskContinuationOptions.OnlyOnFaulted);
                     success = true;
                 }
                 else
@@ -140,31 +142,31 @@ namespace SpeedRunApp.MVC.Controllers
         [HttpGet]
         public ViewResult Activate(string email, long expirationTime, string token)
         {
-            var activateUserAcctVM = _userAcctService.GetActivateUser(email, expirationTime, token);
+            var activateUserVM = _userService.GetActivateUser(email, expirationTime, token);
             HttpContext.Session.Set<string>("Email", email);
 
-            return View(activateUserAcctVM);
+            return View(activateUserVM);
         }
 
         [HttpPost]
-        public JsonResult Activate(ActivateViewModel activateUserAcctVM)
+        public JsonResult Activate(ActivateViewModel activateUserVM)
         {
             var success = false;
             List<string> errorMessages = null;
 
             try
             {
-                if (_userAcctService.UsernameExists(activateUserAcctVM.Username, false))
+                if (_userService.UsernameExists(activateUserVM.Username, false))
                 {
                     ModelState.AddModelError("Activate", "Username already exists for another user");
                 }
 
                 if (ModelState.IsValid)
                 {
-                    _userAcctService.CreateUser(activateUserAcctVM.Username, activateUserAcctVM.Password);
-                    var userAcctVW = _userAcctService.GetUserViews(i => i.Username == activateUserAcctVM.Username).FirstOrDefault();
-                    LoginUser(userAcctVW);
-                    _ = _userAcctService.SendConfirmRegistrationEmail(userAcctVW.Email, userAcctVW.Username).ContinueWith(t => _logger.Error(t.Exception, "SendConfirmRegistrationEmail"), TaskContinuationOptions.OnlyOnFaulted);
+                    _userService.CreateUser(activateUserVM.Username, activateUserVM.Password);
+                    var userVW = _userService.GetUserViews(i => i.Username == activateUserVM.Username).FirstOrDefault();
+                    LoginUser(userVW);
+                    _ = _userService.SendConfirmRegistrationEmail(userVW.Email, userVW.Username).ContinueWith(t => _logger.Error(t.Exception, "SendConfirmRegistrationEmail"), TaskContinuationOptions.OnlyOnFaulted);
                     success = true;
                 }
                 else
@@ -186,9 +188,7 @@ namespace SpeedRunApp.MVC.Controllers
         [HttpGet]
         public ActionResult ResetPassword()
         {
-            var resetPassVM = new ResetPasswordViewModel();
-
-            return PartialView("_ResetPassword", resetPassVM);
+            return View();
         }
 
         [AllowAnonymous]
@@ -200,14 +200,14 @@ namespace SpeedRunApp.MVC.Controllers
 
             try
             {
-                if (!_userAcctService.UsernameExists(resetPassVM.Username, true))
+                if (!_userService.UsernameExists(resetPassVM.Username, true))
                 {
                     ModelState.AddModelError("ResetPassword", "Username not found");
                 }
 
                 if (ModelState.IsValid)
                 {
-                    _ = _userAcctService.SendResetPasswordEmail(resetPassVM.Username).ContinueWith(t => _logger.Error(t.Exception, "SendResetPasswordEmail"), TaskContinuationOptions.OnlyOnFaulted);
+                    _ = _userService.SendResetPasswordEmail(resetPassVM.Username).ContinueWith(t => _logger.Error(t.Exception, "SendResetPasswordEmail"), TaskContinuationOptions.OnlyOnFaulted);
                     success = true;
                 }
                 else
@@ -229,7 +229,7 @@ namespace SpeedRunApp.MVC.Controllers
         [HttpGet]
         public ViewResult ChangePassword(string username, string email, long expirationTime, string token)
         {
-            var changePassVM = _userAcctService.GetChangePassword(username, email, expirationTime, token);
+            var changePassVM = _userService.GetChangePassword(username, email, expirationTime, token);
             HttpContext.Session.Set<string>("Username", username);
 
             return View(changePassVM);
@@ -244,14 +244,14 @@ namespace SpeedRunApp.MVC.Controllers
             try
             {
                 var username = HttpContext.Session.Get<string>("Username");
-                if (_userAcctService.PasswordMatches(changePassVM.Password, username))
+                if (_userService.PasswordMatches(changePassVM.Password, username))
                 {
                     ModelState.AddModelError("ChangePassword", "Password must differ from previous password");
                 }
 
                 if (ModelState.IsValid)
                 {
-                    _userAcctService.ChangeUserAcctPassword(username, changePassVM.Password);
+                    _userService.ChangeUserPassword(username, changePassVM.Password);
                     success = true;
                 }
                 else
@@ -270,14 +270,14 @@ namespace SpeedRunApp.MVC.Controllers
             return Json(new { success = success, errorMessages = errorMessages });
         }
 
-        private async void LoginUser(UserView userAcctVW)
+        private async void LoginUser(UserView userVW)
         {
             var claims = new List<Claim>
                         {
-                            new Claim(ClaimTypes.NameIdentifier, userAcctVW.UserID.ToString()),
-                            new Claim(ClaimTypes.Email, userAcctVW.Email),
-                            new Claim(ClaimTypes.Name, userAcctVW.Username),
-                            new Claim("theme", userAcctVW.IsDarkTheme ? "theme-dark" : "theme-light")
+                            new Claim(ClaimTypes.NameIdentifier, userVW.UserID.ToString()),
+                            new Claim(ClaimTypes.Email, userVW.Email),
+                            new Claim(ClaimTypes.Name, userVW.Username),
+                            new Claim("theme", userVW.IsDarkTheme ? "theme-dark" : "theme-light")
                         };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -291,7 +291,7 @@ namespace SpeedRunApp.MVC.Controllers
         [HttpGet]
         public IActionResult UsernameExists(string username)
         {
-            var result = _userAcctService.UsernameExists(username, false);
+            var result = _userService.UsernameExists(username, false);
 
             return Json(result);
         }
@@ -300,7 +300,7 @@ namespace SpeedRunApp.MVC.Controllers
         [HttpGet]
         public IActionResult ActiveUsernameExists(string username)
         {
-            var result = _userAcctService.UsernameExists(username, true);
+            var result = _userService.UsernameExists(username, true);
 
             return Json(result);
         }
@@ -309,7 +309,7 @@ namespace SpeedRunApp.MVC.Controllers
         [HttpGet]
         public IActionResult UsernameNotExists(string username)
         {
-            var result = !_userAcctService.UsernameExists(username, false);
+            var result = !_userService.UsernameExists(username, false);
 
             return Json(result);
         }
@@ -319,7 +319,7 @@ namespace SpeedRunApp.MVC.Controllers
         public IActionResult PasswordNotMatches(string password)
         {
             var username = HttpContext.Session.Get<string>("Username");
-            var result = !_userAcctService.PasswordMatches(password, username);
+            var result = !_userService.PasswordMatches(password, username);
 
             return Json(result);
         }
@@ -328,7 +328,7 @@ namespace SpeedRunApp.MVC.Controllers
         [HttpGet]
         public IActionResult PasswordMatches(string password, string username)
         {
-            var result = _userAcctService.PasswordMatches(password, username);
+            var result = _userService.PasswordMatches(password, username);
 
             return Json(result);
         }
@@ -337,7 +337,7 @@ namespace SpeedRunApp.MVC.Controllers
         [HttpGet]
         public IActionResult EmailNotExists(string email)
         {
-            var result = !_userAcctService.EmailExists(email);
+            var result = !_userService.EmailExists(email);
 
             return Json(result);
         }

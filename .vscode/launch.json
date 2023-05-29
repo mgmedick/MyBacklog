@@ -6,9 +6,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "buildweb",            
-            "program": "${workspaceFolder}/SpeedRunApp/bin/Debug/net6.0/SpeedRunApp.MVC.dll",
+            "program": "${workspaceFolder}/GameStatsApp/bin/Debug/net6.0/GameStatsApp.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/SpeedRunApp",
+            "cwd": "${workspaceFolder}/GameStatsApp",
             "stopAtEntry": false,
             "internalConsoleOptions": "openOnSessionStart",
             "launchBrowser": {

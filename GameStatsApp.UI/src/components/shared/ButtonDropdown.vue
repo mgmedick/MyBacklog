@@ -1,9 +1,9 @@
 ﻿<template>
-    <div class="btn-dropdown dropdown" :class="{ show : state }" @click="toggleDropdown">
-        <button class="btn dropdown-toggle nowrap-elipsis" :class="btnclasses" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <div class="btn-group" :class="{ show : state }" @click="toggleDropdown">
+        <button class="btn dropdown-toggle" :class="btnclasses" type="button" data-bs-toggle="dropdown" aria-expanded="false">
             <slot name="text"></slot>
         </button>
-        <div class="dropdown-menu" :class="[listclasses]" aria-labelledby="dropdownMenuButton" :style="[ state ? { display:'block' } : { display:'none' } ] ">
+        <div class="dropdown-menu" :class="[listclasses]" aria-labelledby="dropdownMenuButton" :style="[ state ? { display:'block' } : { display:'none' } ] " >
             <slot name="options"></slot>
         </div>
     </div>
@@ -20,6 +20,18 @@
                 state: false
             }
         },
+        // computed: {
+        //     popperPlacement() {
+        //         var result = '';
+
+        //         if (this.listclasses.indexOf("dropdown-menu-end") > -1)
+        //         {
+        //             result = 'bottom-end'
+        //         }
+
+        //         return result;
+        //     }            
+        // },           
         methods: {
             toggleDropdown(e) {
                 this.state = !this.state

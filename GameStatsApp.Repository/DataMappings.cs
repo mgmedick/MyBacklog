@@ -4,7 +4,7 @@ using System.Text;
 using NPoco.FluentMappings;
 using GameStatsApp.Model.Data;
 
-namespace SpeedRunApp.Repository
+namespace GameStatsApp.Repository
 {
     public class DataMappings : Mappings
     {

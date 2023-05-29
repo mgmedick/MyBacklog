@@ -34,7 +34,7 @@
             </div>
         </form>
         <div v-else style="text-align:center;">
-            <i class="fa fa-hourglass-end"></i>
+            <font-awesome-icon icon="fa-solid fa-hourglass-end" />
             <div>
                 Activation link has expired, please <a href="#" @click="showSignUpModal = true">Sign Up</a> to try again.
             </div>

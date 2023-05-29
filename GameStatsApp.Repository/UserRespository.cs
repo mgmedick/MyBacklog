@@ -15,21 +15,21 @@ namespace GameStatsApp.Repository
 {
     public class UserRespository : BaseRepository, IUserRepository
     {
-        public IEnumerable<User> GetUsers(Expression<Func<User, bool>> predicate)
+        public IEnumerable<User> GetUsers(Expression<Func<User, bool>>  predicate = null)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                return db.Query<User>().Where(predicate).ToList();
+                return db.Query<User>().Where(predicate ?? (x => true)).ToList();
             }
         }
 
-        public void SaveUser(User userAcct)
+        public void SaveUser(User user)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
                 using (var tran = db.GetTransaction())
                 {
-                    db.Save<User>(userAcct);
+                    db.Save<User>(user);
 
                     tran.Complete();
                 }
@@ -44,18 +44,28 @@ namespace GameStatsApp.Repository
             }
         }
 
-        public void SaveUserSetting(UserSetting userAcctSetting)
+        public void SaveUserSetting(UserSetting userSetting)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
                 using (var tran = db.GetTransaction())
                 {
-                    db.Save<UserSetting>(userAcctSetting);
+                    db.Save<UserSetting>(userSetting);
 
                     tran.Complete();
                 }
             }
         }
+
+        public IEnumerable<SearchResult> SearchUsers(string searchText)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                var results = db.Query<SearchResult>("SELECT ID AS `Value`, Username AS Label FROM tbl_User WHERE Username LIKE CONCAT('%', @0, '%') LIMIT 10;", searchText).ToList();
+
+                return results;
+            }
+        }        
     }
 }
 

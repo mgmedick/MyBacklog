@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using NPoco;
 using System.Linq;
-using SpeedRunApp.Model.Data;
-using SpeedRunApp.Interfaces.Repositories;
+using GameStatsApp.Model.Data;
+using GameStatsApp.Interfaces.Repositories;
 using System.Linq.Expressions;
 //using Microsoft.Extensions.Configuration;
 
-namespace SpeedRunApp.Repository
+namespace GameStatsApp.Repository
 {
     public class SettingRespository : BaseRepository, ISettingRepository
     {

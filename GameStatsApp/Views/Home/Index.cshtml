@@ -1,8 +1,13 @@
 ﻿
+@using Microsoft.Extensions.Configuration
+@using System.Security.Claims
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostingEnv
+@inject IConfiguration Configuration
+
 @{ ViewBag.Title = "GameStatsApp"; }
 
-<div class="container-lg mx-auto p-0" style="max-width:598px;">
-</div>
+<index :isauth="@Json.Serialize(User.Identity.IsAuthenticated)"></index>
+
 
 
 

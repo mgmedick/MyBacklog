@@ -9,10 +9,11 @@ namespace GameStatsApp.Interfaces.Repositories
 {
     public interface IUserRepository
     {
-        IEnumerable<User> GetUser(Expression<Func<User, bool>> predicate);
-        void SaveUser(User userAcct);
+        IEnumerable<User> GetUsers(Expression<Func<User, bool>> predicate = null);
+        void SaveUser(User user);
         IEnumerable<UserView> GetUserViews(Expression<Func<UserView, bool>> predicate);
-        void SaveUserSetting(UserSetting userAcctSetting);
+        void SaveUserSetting(UserSetting userSetting);
+        IEnumerable<SearchResult> SearchUsers(string searchText);
     }
 }
 

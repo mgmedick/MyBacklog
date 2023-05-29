@@ -5,10 +5,10 @@ using System.Text;
 using System.IO;
 using RazorEngineCore;
 using Microsoft.Extensions.Caching.Memory;
-using SpeedRunApp.Interfaces.Services;
+using GameStatsApp.Interfaces.Services;
 using Serilog;
 
-namespace SpeedRunApp.Service
+namespace GameStatsApp.Service
 {
     public class TemplateService : ITemplateService
     {
@@ -48,13 +48,13 @@ namespace SpeedRunApp.Service
 
         private string GetTemplateContents(string templateFileName)
         {
-            var assembly = Assembly.Load("SpeedRunApp.MVC");
+            var assembly = Assembly.Load("GameStatsApp");
 
             if (assembly != null)
             {
                 StringBuilder sb = new StringBuilder();
 
-                using (StreamReader sr = new StreamReader(assembly.GetManifestResourceStream(String.Format("SpeedRunApp.MVC.Templates.{0}.cshtml", templateFileName))))
+                using (StreamReader sr = new StreamReader(assembly.GetManifestResourceStream(String.Format("GameStatsApp.Templates.{0}.cshtml", templateFileName))))
                 {
                     while (!sr.EndOfStream)
                     {

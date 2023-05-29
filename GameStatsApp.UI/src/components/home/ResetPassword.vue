@@ -21,7 +21,7 @@
             <div v-if="loading">
                 <div class="d-flex p-3">
                     <div class="mx-auto align-self-center">
-                        <i class="fa fa-spinner fa-spin fa-lg"></i>
+                        <font-awesome-icon icon="fa-solid fa-spinner" spin size="lg" />
                     </div>
                 </div>
             </div>

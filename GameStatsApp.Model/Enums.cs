@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace SpeedRunApp.Model
+namespace GameStatsApp.Model
 {
     public enum Template
     {

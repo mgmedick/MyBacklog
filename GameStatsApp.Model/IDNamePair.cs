@@ -1,4 +1,4 @@
-﻿namespace SpeedRunApp.Model
+﻿namespace GameStatsApp.Model
 {
     public class IDNamePair
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SpeedRunCommon.Extensions
+namespace GameStatsApp.Common.Extensions
 {
     public static class DateTimeExtensions
     {

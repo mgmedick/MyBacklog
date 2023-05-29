@@ -5,27 +5,23 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Net.Mail;
 using System.Net;
 using Serilog;
-using SpeedRunApp.Interfaces.Services;
-using SpeedRunApp.Interfaces.Repositories;
+using GameStatsApp.Interfaces.Services;
+using GameStatsApp.Interfaces.Repositories;
 using System.Threading.Tasks;
-using SpeedRunApp.Model.Data;
-using SpeedRunApp.Model;
+using GameStatsApp.Model.Data;
+using GameStatsApp.Model;
 using System.Linq.Expressions;
 
-namespace SpeedRunApp.Service
+namespace GameStatsApp.Service
 {
     public class CacheService : ICacheService
     {
         public IMemoryCache _cache { get; set; }
         public IUserRepository _userRepo { get; set; }
-        public IGameRepository _gameRepo { get; set; }
-        public ISpeedRunRepository _speedRunRepo { get; set; }
-        public CacheService(IMemoryCache cache, IUserRepository userRepo, IGameRepository gameRepo, ISpeedRunRepository speedRunRepo)
+        public CacheService(IMemoryCache cache, IUserRepository userRepo)
         {
             _cache = cache;
             _userRepo = userRepo;
-            _gameRepo = gameRepo;
-            _speedRunRepo = speedRunRepo;
         }
 
         public IEnumerable<User> GetUsers()

@@ -25,14 +25,14 @@
                 </div>
             </div>
             <div v-if="showSuccess" style="text-align:center;">
-                <i class="fa fa-circle-check"></i>
+                <font-awesome-icon icon="fa-solid fa-circle-check" />
                 <div>
                     Successfully reset password.
                 </div>
             </div>
         </form>
         <div v-else style="text-align:center;">
-            <i class="fa fa-hourglass-end"></i>
+            <font-awesome-icon icon="fa-solid fa-hourglass-end" />
             <div>
                 Reset Password link has expired, please <a href="#" @click="showResetModal = true">Reset Password</a> to try again.
             </div>

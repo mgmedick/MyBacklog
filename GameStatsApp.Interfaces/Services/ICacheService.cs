@@ -1,17 +1,14 @@
 ﻿using System;
-using SpeedRunApp.Model;
-using SpeedRunApp.Model.Data;
-using SpeedRunApp.Model.ViewModels;
+using GameStatsApp.Model;
+using GameStatsApp.Model.Data;
+using GameStatsApp.Model.ViewModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace SpeedRunApp.Interfaces.Services
+namespace GameStatsApp.Interfaces.Services
 {
     public interface ICacheService
     {
         IEnumerable<User> GetUsers();
-        IEnumerable<IDNameAbbrPair> GetGameIDNameAbbrs();
-        IEnumerable<IDNameAbbrPair> GetUserIDNameAbbrs();
-        IEnumerable<IDNamePair> GetRunStatusTypes();
     }
 }

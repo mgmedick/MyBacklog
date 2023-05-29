@@ -9,7 +9,7 @@
     {
         <h5 class="m-0 font-weight-bold m-0">@User.FindFirst(ClaimTypes.Name).Value</h5>
         <div>
-            <userdetails :userid="'@User.FindFirst(ClaimTypes.NameIdentifier).Value'"></userdetails>
+            <user-settings :userid="'@User.FindFirst(ClaimTypes.NameIdentifier).Value'"></user-settings>
         </div>    
     }
 </div>

@@ -1,3 +1,3 @@
-# SpeedRunApp.UI
+# GameStatsApp.UI
 
 

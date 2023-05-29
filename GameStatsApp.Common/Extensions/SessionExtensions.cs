@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 
-namespace SpeedRunCommon.Extensions
+namespace GameStatsApp.Common.Extensions
 {
     public static class SessionExtensions
     {

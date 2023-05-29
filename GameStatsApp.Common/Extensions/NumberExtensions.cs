@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace SpeedRunCommon.Extensions
+namespace GameStatsApp.Common.Extensions
 {
     public static class NumberExtensions
     {

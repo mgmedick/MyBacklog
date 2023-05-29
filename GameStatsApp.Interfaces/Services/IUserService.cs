@@ -17,13 +17,14 @@ namespace GameStatsApp.Interfaces.Services
         IEnumerable<UserView> GetUserViews(Expression<Func<UserView, bool>> predicate);        
         Task SendResetPasswordEmail(string username);
         ChangePasswordViewModel GetChangePassword(string username, string email, long expirationTime, string token);
-        void ChangeUserAcctPassword(string username, string pass);
+        void ChangeUserPassword(string username, string pass);
         bool EmailExists(string email);
         bool PasswordMatches(string password, string username);
         bool UsernameExists(string username, bool activeFilter);
         UserViewModel GetUser(int userID);
-        void SaveUser(UserViewModel userAcctVM, int currUserAcctID);
+        void SaveUser(UserViewModel userVM, int currUserID);
         void UpdateIsDarkTheme(int currUserID, bool isDarkTheme);
         Task SendConfirmRegistrationEmail(string email, string username);
+        IEnumerable<SearchResult> SearchUsers(string searchText);
     }
 }

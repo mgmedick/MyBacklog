@@ -5,10 +5,10 @@ using Microsoft.Extensions.Configuration;
 using System.Net.Mail;
 using System.Net;
 using Serilog;
-using SpeedRunApp.Interfaces.Services;
+using GameStatsApp.Interfaces.Services;
 using System.Threading.Tasks;
 
-namespace SpeedRunApp.Service
+namespace GameStatsApp.Service
 {
     public class EmailService : IEmailService
     {

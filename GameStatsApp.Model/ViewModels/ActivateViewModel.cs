@@ -10,7 +10,7 @@ namespace GameStatsApp.Model.ViewModels
     public class ActivateViewModel
     {
         [Required(AllowEmptyStrings = false, ErrorMessage = "Username required")]
-        [Remote(action: "UsernameNotExists", controller: "SpeedRun", ErrorMessage = "Username already exists for another user")]
+        [Remote(action: "UsernameNotExists", controller: "GameStats", ErrorMessage = "Username already exists for another user")]
         [RegularExpression(@"^[._()-\/#&$@+\w\s]{3,30}$", ErrorMessage = @"Username must be between 3 - 30 alphanumeric/special characters")]
         public string Username { get; set; }
 

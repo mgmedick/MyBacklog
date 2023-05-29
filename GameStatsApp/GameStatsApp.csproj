@@ -7,7 +7,7 @@
     <StartupObject />
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(RunConfiguration)' == 'GameStatsApp.MVC' " />
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'GameStatsApp' " />
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.16" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />

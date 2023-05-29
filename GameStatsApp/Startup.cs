@@ -7,11 +7,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-//using SpeedRunApp.Interfaces.Helpers;
-using SpeedRunApp.Repository.Configuration;
+//using GameStatsApp.Interfaces.Helpers;
+using GameStatsApp.Repository.Configuration;
 using System;
 
-namespace SpeedRunApp
+namespace GameStatsApp
 {
     public class Startup
     {
@@ -51,9 +51,9 @@ namespace SpeedRunApp
             services.Scan(scanner =>
             {
                 scanner.TheCallingAssembly();
-                scanner.Assembly("SpeedRunApp.Interfaces");
-                scanner.Assembly("SpeedRunApp.Service");
-                scanner.Assembly("SpeedRunApp.Repository");
+                scanner.Assembly("GameStatsApp.Interfaces");
+                scanner.Assembly("GameStatsApp.Service");
+                scanner.Assembly("GameStatsApp.Repository");
                 scanner.WithDefaultConventions();
                 scanner.SingleImplementationsOfInterface();                
             });

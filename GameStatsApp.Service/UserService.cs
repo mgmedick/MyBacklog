@@ -1,22 +1,22 @@
 ﻿using System;
-using SpeedRunApp.Interfaces.Repositories;
-using SpeedRunApp.Interfaces.Services;
-using SpeedRunApp.Model;
-using SpeedRunApp.Model.Data;
-using SpeedRunApp.Model.ViewModels;
+using GameStatsApp.Interfaces.Repositories;
+using GameStatsApp.Interfaces.Services;
+using GameStatsApp.Model;
+using GameStatsApp.Model.Data;
+using GameStatsApp.Model.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq.Expressions;
-using SpeedRunCommon.Extensions;
+using GameStatsApp.Common.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using System.Security.Claims;
 
-namespace SpeedRunApp.Service
+namespace GameStatsApp.Service
 {
     public class UserService : IUserService
     {
@@ -24,11 +24,10 @@ namespace SpeedRunApp.Service
         private readonly IEmailService _emailService = null;
         private readonly IHttpContextAccessor _context = null;
         private readonly IConfiguration _config = null;
-        private readonly ISpeedRunRepository _speedRunRepo = null;
 
         public UserService(IUserRepository userRepo, IEmailService emailService, IHttpContextAccessor context, IConfiguration config)
         {
-            _userRepo = userAcctRepo;
+            _userRepo = userRepo;
             _emailService = emailService;
             _context = context;
             _config = config;
@@ -41,13 +40,13 @@ namespace SpeedRunApp.Service
             var queryParams = string.Format("email={0}&expirationTime={1}", email, DateTime.UtcNow.AddHours(48).Ticks);
             var token = queryParams.GetHMACSHA256Hash(hashKey);
 
-            var activateUserAcct = new
+            var activateUser = new
             {
                 Email = email,
                 ActivateLink = string.Format("{0}/Home/Activate?{1}&token={2}", baseUrl, queryParams, token)
             };
 
-            await _emailService.SendEmailTemplate(email, "Create your gamestatsapp.com account", Template.ActivateEmail.ToString(), activateUserAcct);
+            await _emailService.SendEmailTemplate(email, "Create your gamestatsapp.com account", Template.ActivateEmail.ToString(), activateUser);
         }
 
         public ActivateViewModel GetActivateUser(string email, long expirationTime, string token)
@@ -58,9 +57,9 @@ namespace SpeedRunApp.Service
             var expirationDate = new DateTime(expirationTime);
             var emailExists = _userRepo.GetUsers(i => i.Email == email).Any();
             var isValid = (hash == token) && expirationDate > DateTime.UtcNow && !emailExists;
-            var activateUserAcctVM = new ActivateViewModel() { IsValid = isValid };
+            var activateUserVM = new ActivateViewModel() { IsValid = isValid };
 
-            return activateUserAcctVM;
+            return activateUserVM;
         }
 
         public async Task SendConfirmRegistrationEmail(string email, string username)
@@ -76,26 +75,26 @@ namespace SpeedRunApp.Service
 
         public async Task SendResetPasswordEmail(string username)
         {
-            var userAcct = _userRepo.GetUsers(i => i.Username == username).FirstOrDefault();
+            var user = _userRepo.GetUsers(i => i.Username == username).FirstOrDefault();
             var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
             var baseUrl = string.Format("{0}://{1}{2}", _context.HttpContext.Request.Scheme, _context.HttpContext.Request.Host, _context.HttpContext.Request.PathBase);
-            var queryParams = string.Format("username={0}&email={1}&expirationTime={2}", userAcct.Username, userAcct.Email, DateTime.UtcNow.AddHours(48).Ticks);
-            var token = string.Format("{0}&password={1}", queryParams, userAcct.Password).GetHMACSHA256Hash(hashKey);
+            var queryParams = string.Format("username={0}&email={1}&expirationTime={2}", user.Username, user.Email, DateTime.UtcNow.AddHours(48).Ticks);
+            var token = string.Format("{0}&password={1}", queryParams, user.Password).GetHMACSHA256Hash(hashKey);
 
             var passwordReset = new
             {
-                Username = userAcct.Username,
+                Username = user.Username,
                 ResetPassLink = string.Format("{0}/Home/ChangePassword?{1}&token={2}", baseUrl, queryParams, token)
             };
 
-            await _emailService.SendEmailTemplate(userAcct.Email, "Reset your gamestatsapp.com password", Template.ResetPasswordEmail.ToString(), passwordReset);
+            await _emailService.SendEmailTemplate(user.Email, "Reset your gamestatsapp.com password", Template.ResetPasswordEmail.ToString(), passwordReset);
         }
         
         public ChangePasswordViewModel GetChangePassword(string username, string email, long expirationTime, string token)
         {
-            var userAcct = _userRepo.GetUsers(i => i.Username == username).FirstOrDefault();
+            var user = _userRepo.GetUsers(i => i.Username == username).FirstOrDefault();
             var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
-            var strToHash = string.Format("username={0}&email={1}&expirationTime={2}&password={3}", username, email, expirationTime, userAcct.Password);
+            var strToHash = string.Format("username={0}&email={1}&expirationTime={2}&password={3}", username, email, expirationTime, user.Password);
             var hash = strToHash.GetHMACSHA256Hash(hashKey);
             var expirationDate = new DateTime(expirationTime);
             var isValid = (hash == token) && expirationDate > DateTime.UtcNow;
@@ -119,7 +118,7 @@ namespace SpeedRunApp.Service
             var email = _context.HttpContext.Session.Get<string>("Email");
             var isdarktheme = (_context.HttpContext.Request.Cookies["theme"] ?? _config.GetSection("SiteSettings").GetSection("DefaultTheme").Value) == "theme-dark";
 
-            var userAcct = new User()
+            var user = new User()
             {
                 Username = username,
                 Password = pass.HashString(),
@@ -129,68 +128,67 @@ namespace SpeedRunApp.Service
                 CreatedDate = DateTime.UtcNow
             };
 
-            _userRepo.SaveUser(userAcct);
+            _userRepo.SaveUser(user);
 
-            var userAcctSetting = new UserSetting() {
-                UserID = userAcct.ID,
+            var userSetting = new UserSetting() {
+                UserID = user.ID,
                 IsDarkTheme = isdarktheme
             };
 
-            _userRepo.SaveUserSetting(userAcctSetting);
+            _userRepo.SaveUserSetting(userSetting);
         }
 
         public void ChangeUserPassword(string username, string pass)
         {
-            var userAcct = _userRepo.GetUsers(i => i.Username == username).FirstOrDefault();
-            userAcct.Password = pass.HashString();
-            userAcct.ModifiedBy = userAcct.ID;
-            userAcct.ModifiedDate = DateTime.UtcNow;
+            var user = _userRepo.GetUsers(i => i.Username == username).FirstOrDefault();
+            user.Password = pass.HashString();
+            user.ModifiedBy = user.ID;
+            user.ModifiedDate = DateTime.UtcNow;
 
-            _userRepo.SaveUser(userAcct);
+            _userRepo.SaveUser(user);
         }
 
         public UserViewModel GetUser(int userID)
         {
-            var userAcctView = _userRepo.GetUserViews(i => i.UserID == userID).FirstOrDefault();
-            var userAcctVM = new UserViewModel(userAcctView);
-            userAcctVM.SpeedRunListCategories = _speedRunRepo.SpeedRunListCategories().ToList();
+            var userView = _userRepo.GetUserViews(i => i.UserID == userID).FirstOrDefault();
+            var userVM = new UserViewModel(userView);
 
-            return userAcctVM;
+            return userVM;
         }
 
-        public void SaveUser(UserViewModel userAcctVM, int currUserID)
+        public void SaveUser(UserViewModel userVM, int currUserID)
         {
-            var userAcct = _userRepo.GetUsers(i => i.ID == userAcctVM.UserID).FirstOrDefault();
+            var user = _userRepo.GetUsers(i => i.ID == userVM.UserID).FirstOrDefault();
 
-            if (userAcct != null)
+            if (user != null)
             {
-                var userAcctSetting = new UserSetting()
+                var userSetting = new UserSetting()
                 {
-                    UserID = userAcctVM.UserID,
-                    IsDarkTheme = userAcctVM.IsDarkTheme
+                    UserID = userVM.UserID,
+                    IsDarkTheme = userVM.IsDarkTheme
                 };
 
-                _userRepo.SaveUserSetting(userAcctSetting);
+                _userRepo.SaveUserSetting(userSetting);
 
-                userAcct.ModifiedDate = DateTime.UtcNow;
-                userAcct.ModifiedBy = currUserID;
-                _userRepo.SaveUser(userAcct);
+                user.ModifiedDate = DateTime.UtcNow;
+                user.ModifiedBy = currUserID;
+                _userRepo.SaveUser(user);
             }
         }
 
         public void UpdateIsDarkTheme(int currUserID, bool isDarkTheme)
         {
-            var userAcct = _userRepo.GetUsers(i => i.ID == currUserID).FirstOrDefault();
+            var user = _userRepo.GetUsers(i => i.ID == currUserID).FirstOrDefault();
 
-            if (userAcct != null)
+            if (user != null)
             {
-                var userAcctSetting = new UserSetting()
+                var userSetting = new UserSetting()
                 {
-                    UserID = userAcct.ID,
+                    UserID = user.ID,
                     IsDarkTheme = isDarkTheme
                 };
 
-                _userRepo.SaveUserSetting(userAcctSetting);
+                _userRepo.SaveUserSetting(userSetting);
             }
         }
 
@@ -205,11 +203,11 @@ namespace SpeedRunApp.Service
         public bool PasswordMatches(string password, string username)
         {
             var result = false;
-            var userAcct = _userRepo.GetUsers(i => i.Username == username && i.Active).FirstOrDefault();
+            var user = _userRepo.GetUsers(i => i.Username == username && i.Active).FirstOrDefault();
 
-            if (userAcct != null)
+            if (user != null)
             {
-                result = password.VerifyHash(userAcct.Password);
+                result = password.VerifyHash(user.Password);
             }
 
             return result;
@@ -221,5 +219,10 @@ namespace SpeedRunApp.Service
 
             return result;
         }
+
+        public IEnumerable<SearchResult> SearchUsers(string searchText)
+        {
+            return _userRepo.SearchUsers(searchText);
+        }        
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Newtonsoft.Json;
 
-namespace SpeedRunCommon.Extensions
+namespace GameStatsApp.Common.Extensions
 {
     public static class TempDataExtensions
     {

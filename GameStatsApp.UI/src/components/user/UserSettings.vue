@@ -37,7 +37,7 @@
     import { getFormData } from '../../js/common.js';
 
     export default {
-        name: "UserDetails",
+        name: "UserSettings",
         props: {
             userid: String
         },

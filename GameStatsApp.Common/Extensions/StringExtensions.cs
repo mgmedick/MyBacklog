@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SpeedRunCommon.Extensions
+namespace GameStatsApp.Common.Extensions
 {
     public static class StringHelpers
     {

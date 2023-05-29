@@ -1,40 +1,38 @@
 ﻿<template>
-    <div>
-        <nav class="navbar navbar-expand-lg bg-dark">
-            <a class="navbar-brand" href="#/" draggable="false" @click="onHomeClick">
-                <img src="/dist/fonts/pie-chart.svg" width="30" height="30" class="d-inline-block align-top pr-1" alt="">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/" draggable="false">
+                <font-awesome-icon icon="fa-solid fa-gear" />
                 GameStatsApp
             </a>
-            <button id="btnToggleNavbar" class="navbar-toggler" type="button" @click="toggleNavbar = !toggleNavbar" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" @click="toggleNavbar = !toggleNavbar" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div id="navbarNav" class="navbar-collapse" :style="[ toggleNavbar ? null : { display:'none' } ]">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item active">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
                         <a class="nav-link" href="/Menu/About">About</a>
                     </li>                    
                 </ul>
-                <form class="form-inline">
-                    <autocomplete v-model="searchText" @change="onChange" @search="onSearch" @selected="onSearchSelected" :options="searchResults" labelby="label" valueby="label" :isasync="true" :loading="searchLoading" :placeholder="'Search users'" style="width:100%"/>                
+                <form class="d-flex">
+                    <autocomplete v-model="searchText" inputclass="cmv-modal-md" @change="onChange" @search="onSearch" @selected="onSearchSelected" :options="searchResults" labelby="label" valueby="label" :isasync="true" :loading="searchLoading" :placeholder="'Search users'" style="width:100%"/>                
                 </form>
                 <div v-if="isauth">
-                    <button-dropdown :btnclasses="'btn-secondary'" :listclasses="'dropdown-menu-sm-right'">
-                        <template v-slot:text>
-                            <span>
-                                <i class="fa fa-user"></i><span class="pl-2">{{ username }}</span>
-                            </span>
-                        </template>
-                        <template v-slot:options>
+                    <div class="btn-group">
+                        <button class="btn dropdown-toggle btn-secondary" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                            <font-awesome-icon icon="fa-solid fa-user" />
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
                             <div class="dropdown-item">
-                                <div class="custom-control custom-switch">
-                                    <input id="chkNightMode" type="checkbox" class="custom-control-input" data-toggle="toggle" v-model="isDarkTheme">
-                                    <label class="custom-control-label pl-1" for="chkNightMode"><i class="fa fa-moon"></i><span class="pl-2">Night Mode</span></label>
+                                <div class="form-check form-switch">
+                                    <input id="chkNightMode" class="form-check-input" type="checkbox" data-toggle="toggle" v-model="isDarkTheme">
+                                    <label class="form-check-label" for="chkNightMode"><font-awesome-icon icon="fa-solid fa-moon" /><span class="ps-2">Night Mode</span></label>
                                 </div>
                             </div>
-                            <a href="/User/UserDetails" class="dropdown-item"><i class="fa fa-cog"></i><span class="pl-2">Settings</span></a>
-                            <a href="/Home/Logout" class="dropdown-item"><i class="fa fa-sign-out-alt"></i><span class="pl-2">Log out</span></a>
-                        </template>
-                    </button-dropdown>
+                            <a href="/User/UserSettings" class="dropdown-item"><font-awesome-icon icon="fa-solid fa-gear" /><span class="ps-2">Settings</span></a>
+                            <a href="/Home/Logout" class="dropdown-item"><font-awesome-icon icon="fa-solid fa-right-from-bracket" /><span class="ps-2">Log out</span></a>
+                        </div>
+                    </div>
                 </div>
                 <ul v-else class="navbar-nav">
                     <li class="nav-item">
@@ -44,60 +42,26 @@
                         <a class="nav-link" href="#" @click="showSignUpModal = true">Sign Up</a>
                     </li>
                     <li class="nav-item">
-                        <button-dropdown :btnclasses="'btn-secondary'" :listclasses="'dropdown-menu-sm-right'">
-                            <template v-slot:text>
-                                <span>
-                                    <i class="fa fa-user"></i>
-                                </span>
-                            </template>
-                            <template v-slot:options>
+                        <div class="btn-group">
+                            <button class="btn dropdown-toggle btn-secondary" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                                <font-awesome-icon icon="fa-solid fa-user" />
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
                                 <div class="dropdown-item">
-                                    <div class="custom-control custom-switch">
-                                        <input id="chkNightMode" type="checkbox" class="custom-control-input" data-toggle="toggle" v-model="isDarkTheme">
-                                        <label class="custom-control-label pl-1" for="chkNightMode"><i class="fa fa-moon"></i><span class="pl-2">Night Mode</span></label>
+                                    <div class="form-check form-switch">
+                                        <input id="chkNightMode" class="form-check-input" type="checkbox" data-toggle="toggle" v-model="isDarkTheme">
+                                        <label class="form-check-label" for="chkNightMode"><font-awesome-icon icon="fa-solid fa-moon" /><span class="ps-2">Night Mode</span></label>
                                     </div>
                                 </div>
-                                <a class="dropdown-item" href="#" @click="showLoginModal = true"><i class="fa fa-user"></i><span class="pl-2">Log In</span></a>
-                                <a class="dropdown-item" href="#" @click="showSignUpModal = true"><i class="fa fa-clipboard"></i><span class="pl-2">Sign Up</span></a>
-                            </template>
-                        </button-dropdown> 
+                                <a class="dropdown-item" href="/Home/Login"><i class="fa fa-user"></i><span class="pl-2">Log In</span></a>
+                                <a class="dropdown-item" href="/Home/SignUp"><i class="fa fa-clipboard"></i><span class="pl-2">Sign Up</span></a>
+                            </div>
+                        </div>
                     </li>                   
                 </ul>
             </div>
-        </nav>
-        <modal v-if="showImportStatusModal" contentclass="cmv-modal-md" @close="showImportStatusModal = false">
-            <template v-slot:title>
-                Import Status
-            </template>
-            <div class="container">
-                <import-status />
-            </div>
-        </modal>          
-        <modal v-if="showLoginModal" contentclass="cmv-modal-md" @close="showLoginModal = false">
-            <template v-slot:title>
-                Log In
-            </template>
-            <div class="container">
-                <login @forgotpass="showResetModal = !(showLoginModal = false)" />
-            </div>
-        </modal>
-        <modal v-if="showResetModal" contentclass="cmv-modal-md" @close="showResetModal = false">
-            <template v-slot:title>
-                Reset Password
-            </template>
-            <div class="container">
-                <reset-password />
-            </div>
-        </modal>
-        <modal v-if="showSignUpModal" contentclass="cmv-modal-md" @close="showSignUpModal = false">
-            <template v-slot:title>
-                Sign Up
-            </template>
-            <div class="container">
-                <signup />
-            </div>
-        </modal>      
-    </div>   
+        </div> 
+    </nav>    
 </template>
 <script>
     import axios from 'axios'
@@ -121,7 +85,8 @@
                 showSignUpModal: false,
                 showDropdown: false,
                 toggleNavbar: false,
-                isDarkTheme: this.isdarktheme
+                isDarkTheme: this.isdarktheme,
+                state: false
             }
         },
         computed: {
@@ -193,9 +158,6 @@
                 
                 location.href = encodeURI('/' + controller + "/" + action + "/" + result.value);
             },
-            onHomeClick: function() {
-                window.location.href = "/";          
-            },
             updateTheme: function(val){
                 var el = document.body;
 
@@ -206,6 +168,9 @@
                     el.classList.remove("theme-dark");
                     el.classList.add("theme-light");
                 }
+            },
+            toggleDropdown(e) {
+                this.state = !this.state
             }
         }
     };

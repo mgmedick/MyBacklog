@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SpeedRunApp.Model
+namespace GameStatsApp.Model
 {
     public class LabelValuePair
     {

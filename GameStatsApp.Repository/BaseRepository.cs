@@ -4,7 +4,7 @@ using System.Text;
 using NPoco;
 //using Microsoft.Extensions.Configuration;
 
-namespace SpeedRunApp.Repository
+namespace GameStatsApp.Repository
 {
     public abstract class BaseRepository
     {

@@ -6,7 +6,7 @@ using NPoco.FluentMappings;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 
-namespace SpeedRunApp.Repository.Configuration
+namespace GameStatsApp.Repository.Configuration
 {
     public static class NPocoBootstrapper
     {
