@@ -114,9 +114,15 @@
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },
             async handleCredentialResponse(response) {
-                var item = atob(response.credential);
-                console.log(response.credential)
-                // Put your backend code in here
+                axios.post('/Home/LoginByGoogle', null,{ params: { token: response.credential } })
+                    .then((res) => {
+                        if (res.data.success) {
+                            location.reload();
+                        } else {
+                            that.errorMessages = res.data.errorMessages;
+                        }
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
             },
             resizeButtons() {
                 var that = this;

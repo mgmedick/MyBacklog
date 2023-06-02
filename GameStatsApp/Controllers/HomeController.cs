@@ -170,7 +170,7 @@ namespace GameStatsApp.Controllers
                     }
                     else
                     {
-                        var username = result.GivenName + '_' + Guid.NewGuid();
+                        var username = result.Email.Split('@')[0] + '_' + ((String)result.Email).GetHashCode();
                         _userService.CreateUser(result.Email, username, null);
                         userVW = _userService.GetUserViews(i => i.Email == result.Email).FirstOrDefault();
                         LoginUser(userVW);
