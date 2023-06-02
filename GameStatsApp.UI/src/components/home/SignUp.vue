@@ -1,43 +1,51 @@
 ﻿<template>
-    <h2>Welcome to GameStatsApp</h2>
-    <form @submit.prevent="submitForm">
-        <div>
-            <ul class="list-group">
-                <li class="list-group-item list-group-item-danger" v-for="errorMessage in errorMessages">{{ errorMessage }}</li>
-            </ul>
-        </div>        
-        <div class="mb-3">
-            <label for="txtEmail" class="form-label">Email</label>
-            <input id="txtEmail" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Email" @blur="v$.form.Email.$touch" aria-describedby="spnEmailErrors">
+    <div>
+        <h2 class="text-center">Welcome to GameStatsApp</h2>
+        <form @submit.prevent="submitForm">
             <div>
-                <small id="spnEmailErrors" class="form-text text-danger" v-for="error of v$.form.Email.$errors">{{ error.$message }}</small>
+                <ul class="list-group">
+                    <li class="list-group-item list-group-item-danger" v-for="errorMessage in errorMessages">{{ errorMessage }}</li>
+                </ul>
+            </div>        
+            <div class="mb-3">
+                <label for="txtEmail" class="form-label">Email</label>
+                <input id="txtEmail" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Email" @blur="v$.form.Email.$touch" aria-describedby="spnEmailErrors">
+                <div>
+                    <small id="spnEmailErrors" class="form-text text-danger" v-for="error of v$.form.Email.$errors">{{ error.$message }}</small>
+                </div>
             </div>
-        </div>
-        <div class="row g-2 justify-content-center">
-            <button type="submit" class="btn btn-primary">Sign Up</button>
-        </div>        
-        <div>
-            <div v-if="loading">
-                <div class="d-flex m-3">
-                    <div class="mx-auto">
-                        <font-awesome-icon icon="fa-solid fa-spinner" spin size="lg" />
+            <div class="row g-2 justify-content-center mb-3">
+                <button id="btnSignUp" type="submit" class="btn btn-primary">Sign Up</button>
+                <div class="text-center"><small class="fw-bold">OR</small></div>
+                <button type="submit" class="btn btn-primary">Continue with Facebook</button>
+                <div ref="googleLoginBtn">
+                </div>
+            </div>        
+            <div>
+                <div v-if="loading">
+                    <div class="d-flex m-3">
+                        <div class="mx-auto">
+                            <font-awesome-icon icon="fa-solid fa-spinner" spin size="lg" />
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="showSuccess">
+                    <div>
+                        <div><span>To Activate your account click the activation link in the email we just sent you.</span></div>
+                        <br />
+                        <div class="mx-auto" style="max-width:350px;">
+                            <span>If your email has not arrived try these steps:</span>
+                            <ul class="pl-4">
+                                <li>Wait 30 mins</li>
+                                <li>Check your spam folder</li>
+                                <li>Try Sign Up again</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div v-else-if="showSuccess">
-                <div class="m-3">
-                    <div><span>To Activate your account click the activation link in the email we just sent you.</span></div>
-                    <br />
-                    <div><span>If your email has not arrived try these steps:</span></div>
-                    <ul class="pl-4">
-                        <li>Wait 30 mins</li>
-                        <li>Check your spam folder</li>
-                        <li>Try Sign Up again</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </form>
+        </form>
+    </div>
 </template>
 <script>
     import { getFormData } from '../../js/common.js';
@@ -61,6 +69,9 @@
         setup() {
             return { v$: useVuelidate() }
         },
+        props: {
+            gclientid: String
+        },        
         data() {
             return {
                 form: {
@@ -68,13 +79,23 @@
                 },
                 loading: false,
                 showSuccess: false,
-                errorMessages: []
+                errorMessages: [],
+                width: document.documentElement.clientWidth
             }
         },
         computed: {
         },
-        created: function () {
-        },
+        mounted: function () {
+            window.google.accounts.id.initialize({
+                client_id: this.gclientid,
+                callback: this.handleCredentialResponse,
+                auto_select: true
+            });
+
+            this.renderGoogleButton();
+
+            window.addEventListener('resize', this.resizeButtons); 
+        },     
         methods: {
             async submitForm() {
                 const isValid = await this.v$.$validate()
@@ -91,6 +112,33 @@
                         that.loading = false;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
+            },
+            async handleCredentialResponse(response) {
+                var item = atob(response.credential);
+                console.log(response.credential)
+                // Put your backend code in here
+            },
+            resizeButtons() {
+                var that = this;
+                if (that.width != document.documentElement.clientWidth) {  
+                    that.width = document.documentElement.clientWidth;         
+                    that.renderGoogleButton();
+                }                 
+            },
+            renderGoogleButton() {
+                var btnwidth = document.getElementById("btnSignUp").clientWidth;   
+
+                const options = {
+                    type: 'standard',
+                    shape: 'pill',
+                    theme: 'outline',
+                    text: 'signin_with',
+                    size: 'large',
+                    logo_alignment: 'left',
+                    width: btnwidth
+                }
+
+                window.google.accounts.id.renderButton(this.$refs.googleLoginBtn, options);
             }
         },
         validations() {

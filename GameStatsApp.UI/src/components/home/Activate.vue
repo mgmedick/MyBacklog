@@ -1,52 +1,49 @@
 ﻿<template>
     <div>
-        <form v-if="islinkvalid" @submit.prevent="submitForm" autocomplete="off">
+        <h2 class="text-center">Create Account</h2>
+        <form v-if="!islinkvalid" @submit.prevent="submitForm" autocomplete="off">
             <div>
-                <ul>
-                    <li class="text-danger small font-weight-semibold" v-for="errorMessage in errorMessages">{{ errorMessage }}</li>
+                <ul class="list-group">
+                    <li class="list-group-item list-group-item-danger" v-for="errorMessage in errorMessages">{{ errorMessage }}</li>
                 </ul>
             </div>
-            <div class="form-group row no-gutters">
-                <label class="col-sm-4 col-form-label">Username</label>
-                <div class="col-sm-auto">
-                    <input type="text" name="Username" class="form-control" autocomplete="off" v-model.lazy="form.Username" @blur="v$.form.Username.$touch" />
-                    <span class="text-danger small font-weight-semibold" v-for="error of v$.form.Username.$errors">{{ error.$message }}</span>
+            <div class="mb-2">
+                <label for="txtEmail" class="form-label">Email</label>
+                <input id="txtEmail" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Email" disabled>
+            </div>              
+            <div class="mb-2">
+                <label for="txtUserName" class="form-label">Username</label>
+                <input id="txtUserName" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Username" @blur="v$.form.Username.$touch" aria-describedby="spnUserNameErrors">
+                <div>
+                    <span id="spnUserNameErrors" class="form-text text-danger" v-for="error of v$.form.Username.$errors">{{ error.$message }}</span>
                 </div>
             </div>
-            <div class="form-group row no-gutters">
-                <label class="col-sm-4 col-form-label">Password</label>
-                <div class="col-sm-auto">
-                    <input type="password" class="form-control" autocomplete="new-password" v-model.lazy="form.Password" @blur="v$.form.Password.$touch">
-                    <span class="text-danger small font-weight-semibold" v-for="error of v$.form.Password.$errors">{{ error.$message }}</span>
+            <div class="mb-2">
+                <label for="txtPassword" class="form-label">Password</label>
+                <input id="txtPassword" type="password" class="form-control" autocomplete="off" v-model.lazy="form.Password" @blur="v$.form.Password.$touch" aria-describedby="spnPasswordErrors">
+                <div>
+                    <span id="spnPasswordErrors" class="form-text text-danger" v-for="error of v$.form.Password.$errors">{{ error.$message }}</span>
                 </div>
             </div>
-            <div class="form-group row no-gutters">
-                <label class="col-sm-4 col-form-label">Confirm Password</label>
-                <div class="col-sm-auto">
-                    <input type="password" class="form-control" autocomplete="new-password" v-model.lazy="form.ConfirmPassword" @blur="v$.form.ConfirmPassword.$touch">
-                    <span class="text-danger small font-weight-semibold" v-for="error of v$.form.ConfirmPassword.$errors">{{ error.$message }}</span>
+            <div class="mb-3">
+                <label for="txtConfirmPassword" class="form-label">Confirm Password</label>
+                <input id="txtConfirmPassword" type="password" class="form-control" autocomplete="off" v-model.lazy="form.ConfirmPassword" @blur="v$.form.ConfirmPassword.$touch" aria-describedby="spnConfirmPasswordErrors">
+                <div>
+                    <span id="spnConfirmPasswordErrors" class="form-text text-danger" v-for="error of v$.form.ConfirmPassword.$errors">{{ error.$message }}</span>
                 </div>
             </div>
-            <div class="row no-gutters pt-1">
-                <div class="form-group mx-auto">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
-            </div>
+            <div class="row g-2 justify-content-center mb-3">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>      
         </form>
-        <div v-else style="text-align:center;">
-            <font-awesome-icon icon="fa-solid fa-hourglass-end" />
+        <div v-else class="text-center">
+            <div class="m-3">
+                <font-awesome-icon icon="fa-solid fa-hourglass-end" size="2xl" />
+            </div>
             <div>
-                Activation link has expired, please <a href="#" @click="showSignUpModal = true">Sign Up</a> to try again.
+                Activation link has expired, please <a href="/Home/Signup">Sign Up</a> to try again.
             </div>
-        </div>
-        <modal v-if="showSignUpModal" contentclass="cmv-modal-md" @close="showSignUpModal = false">
-            <template v-slot:title>
-                Sign Up
-            </template>
-            <div class="container">
-                <signup />
-            </div>
-        </modal>        
+        </div>    
     </div>
 </template>
 <script>
@@ -72,7 +69,8 @@
     export default {
         name: "Activate",
         props: {
-            islinkvalid: Boolean
+            islinkvalid: Boolean,
+            isoauth: Boolean
         },
         setup() {
             return { v$: useVuelidate() }

@@ -12,7 +12,6 @@ namespace GameStatsApp.Model.ViewModels
     {
         [Required(AllowEmptyStrings = false, ErrorMessage = "Email required")]
         [EmailAddress(ErrorMessage = "Invalid Email format")]
-        //[Remote(action: "EmailNotExists", controller: "GameStats", ErrorMessage = "Email already exists for another user")]
         public string Email { get; set; }
     }
 }

@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Serilog;
 using Microsoft.AspNetCore.Authorization;
+using Google.Apis.Auth;
 
 namespace GameStatsApp.Controllers
 {
@@ -57,19 +58,19 @@ namespace GameStatsApp.Controllers
 
             try
             {
-                if (!_userService.UsernameExists(loginVM.Username, true))
+                if (!_userService.EmailExists(loginVM.Email, true))
                 {
-                    ModelState.AddModelError("Login", "Invalid username");
+                    ModelState.AddModelError("Login", "Invalid email");
                 }
 
-                if (!_userService.PasswordMatches(loginVM.Password, loginVM.Username))
+                if (!_userService.PasswordMatches(loginVM.Password, loginVM.Email))
                 {
                     ModelState.AddModelError("Login", "Invalid password");
                 }
 
-                if(ModelState.IsValid)
+                if (ModelState.IsValid)
                 {
-                    var userVW = _userService.GetUserViews(i => i.Username == loginVM.Username).FirstOrDefault();
+                    var userVW = _userService.GetUserViews(i => i.Email == loginVM.Email).FirstOrDefault();
                     LoginUser(userVW);
                     success = true;
                 }
@@ -79,7 +80,7 @@ namespace GameStatsApp.Controllers
                     errorMessages = ModelState.Values.SelectMany(i => i.Errors).Select(i => i.ErrorMessage).ToList();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.Error(ex, "Login");
                 success = false;
@@ -96,7 +97,7 @@ namespace GameStatsApp.Controllers
             var baseUrl = string.Format("{0}://{1}{2}", Request.Scheme, Request.Host, Request.PathBase);
             var refUrl = Request.Headers["Referer"].ToString();
             var url = !string.IsNullOrWhiteSpace(refUrl) ? refUrl : baseUrl;
-            
+
             return Redirect(url);
         }
 
@@ -114,7 +115,7 @@ namespace GameStatsApp.Controllers
 
             try
             {
-                if (_userService.EmailExists(signUpVM.Email))
+                if (_userService.EmailExists(signUpVM.Email, false))
                 {
                     ModelState.AddModelError("SignUp", "Email already exists for another user");
                 }
@@ -133,7 +134,60 @@ namespace GameStatsApp.Controllers
             catch (Exception ex)
             {
                 _logger.Error(ex, "SignUp");
-                return Json(new { success = false, message = "Error signing up user." });
+                return Json(new { success = false, message = "Error signing up user" });
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> LoginByGoogle(string token)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+ 
+            try
+            {
+                var result = await GoogleJsonWebSignature.ValidateAsync(token);
+
+                if (result == null)
+                {
+                    ModelState.AddModelError("LoginByGoogle", "Invalid Token");
+                }
+
+                var userVW = _userService.GetUserViews(i => i.Email == result.Email && i.Active).FirstOrDefault();              
+                if(_userService.EmailExists(result.Email, false) && userVW == null)
+                {
+                    ModelState.AddModelError("LoginByGoogle", "Linked user has been inactivated");
+                }
+
+                if (ModelState.IsValid)           
+                {
+                    if (userVW != null)
+                    {
+                        LoginUser(userVW);
+                        success = true;
+                    }
+                    else
+                    {
+                        var username = result.GivenName + '_' + Guid.NewGuid();
+                        _userService.CreateUser(result.Email, username, null);
+                        userVW = _userService.GetUserViews(i => i.Email == result.Email).FirstOrDefault();
+                        LoginUser(userVW);
+                        _ = _userService.SendConfirmRegistrationEmail(userVW.Email, userVW.Username).ContinueWith(t => _logger.Error(t.Exception, "SendConfirmRegistrationEmail"), TaskContinuationOptions.OnlyOnFaulted);
+                        success = true;
+                    }
+                }
+                else
+                {
+                    success = false;
+                    errorMessages = ModelState.Values.SelectMany(i => i.Errors).Select(i => i.ErrorMessage).ToList();
+                }                
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "LoginByGoogle");
+                return Json(new { success = false, message = "Error logging in with Google" });
             }
 
             return Json(new { success = success, errorMessages = errorMessages });
@@ -156,6 +210,13 @@ namespace GameStatsApp.Controllers
 
             try
             {
+                activateUserVM.Email = HttpContext.Session.Get<string>("Email");
+
+                if (_userService.EmailExists(activateUserVM.Email, false))
+                {
+                    ModelState.AddModelError("Activate", "Email already exists for another user");
+                }
+
                 if (_userService.UsernameExists(activateUserVM.Username, false))
                 {
                     ModelState.AddModelError("Activate", "Username already exists for another user");
@@ -163,8 +224,8 @@ namespace GameStatsApp.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    _userService.CreateUser(activateUserVM.Username, activateUserVM.Password);
-                    var userVW = _userService.GetUserViews(i => i.Username == activateUserVM.Username).FirstOrDefault();
+                    _userService.CreateUser(activateUserVM.Email, activateUserVM.Username, activateUserVM.Password);
+                    var userVW = _userService.GetUserViews(i => i.Email == activateUserVM.Email).FirstOrDefault();
                     LoginUser(userVW);
                     _ = _userService.SendConfirmRegistrationEmail(userVW.Email, userVW.Username).ContinueWith(t => _logger.Error(t.Exception, "SendConfirmRegistrationEmail"), TaskContinuationOptions.OnlyOnFaulted);
                     success = true;
@@ -177,9 +238,9 @@ namespace GameStatsApp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "ResetPassword");
+                _logger.Error(ex, "Activate");
                 success = false;
-                errorMessages = new List<string>() { "Error resetting password" };
+                errorMessages = new List<string>() { "Error creating user" };
             }
 
             return Json(new { success = success, errorMessages = errorMessages });
@@ -200,14 +261,14 @@ namespace GameStatsApp.Controllers
 
             try
             {
-                if (!_userService.UsernameExists(resetPassVM.Username, true))
+                if (!_userService.EmailExists(resetPassVM.Email, true))
                 {
-                    ModelState.AddModelError("ResetPassword", "Username not found");
+                    ModelState.AddModelError("ResetPassword", "Email not found");
                 }
 
                 if (ModelState.IsValid)
                 {
-                    _ = _userService.SendResetPasswordEmail(resetPassVM.Username).ContinueWith(t => _logger.Error(t.Exception, "SendResetPasswordEmail"), TaskContinuationOptions.OnlyOnFaulted);
+                    _ = _userService.SendResetPasswordEmail(resetPassVM.Email).ContinueWith(t => _logger.Error(t.Exception, "SendResetPasswordEmail"), TaskContinuationOptions.OnlyOnFaulted);
                     success = true;
                 }
                 else
@@ -227,10 +288,10 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpGet]
-        public ViewResult ChangePassword(string username, string email, long expirationTime, string token)
+        public ViewResult ChangePassword(string email, long expirationTime, string token)
         {
-            var changePassVM = _userService.GetChangePassword(username, email, expirationTime, token);
-            HttpContext.Session.Set<string>("Username", username);
+            var changePassVM = _userService.GetChangePassword(email, expirationTime, token);
+            HttpContext.Session.Set<string>("Email", email);
 
             return View(changePassVM);
         }
@@ -243,15 +304,15 @@ namespace GameStatsApp.Controllers
 
             try
             {
-                var username = HttpContext.Session.Get<string>("Username");
-                if (_userService.PasswordMatches(changePassVM.Password, username))
+                var email = HttpContext.Session.Get<string>("Email");
+                if (_userService.PasswordMatches(changePassVM.Password, email))
                 {
                     ModelState.AddModelError("ChangePassword", "Password must differ from previous password");
                 }
 
                 if (ModelState.IsValid)
                 {
-                    _userService.ChangeUserPassword(username, changePassVM.Password);
+                    _userService.ChangeUserPassword(email, changePassVM.Password);
                     success = true;
                 }
                 else
@@ -289,18 +350,9 @@ namespace GameStatsApp.Controllers
 
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult UsernameExists(string username)
+        public IActionResult ActiveEmailExists(string email)
         {
-            var result = _userService.UsernameExists(username, false);
-
-            return Json(result);
-        }
-
-        [AllowAnonymous]
-        [HttpGet]
-        public IActionResult ActiveUsernameExists(string username)
-        {
-            var result = _userService.UsernameExists(username, true);
+            var result = _userService.EmailExists(email, true);
 
             return Json(result);
         }
@@ -313,22 +365,13 @@ namespace GameStatsApp.Controllers
 
             return Json(result);
         }
-
+     
         [AllowAnonymous]
         [HttpGet]
         public IActionResult PasswordNotMatches(string password)
         {
-            var username = HttpContext.Session.Get<string>("Username");
-            var result = !_userService.PasswordMatches(password, username);
-
-            return Json(result);
-        }
-
-        [AllowAnonymous]
-        [HttpGet]
-        public IActionResult PasswordMatches(string password, string username)
-        {
-            var result = _userService.PasswordMatches(password, username);
+            var email = HttpContext.Session.Get<string>("Email");
+            var result = !_userService.PasswordMatches(password, email);
 
             return Json(result);
         }
@@ -337,9 +380,9 @@ namespace GameStatsApp.Controllers
         [HttpGet]
         public IActionResult EmailNotExists(string email)
         {
-            var result = !_userService.EmailExists(email);
+            var result = !_userService.EmailExists(email, false);
 
             return Json(result);
-        }
+        }     
     }
 }

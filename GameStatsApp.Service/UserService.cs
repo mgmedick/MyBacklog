@@ -57,7 +57,7 @@ namespace GameStatsApp.Service
             var expirationDate = new DateTime(expirationTime);
             var emailExists = _userRepo.GetUsers(i => i.Email == email).Any();
             var isValid = (hash == token) && expirationDate > DateTime.UtcNow && !emailExists;
-            var activateUserVM = new ActivateViewModel() { IsValid = isValid };
+            var activateUserVM = new ActivateViewModel() { Email = email, IsValid = isValid };
 
             return activateUserVM;
         }
@@ -73,9 +73,9 @@ namespace GameStatsApp.Service
             await _emailService.SendEmailTemplate(email, "Thanks for registering at gamestatsapp.com", Template.ConfirmRegistration.ToString(), confirmRegistration);
         }
 
-        public async Task SendResetPasswordEmail(string username)
+        public async Task SendResetPasswordEmail(string email)
         {
-            var user = _userRepo.GetUsers(i => i.Username == username).FirstOrDefault();
+            var user = _userRepo.GetUsers(i => i.Email == email).FirstOrDefault();
             var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
             var baseUrl = string.Format("{0}://{1}{2}", _context.HttpContext.Request.Scheme, _context.HttpContext.Request.Host, _context.HttpContext.Request.PathBase);
             var queryParams = string.Format("username={0}&email={1}&expirationTime={2}", user.Username, user.Email, DateTime.UtcNow.AddHours(48).Ticks);
@@ -90,11 +90,11 @@ namespace GameStatsApp.Service
             await _emailService.SendEmailTemplate(user.Email, "Reset your gamestatsapp.com password", Template.ResetPasswordEmail.ToString(), passwordReset);
         }
         
-        public ChangePasswordViewModel GetChangePassword(string username, string email, long expirationTime, string token)
+        public ChangePasswordViewModel GetChangePassword(string email, long expirationTime, string token)
         {
-            var user = _userRepo.GetUsers(i => i.Username == username).FirstOrDefault();
+            var user = _userRepo.GetUsers(i => i.Email == email).FirstOrDefault();
             var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
-            var strToHash = string.Format("username={0}&email={1}&expirationTime={2}&password={3}", username, email, expirationTime, user.Password);
+            var strToHash = string.Format("email={0}&expirationTime={1}&password={2}", email, expirationTime, user.Password);
             var hash = strToHash.GetHMACSHA256Hash(hashKey);
             var expirationDate = new DateTime(expirationTime);
             var isValid = (hash == token) && expirationDate > DateTime.UtcNow;
@@ -113,9 +113,8 @@ namespace GameStatsApp.Service
             return _userRepo.GetUserViews(predicate);
         }
 
-        public void CreateUser(string username, string pass)
+        public void CreateUser(string email, string username, string pass)
         {
-            var email = _context.HttpContext.Session.Get<string>("Email");
             var isdarktheme = (_context.HttpContext.Request.Cookies["theme"] ?? _config.GetSection("SiteSettings").GetSection("DefaultTheme").Value) == "theme-dark";
 
             var user = new User()
@@ -138,9 +137,9 @@ namespace GameStatsApp.Service
             _userRepo.SaveUserSetting(userSetting);
         }
 
-        public void ChangeUserPassword(string username, string pass)
+        public void ChangeUserPassword(string email, string pass)
         {
-            var user = _userRepo.GetUsers(i => i.Username == username).FirstOrDefault();
+            var user = _userRepo.GetUsers(i => i.Email == email).FirstOrDefault();
             user.Password = pass.HashString();
             user.ModifiedBy = user.ID;
             user.ModifiedDate = DateTime.UtcNow;
@@ -195,15 +194,15 @@ namespace GameStatsApp.Service
         //jqvalidate
         public bool EmailExists(string email)
         {
-            var result = _userRepo.GetUsers(i => i.Email == email).Any();
+            var result = _userRepo.GetUsers(i => i.Email == email & i.Active).Any();
 
             return result;
         }
 
-        public bool PasswordMatches(string password, string username)
+        public bool PasswordMatches(string password, string email)
         {
             var result = false;
-            var user = _userRepo.GetUsers(i => i.Username == username && i.Active).FirstOrDefault();
+            var user = _userRepo.GetUsers(i => i.Email == email && i.Active).FirstOrDefault();
 
             if (user != null)
             {
@@ -219,6 +218,13 @@ namespace GameStatsApp.Service
 
             return result;
         }
+
+        public bool EmailExists(string email, bool activeFilter)
+        {
+            var result = _userRepo.GetUsers(i => i.Email == email && (i.Active || i.Active == activeFilter)).Any();
+
+            return result;
+        }        
 
         public IEnumerable<SearchResult> SearchUsers(string searchText)
         {

@@ -36,10 +36,10 @@
                 </div>
                 <ul v-else class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="#" @click="showLoginModal = true">Log In</a>
+                        <a class="nav-link" href="/Home/Login">Log In</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" @click="showSignUpModal = true">Sign Up</a>
+                        <a class="nav-link" href="/Home/SignUp">Sign Up</a>
                     </li>
                     <li class="nav-item">
                         <div class="btn-group">

@@ -1,17 +1,17 @@
 ﻿<template>
     <div>
-        <h2>Welcome to GameStatsApp</h2>
+        <h2 class="text-center">Welcome to GameStatsApp</h2>
         <form @submit.prevent="submitForm">
             <div>
                 <ul class="list-group">
                     <li class="list-group-item list-group-item-danger" v-for="errorMessage in errorMessages">{{ errorMessage }}</li>
                 </ul>
             </div>
-            <div class="mb-1">
-                <label for="txtUserName" class="form-label">Username</label>
-                <input id="txtUserName" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Username" @blur="v$.form.Username.$touch" aria-describedby="spnUserNameErrors">
+            <div class="mb-2">
+                <label for="txtEmail" class="form-label">Email</label>
+                <input id="txtEmail" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Email" @blur="v$.form.Email.$touch" aria-describedby="spnEmailErrors">
                 <div>
-                    <span id="spnUserNameErrors" class="form-text text-danger" v-for="error of v$.form.Username.$errors">{{ error.$message }}</span>
+                    <span id="spnEmailErrors" class="form-text text-danger" v-for="error of v$.form.Email.$errors">{{ error.$message }}</span>
                 </div>
             </div>
             <div class="mb-3">
@@ -24,8 +24,8 @@
             <div class="row g-2 justify-content-center">
                 <button type="submit" class="btn btn-primary">Log In</button>
                 <div class="text-center"><small class="fw-bold">OR</small></div>
-                <button type="submit" class="btn btn-primary">Continue with Facebook</button>
-                <button type="submit" class="btn btn-primary">Continue with Google</button>
+                <button type="submit" class="btn btn-outline-dark d-flex"><font-awesome-icon icon="fa-brands fa-facebook" size="xl" /><span class="mx-auto">Continue with Facebook</span></button>
+                <button type="submit" class="btn btn-outline-dark d-flex"><font-awesome-icon icon="fa-brands fa-google" size="xl" /><span class="mx-auto">Continue with Google</span></button>
             </div>
         </form>
     </div>
@@ -37,10 +37,10 @@
     import { required, helpers } from '@vuelidate/validators';
     const { withAsync } = helpers;
 
-    const asyncActiveUsernameExists = async (value) => {
+    const asyncActiveEmailExists = async (value) => {
         if (value === '') return true;
 
-        return await axios.get('/Home/ActiveUsernameExists', { params: { username: value } })
+        return await axios.get('/Home/ActiveEmailExists', { params: { email: value } })
             .then(res => {
                 return res.data;
             })
@@ -55,7 +55,7 @@
         data() {
             return {
                 form: {
-                    Username: '',
+                    Email: '',
                     Password: ''
                 },
                 errorMessages: []
@@ -83,9 +83,9 @@
         validations() {
             return {
                 form: {
-                    Username: {
-                        required: helpers.withMessage('Username is required', required),
-                        activeUsernameExists: helpers.withMessage('Invalid Username', withAsync(asyncActiveUsernameExists))
+                    Email: {
+                        required: helpers.withMessage('Email is required', required),
+                        activeEmailExists: helpers.withMessage('Invalid Email', withAsync(asyncActiveEmailExists))
                     },
                     Password: {
                         required: helpers.withMessage('Password is required', required)

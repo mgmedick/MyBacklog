@@ -7,9 +7,9 @@
             </ul>
         </div>
         <div class="form-group row no-gutters">
-            <label class="col-sm-3 col-form-label">Username</label>
+            <label class="col-sm-3 col-form-label">Email</label>
             <div class="col-sm-auto">
-                <input type="text" name="Username" class="form-control" autocomplete="off" v-model.lazy="form.Username" @blur="v$.form.Username.$touch">
+                <input type="text" name="Email" class="form-control" autocomplete="off" v-model.lazy="form.Email" @blur="v$.form.Email.$touch">
             </div>
         </div>
         <div class="row no-gutters pt-1">
@@ -50,10 +50,10 @@
     import { required, helpers } from '@vuelidate/validators';
     const { withAsync } = helpers;
 
-    const asyncActiveUsernameExists = async (value) => {
+    const asyncActiveEmailExists = async (value) => {
         if (value === '') return true;
 
-        return await axios.get('/Home/ActiveUsernameExists', { params: { username: value } })
+        return await axios.get('/Home/ActiveEmailExists', { params: { email: value } })
             .then(res => {
                 return res.data;
             })
@@ -68,7 +68,7 @@
         data() {
             return {
                 form: {
-                    Username: ''
+                    Email: ''
                 },
                 loading: false,
                 showSuccess: false,
@@ -100,9 +100,9 @@
         validations() {
             return {
                 form: {
-                    Username: {
-                        required: helpers.withMessage('Username is required', required),
-                        activeUsernameExists: helpers.withMessage('Invalid Username', withAsync(asyncActiveUsernameExists))
+                    Email: {
+                        required: helpers.withMessage('Email is required', required),
+                        activeEmailExists: helpers.withMessage('Invalid Email', withAsync(asyncActiveEmailExists))
                     }
                 }
             }

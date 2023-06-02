@@ -12,15 +12,16 @@ namespace GameStatsApp.Interfaces.Services
     {
         Task SendActivationEmail(string email);
         ActivateViewModel GetActivateUser(string email, long expirationTime, string token);
-        void CreateUser(string username, string pass);
+        void CreateUser(string email, string username, string pass);
         IEnumerable<User> GetUsers(Expression<Func<User, bool>> predicate);
         IEnumerable<UserView> GetUserViews(Expression<Func<UserView, bool>> predicate);        
-        Task SendResetPasswordEmail(string username);
-        ChangePasswordViewModel GetChangePassword(string username, string email, long expirationTime, string token);
-        void ChangeUserPassword(string username, string pass);
+        Task SendResetPasswordEmail(string email);
+        ChangePasswordViewModel GetChangePassword(string email, long expirationTime, string token);
+        void ChangeUserPassword(string email, string pass);
         bool EmailExists(string email);
-        bool PasswordMatches(string password, string username);
+        bool PasswordMatches(string password, string email);
         bool UsernameExists(string username, bool activeFilter);
+        bool EmailExists(string email, bool activeFilter);
         UserViewModel GetUser(int userID);
         void SaveUser(UserViewModel userVM, int currUserID);
         void UpdateIsDarkTheme(int currUserID, bool isDarkTheme);

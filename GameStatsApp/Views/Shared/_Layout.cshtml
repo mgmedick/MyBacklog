@@ -16,11 +16,13 @@
         <link rel="stylesheet" href="~/dist/vendor.min.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/dist/style.min.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/dist/master.min.css" asp-append-version="true" />
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="~/dist/vendor.min.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/dist/style.min.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/dist/master.min.css" asp-append-version="true" />
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
     </environment>
     @RenderSection("Styles", required: false)
 </head>

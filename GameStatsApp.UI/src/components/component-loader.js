@@ -3,7 +3,8 @@ import { createApp } from "vue";
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner } from '@fortawesome/free-solid-svg-icons'
-library.add(faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner);
+import { faGoogle, faFacebook } from '@fortawesome/free-brands-svg-icons'
+library.add(faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner, faGoogle, faFacebook);
 
 import buttonDropdown from './shared/ButtonDropdown.vue';
 import autocomplete from './shared/Autocomplete.vue';
