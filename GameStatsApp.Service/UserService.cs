@@ -78,7 +78,7 @@ namespace GameStatsApp.Service
             var user = _userRepo.GetUsers(i => i.Email == email).FirstOrDefault();
             var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
             var baseUrl = string.Format("{0}://{1}{2}", _context.HttpContext.Request.Scheme, _context.HttpContext.Request.Host, _context.HttpContext.Request.PathBase);
-            var queryParams = string.Format("username={0}&email={1}&expirationTime={2}", user.Username, user.Email, DateTime.UtcNow.AddHours(48).Ticks);
+            var queryParams = string.Format("email={0}&expirationTime={1}", user.Email, DateTime.UtcNow.AddHours(48).Ticks);
             var token = string.Format("{0}&password={1}", queryParams, user.Password).GetHMACSHA256Hash(hashKey);
 
             var passwordReset = new
@@ -119,9 +119,9 @@ namespace GameStatsApp.Service
 
             var user = new User()
             {
+                Email = email,
                 Username = username,
                 Password = pass.HashString(),
-                Email = email,
                 Active = true,
                 CreatedBy = 1,
                 CreatedDate = DateTime.UtcNow
@@ -203,6 +203,7 @@ namespace GameStatsApp.Service
         {
             var result = false;
             var user = _userRepo.GetUsers(i => i.Email == email && i.Active).FirstOrDefault();
+            var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
 
             if (user != null)
             {

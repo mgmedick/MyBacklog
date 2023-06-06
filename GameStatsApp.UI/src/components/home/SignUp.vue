@@ -18,8 +18,7 @@
                 <button id="btnSignUp" type="submit" class="btn btn-primary">Sign Up</button>
                 <div class="text-center"><small class="fw-bold">OR</small></div>
                 <button type="submit" class="btn btn-primary">Continue with Facebook</button>
-                <div ref="googleLoginBtn">
-                </div>
+                <div ref="googleLoginBtn"></div>
             </div>        
             <div>
                 <div v-if="loading">
@@ -114,10 +113,10 @@
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },
             async handleCredentialResponse(response) {
-                axios.post('/Home/LoginByGoogle', null,{ params: { token: response.credential } })
+                axios.post('/Home/LoginOrSignUpByGoogle', null,{ params: { token: response.credential } })
                     .then((res) => {
                         if (res.data.success) {
-                            location.reload();
+                            location.href = '/';
                         } else {
                             that.errorMessages = res.data.errorMessages;
                         }
@@ -152,7 +151,7 @@
                 form: {
                     Email: {
                         required: helpers.withMessage('Email is required', required),
-                        email: helpers.withMessage('Invalid Email', email),
+                        email: helpers.withMessage('Email not found', email),
                         emailNotExists: helpers.withMessage('Email already exists', withAsync(asyncEmailNotExists))
                     }
                 }

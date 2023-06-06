@@ -16,7 +16,6 @@
         emits: ["update:modelValue", "search", "selected"],
         props: {
             modelValue: String,
-            inputclass: String,
             options: {
                 type: Array,
                 default: () => []

@@ -1,50 +1,47 @@
 ﻿<template>
     <div>
+        <h2 class="text-center">Change Password</h2>
         <form v-if="islinkvalid" @submit.prevent="submitForm">
             <div>
-                <ul>
-                    <li v-for="errorMessage in errorMessages">{{ errorMessage }}</li>
-                    <li v-for="error of v$.$errors" :key="error.$uid">{{ error.$message }}</li>
+                <ul class="list-group">
+                    <li class="list-group-item list-group-item-danger" v-for="errorMessage in errorMessages">{{ errorMessage }}</li>
                 </ul>
             </div>
-            <div class="form-group row no-gutters">
-                <label class="col-sm-4 col-form-label">Password</label>
-                <div class="col-sm-auto">
-                    <input type="password" class="form-control" autocomplete="off" v-model.trim="v$.form.Password.$model">
+            <div class="mb-2">
+                <label for="txtPassword" class="form-label">New Password</label>
+                <input id="txtPassword" type="password" class="form-control" autocomplete="off" v-model.lazy="form.Password" @blur="v$.form.Password.$touch" aria-describedby="spnPasswordErrors">
+                <div>
+                    <span id="spnPasswordErrors" class="form-text text-danger" v-for="error of v$.form.Password.$errors">{{ error.$message }}</span>
                 </div>
             </div>
-            <div class="form-group row no-gutters">
-                <label class="col-sm-4 col-form-label">Confirm Password</label>
-                <div class="col-sm-auto">
-                    <input type="password" class="form-control" autocomplete="off" v-model.trim="v$.form.ConfirmPassword.$model">
+            <div class="mb-3">
+                <label for="txtConfirmPassword" class="form-label">Confirm New Password</label>
+                <input id="txtConfirmPassword" type="password" class="form-control" autocomplete="off" v-model.lazy="form.ConfirmPassword" @blur="v$.form.ConfirmPassword.$touch" aria-describedby="spnConfirmPasswordErrors">
+                <div>
+                    <span id="spnConfirmPasswordErrors" class="form-text text-danger" v-for="error of v$.form.ConfirmPassword.$errors">{{ error.$message }}</span>
                 </div>
             </div>
-            <div class="row no-gutters pt-1">
-                <div class="form-group mx-auto">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
+            <div class="row g-2 justify-content-center mb-3">
+                <button type="submit" class="btn btn-primary">Change Password</button>
             </div>
             <div v-if="showSuccess" style="text-align:center;">
-                <font-awesome-icon icon="fa-solid fa-circle-check" />
+                <font-awesome-icon icon="fa-solid fa-circle-check bg-success" size="2xl"/>
                 <div>
                     Successfully reset password.
                 </div>
             </div>
         </form>
-        <div v-else style="text-align:center;">
-            <font-awesome-icon icon="fa-solid fa-hourglass-end" />
+        <div v-else class="text-center">
+            <div class="m-3">
+                <font-awesome-icon icon="fa-solid fa-hourglass-end" size="2xl" />
+            </div>
             <div>
-                Reset Password link has expired, please <a href="#" @click="showResetModal = true">Reset Password</a> to try again.
+                <span>Reset Password link has expired, please try again.</span>
+                <div>
+                    <a href="#" @click="showResetModal = true">Reset Password</a>
+                </div>
             </div>
         </div>
-        <modal v-if="showResetModal" contentclass="cmv-modal-md" @close="showResetModal = false">
-            <template v-slot:title>
-                Reset Password
-            </template>
-            <div class="container">
-                <reset-password />
-            </div>
-        </modal>
     </div>
 </template>
 <script>

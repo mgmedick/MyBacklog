@@ -1,48 +1,28 @@
 ﻿<template>
     <div>
-        <div v-if="isauth">          
+        <div v-if="!linkedaccounts || linkedaccounts.length == 0">          
+            <link-accounts></link-accounts>
         </div>
         <div v-else>
-            <login @forgotpass="showResetModal = !(showLoginModal = false)" @signup="showSignUpModal = !(showLoginModal = false)"/>
-        </div>   
-        <modal v-if="showResetModal" contentclass="cmv-modal-md" @close="showResetModal = false">
-            <template v-slot:title>
-                Reset Password
-            </template>
-            <div class="container">
-                <reset-password />
-            </div>
-        </modal>
-        <modal v-if="showSignUpModal" contentclass="cmv-modal-md" @close="showSignUpModal = false">
-            <template v-slot:title>
-                Sign Up
-            </template>
-            <div class="container">
-                <signup />
-            </div>
-        </modal>           
+            <span>Accounts are linked</span>
+        </div>            
     </div>   
 </template>
 <script>
     export default {
         name: "Index",
         props: {
-            isauth: Boolean
+            linkedaccounts: Array
         },
         data: function () {
             return {
-                showResetModal: false,
-                showSignUpModal: false
-            }
+            };
         },
-        computed: {
-        },
-        watch: {
-        },
+        computed: {},
+        watch: {},
         created: function () {
-        },        
-        methods: {
-        }
+        },
+        methods: {},
     };
 </script>
 

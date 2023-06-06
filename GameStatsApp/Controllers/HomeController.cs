@@ -30,8 +30,7 @@ namespace GameStatsApp.Controllers
 
         public ActionResult Index()
         {
-            var identity = (ClaimsIdentity)HttpContext.User.Identity;
-            if (identity == null || !identity.IsAuthenticated)
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Login");
             }
@@ -60,7 +59,7 @@ namespace GameStatsApp.Controllers
             {
                 if (!_userService.EmailExists(loginVM.Email, true))
                 {
-                    ModelState.AddModelError("Login", "Invalid email");
+                    ModelState.AddModelError("Login", "Email not found");
                 }
 
                 if (!_userService.PasswordMatches(loginVM.Password, loginVM.Email))
@@ -141,7 +140,7 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> LoginByGoogle(string token)
+        public async Task<JsonResult> LoginOrSignUpByGoogle(string token)
         {
             var success = false;
             List<string> errorMessages = null;
@@ -152,13 +151,13 @@ namespace GameStatsApp.Controllers
 
                 if (result == null)
                 {
-                    ModelState.AddModelError("LoginByGoogle", "Invalid Token");
+                    ModelState.AddModelError("LoginOrSignUpByGoogle", "Invalid Token");
                 }
 
                 var userVW = _userService.GetUserViews(i => i.Email == result.Email && i.Active).FirstOrDefault();              
-                if(_userService.EmailExists(result.Email, false) && userVW == null)
+                if (_userService.EmailExists(result.Email, false) && userVW == null)
                 {
-                    ModelState.AddModelError("LoginByGoogle", "Linked user has been inactivated");
+                    ModelState.AddModelError("LoginOrSignUpByGoogle", "Email not found");
                 }
 
                 if (ModelState.IsValid)           
@@ -170,8 +169,14 @@ namespace GameStatsApp.Controllers
                     }
                     else
                     {
-                        var username = result.Email.Split('@')[0] + '_' + ((String)result.Email).GetHashCode();
-                        _userService.CreateUser(result.Email, username, null);
+                        var username = result.Email.Split('@')[0];
+                        if (_userService.UsernameExists(username, false))
+                        {
+                            username += '_' + ((String)result.Email).GetHashCode();
+                        }
+                        var pass = StringExtensions.GeneratePassword(15, 2);
+
+                        _userService.CreateUser(result.Email, username, pass);
                         userVW = _userService.GetUserViews(i => i.Email == result.Email).FirstOrDefault();
                         LoginUser(userVW);
                         _ = _userService.SendConfirmRegistrationEmail(userVW.Email, userVW.Username).ContinueWith(t => _logger.Error(t.Exception, "SendConfirmRegistrationEmail"), TaskContinuationOptions.OnlyOnFaulted);
@@ -186,7 +191,7 @@ namespace GameStatsApp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "LoginByGoogle");
+                _logger.Error(ex, "LoginOrSignUpByGoogle");
                 return Json(new { success = false, message = "Error logging in with Google" });
             }
 
@@ -338,7 +343,8 @@ namespace GameStatsApp.Controllers
                             new Claim(ClaimTypes.NameIdentifier, userVW.UserID.ToString()),
                             new Claim(ClaimTypes.Email, userVW.Email),
                             new Claim(ClaimTypes.Name, userVW.Username),
-                            new Claim("theme", userVW.IsDarkTheme ? "theme-dark" : "theme-light")
+                            new Claim("theme", userVW.IsDarkTheme ? "theme-dark" : "theme-light"),
+                            new Claim("linkedaccounts", string.Empty)
                         };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

@@ -20,12 +20,15 @@
                 <div>
                     <span id="spnPasswordErrors" class="form-text text-danger" v-for="error of v$.form.Password.$errors">{{ error.$message }}</span>
                 </div>
+                <div>
+                    <a href="/Home/ResetPassword" class="link-dark small">Forgot your password?</a>
+                </div>
             </div>   
             <div class="row g-2 justify-content-center">
-                <button type="submit" class="btn btn-primary">Log In</button>
+                <button id="btnLogin" type="submit" class="btn btn-primary">Log In</button>
                 <div class="text-center"><small class="fw-bold">OR</small></div>
                 <button type="submit" class="btn btn-outline-dark d-flex"><font-awesome-icon icon="fa-brands fa-facebook" size="xl" /><span class="mx-auto">Continue with Facebook</span></button>
-                <button type="submit" class="btn btn-outline-dark d-flex"><font-awesome-icon icon="fa-brands fa-google" size="xl" /><span class="mx-auto">Continue with Google</span></button>
+                <div ref="googleLoginBtn"></div>
             </div>
         </form>
     </div>
@@ -52,15 +55,30 @@
         setup() {
             return { v$: useVuelidate() }
         },
+        props: {
+            gclientid: String
+        },           
         data() {
             return {
                 form: {
                     Email: '',
                     Password: ''
                 },
-                errorMessages: []
+                errorMessages: [],
+                width: document.documentElement.clientWidth
             }
         },
+        mounted: function () {
+            window.google.accounts.id.initialize({
+                client_id: this.gclientid,
+                callback: this.handleCredentialResponse,
+                auto_select: true
+            });
+
+            this.renderGoogleButton();
+
+            window.addEventListener('resize', this.resizeButtons); 
+        },          
         methods: {
             async submitForm() {
                 const isValid = await this.v$.$validate()
@@ -72,12 +90,45 @@
                 axios.post('/Home/Login', formData)
                     .then((res) => {
                         if (res.data.success) {
-                            location.reload();
+                            location.href = '/';
                         } else {
                             that.errorMessages = res.data.errorMessages;
                         }
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
+            },
+            async handleCredentialResponse(response) {
+                axios.post('/Home/LoginOrSignUpByGoogle', null,{ params: { token: response.credential } })
+                    .then((res) => {
+                        if (res.data.success) {
+                            location.href = '/';
+                        } else {
+                            that.errorMessages = res.data.errorMessages;
+                        }
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
+            },
+            resizeButtons() {
+                var that = this;
+                if (that.width != document.documentElement.clientWidth) {  
+                    that.width = document.documentElement.clientWidth;         
+                    that.renderGoogleButton();
+                }                 
+            },            
+            renderGoogleButton() {
+                var btnwidth = document.getElementById("btnLogin").clientWidth;   
+
+                const options = {
+                    type: 'standard',
+                    shape: 'pill',
+                    theme: 'outline',
+                    text: 'signin_with',
+                    size: 'large',
+                    logo_alignment: 'left',
+                    width: btnwidth
+                }
+
+                window.google.accounts.id.renderButton(this.$refs.googleLoginBtn, options);
             }
         },
         validations() {
@@ -85,7 +136,7 @@
                 form: {
                     Email: {
                         required: helpers.withMessage('Email is required', required),
-                        activeEmailExists: helpers.withMessage('Invalid Email', withAsync(asyncActiveEmailExists))
+                        activeEmailExists: helpers.withMessage('Email not found', withAsync(asyncActiveEmailExists))
                     },
                     Password: {
                         required: helpers.withMessage('Password is required', required)

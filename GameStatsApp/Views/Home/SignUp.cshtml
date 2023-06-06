@@ -2,7 +2,7 @@
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 
-@{ ViewBag.Title = "Login"; }
+@{ ViewBag.Title = "SignUp"; }
 
 <div class="mx-auto" style="max-width:400px;">
     <signup :gclientid="'@(Configuration.GetSection("SiteSettings").GetSection("GoogleClientID").Value)'"/>

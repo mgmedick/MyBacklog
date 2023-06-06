@@ -3,10 +3,11 @@
 @using System.Security.Claims
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostingEnv
 @inject IConfiguration Configuration
+@using System.Text.Json;
 
 @{ ViewBag.Title = "GameStatsApp"; }
 
-<index :isauth="@Json.Serialize(User.Identity.IsAuthenticated)"></index>
+<index :linkedaccounts="'@User.FindFirst("linkedaccounts")?.Value'"></index>
 
 
 

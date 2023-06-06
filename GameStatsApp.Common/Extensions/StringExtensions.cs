@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace GameStatsApp.Common.Extensions
 {
-    public static class StringHelpers
+    public static class StringExtensions
     {
         public static string[] SplitString(this string param, string delimiter, int? count = null)
         {
@@ -49,5 +49,74 @@ namespace GameStatsApp.Common.Extensions
             result = string.Join(string.Empty, baHashedText.ToList().Select(b => b.ToString("x2")).ToArray());
             return result;
         }
+        
+        public static string GeneratePassword(int length, int numberOfNonAlphanumericCharacters)
+        {
+            var punctuations = "!@#$%^&*()_-+=[{]};:>|./?".ToCharArray();
+            if (length < 1 || length > 128)
+            {
+                throw new ArgumentException(nameof(length));
+            }
+
+            if (numberOfNonAlphanumericCharacters > length || numberOfNonAlphanumericCharacters < 0)
+            {
+                throw new ArgumentException(nameof(numberOfNonAlphanumericCharacters));
+            }
+
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                var byteBuffer = new byte[length];
+
+                rng.GetBytes(byteBuffer);
+
+                var count = 0;
+                var characterBuffer = new char[length];
+
+                for (var iter = 0; iter < length; iter++)
+                {
+                    var i = byteBuffer[iter] % 87;
+
+                    if (i < 10)
+                    {
+                        characterBuffer[iter] = (char)('0' + i);
+                    }
+                    else if (i < 36)
+                    {
+                        characterBuffer[iter] = (char)('A' + i - 10);
+                    }
+                    else if (i < 62)
+                    {
+                        characterBuffer[iter] = (char)('a' + i - 36);
+                    }
+                    else
+                    {
+                        characterBuffer[iter] = punctuations[i - 62];
+                        count++;
+                    }
+                }
+
+                if (count >= numberOfNonAlphanumericCharacters)
+                {
+                    return new string(characterBuffer);
+                }
+
+                int j;
+                var rand = new Random();
+
+                for (j = 0; j < numberOfNonAlphanumericCharacters - count; j++)
+                {
+                    int k;
+                    do
+                    {
+                        k = rand.Next(0, length);
+                    }
+                    while (!char.IsLetterOrDigit(characterBuffer[k]));
+
+                    characterBuffer[k] = punctuations[rand.Next(0, punctuations.Length)];
+                }
+
+                return new string(characterBuffer);
+            }
+        }      
     }
 }

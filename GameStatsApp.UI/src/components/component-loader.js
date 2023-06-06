@@ -18,6 +18,7 @@ import activate from './home/Activate.vue';
 import login from './home/Login.vue';
 import resetPassword from './home/ResetPassword.vue';
 import changePassword from './home/ChangePassword.vue';
+import linkAccounts from './home/LinkAccounts.vue';
 
 import userSettings from './user/UserSettings.vue';
 
@@ -44,6 +45,7 @@ export default {
         app.component("login", login);
         app.component("signup", signUp);
         app.component("activate", activate);
+        app.component("link-accounts", linkAccounts);
 
         app.mount('#vue-app');
         app.provide('app', 'Vue3');
