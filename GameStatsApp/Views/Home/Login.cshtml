@@ -5,9 +5,10 @@
 
 @{ ViewBag.Title = "Login"; }
 
-<div class="mx-auto" style="max-width:400px;">
-    <login :gclientid="'@(Configuration.GetSection("SiteSettings").GetSection("GoogleClientID").Value)'"/>
-</div>
+<login :gclientid="'@(Configuration.GetSection("SiteSettings").GetSection("GoogleClientID").Value)'"/>
+
+
+
 
 
 

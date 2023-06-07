@@ -1,36 +1,41 @@
 ﻿<template>
-    <div>
-        <h2 class="text-center">Welcome to GameStatsApp</h2>
-        <form @submit.prevent="submitForm">
-            <div>
-                <ul class="list-group">
-                    <li class="list-group-item list-group-item-danger" v-for="errorMessage in errorMessages">{{ errorMessage }}</li>
-                </ul>
-            </div>
-            <div class="mb-2">
-                <label for="txtEmail" class="form-label">Email</label>
-                <input id="txtEmail" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Email" @blur="v$.form.Email.$touch" aria-describedby="spnEmailErrors">
-                <div>
-                    <span id="spnEmailErrors" class="form-text text-danger" v-for="error of v$.form.Email.$errors">{{ error.$message }}</span>
+    <div class="mx-auto">
+        <h2 class="text-center mb-3">Welcome to GameStatsApp</h2>
+        <div class="mx-auto" style="max-width:400px;">
+            <form @submit.prevent="submitForm">
+                <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <span>{{ errorMessage }}</span>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>  
+                <div class="mb-2">
+                    <label for="txtEmail" class="form-label">Email</label>
+                    <input id="txtEmail" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Email" @blur="v$.form.Email.$touch" aria-describedby="spnEmailErrors">
+                    <div>
+                        <span id="spnEmailErrors" class="form-text text-danger" v-for="error of v$.form.Email.$errors">{{ error.$message }}</span>
+                    </div>
                 </div>
-            </div>
-            <div class="mb-3">
-                <label for="txtPassword" class="form-label">Password</label>
-                <input id="txtPassword" type="password" class="form-control" autocomplete="off" v-model.lazy="form.Password" @blur="v$.form.Password.$touch" aria-describedby="spnPasswordErrors">
-                <div>
-                    <span id="spnPasswordErrors" class="form-text text-danger" v-for="error of v$.form.Password.$errors">{{ error.$message }}</span>
+                <div class="mb-3">
+                    <label for="txtPassword" class="form-label">Password</label>
+                    <input id="txtPassword" type="password" class="form-control" autocomplete="off" v-model.lazy="form.Password" @blur="v$.form.Password.$touch" aria-describedby="spnPasswordErrors">
+                    <div>
+                        <span id="spnPasswordErrors" class="form-text text-danger" v-for="error of v$.form.Password.$errors">{{ error.$message }}</span>
+                    </div>
+                    <div>
+                        <a :href="'/Home/ResetPassword?email=' + form.Email" class="link-dark small">Forgot your password?</a>
+                    </div>
+                </div>   
+                <div class="row g-2 justify-content-center">
+                    <button id="btnLogin" type="submit" class="btn btn-primary">Log In</button>
+                    <div class="text-center"><small class="fw-bold">OR</small></div>
+                    <button type="submit" class="btn btn-outline-dark d-flex"><font-awesome-icon icon="fa-brands fa-facebook" size="xl" /><span class="mx-auto">Continue with Facebook</span></button>
+                    <div ref="googleLoginBtn"></div>
                 </div>
-                <div>
-                    <a href="/Home/ResetPassword" class="link-dark small">Forgot your password?</a>
-                </div>
-            </div>   
-            <div class="row g-2 justify-content-center">
-                <button id="btnLogin" type="submit" class="btn btn-primary">Log In</button>
-                <div class="text-center"><small class="fw-bold">OR</small></div>
-                <button type="submit" class="btn btn-outline-dark d-flex"><font-awesome-icon icon="fa-brands fa-facebook" size="xl" /><span class="mx-auto">Continue with Facebook</span></button>
-                <div ref="googleLoginBtn"></div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </template>
 <script>
@@ -65,6 +70,7 @@
                     Password: ''
                 },
                 errorMessages: [],
+                errorToasts: [],
                 width: document.documentElement.clientWidth
             }
         },
@@ -104,6 +110,11 @@
                             location.href = '/';
                         } else {
                             that.errorMessages = res.data.errorMessages;
+                            that.$nextTick(function() {
+                                that.$refs.errortoasts?.forEach(el => {
+                                    new Toast(el).show();
+                                });
+                            });                            
                         }
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });

@@ -252,9 +252,10 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpGet]
-        public ActionResult ResetPassword()
+        public ActionResult ResetPassword(string email)
         {
-            return View();
+            var resetPassVM = new ResetPasswordViewModel() { Email = email };
+            return View(resetPassVM);
         }
 
         [AllowAnonymous]

@@ -4,9 +4,9 @@
 
 @{ ViewBag.Title = "SignUp"; }
 
-<div class="mx-auto" style="max-width:400px;">
-    <signup :gclientid="'@(Configuration.GetSection("SiteSettings").GetSection("GoogleClientID").Value)'"/>
-</div>
+<signup :gclientid="'@(Configuration.GetSection("SiteSettings").GetSection("GoogleClientID").Value)'"/>
+
+
         
 
 

@@ -1,6 +1,6 @@
 ﻿<template>
     <div>
-        <h2 class="text-center">Welcome to GameStatsApp</h2>
+        <h2 class="text-center mb-3">Welcome to GameStatsApp</h2>
         <form @submit.prevent="updateUsername" autocomplete="off">
             <div>
                 <ul class="list-group">

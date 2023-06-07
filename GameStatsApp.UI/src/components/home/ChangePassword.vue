@@ -1,44 +1,53 @@
 ﻿<template>
-    <div>
-        <h2 class="text-center">Change Password</h2>
-        <form v-if="islinkvalid" @submit.prevent="submitForm">
-            <div>
-                <ul class="list-group">
-                    <li class="list-group-item list-group-item-danger" v-for="errorMessage in errorMessages">{{ errorMessage }}</li>
-                </ul>
-            </div>
-            <div class="mb-2">
-                <label for="txtPassword" class="form-label">New Password</label>
-                <input id="txtPassword" type="password" class="form-control" autocomplete="off" v-model.lazy="form.Password" @blur="v$.form.Password.$touch" aria-describedby="spnPasswordErrors">
-                <div>
-                    <span id="spnPasswordErrors" class="form-text text-danger" v-for="error of v$.form.Password.$errors">{{ error.$message }}</span>
+    <div class="mx-auto">
+        <h2 class="text-center mb-3">Change Password</h2>
+        <div class="mx-auto" style="max-width:400px;">
+            <form v-if="islinkvalid" @submit.prevent="submitForm">         
+                <div class="toast-container position-absolute p-3 top-0 end-0" id="toastPlacement"> 
+                    <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <span>{{ errorMessage }}</span>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>            
+                    <div ref="successtoast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <span>Successfully reset password</span>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="mb-3">
-                <label for="txtConfirmPassword" class="form-label">Confirm New Password</label>
-                <input id="txtConfirmPassword" type="password" class="form-control" autocomplete="off" v-model.lazy="form.ConfirmPassword" @blur="v$.form.ConfirmPassword.$touch" aria-describedby="spnConfirmPasswordErrors">
-                <div>
-                    <span id="spnConfirmPasswordErrors" class="form-text text-danger" v-for="error of v$.form.ConfirmPassword.$errors">{{ error.$message }}</span>
+                <div class="mb-2">
+                    <label for="txtPassword" class="form-label">New Password</label>
+                    <input id="txtPassword" type="password" class="form-control" autocomplete="off" v-model.lazy="form.Password" @blur="v$.form.Password.$touch" aria-describedby="spnPasswordErrors">
+                    <div>
+                        <span id="spnPasswordErrors" class="form-text text-danger" v-for="error of v$.form.Password.$errors">{{ error.$message }}</span>
+                    </div>
                 </div>
-            </div>
-            <div class="row g-2 justify-content-center mb-3">
-                <button type="submit" class="btn btn-primary">Change Password</button>
-            </div>
-            <div v-if="showSuccess" style="text-align:center;">
-                <font-awesome-icon icon="fa-solid fa-circle-check bg-success" size="2xl"/>
-                <div>
-                    Successfully reset password.
+                <div class="mb-3">
+                    <label for="txtConfirmPassword" class="form-label">Confirm New Password</label>
+                    <input id="txtConfirmPassword" type="password" class="form-control" autocomplete="off" v-model.lazy="form.ConfirmPassword" @blur="v$.form.ConfirmPassword.$touch" aria-describedby="spnConfirmPasswordErrors">
+                    <div>
+                        <span id="spnConfirmPasswordErrors" class="form-text text-danger" v-for="error of v$.form.ConfirmPassword.$errors">{{ error.$message }}</span>
+                    </div>
                 </div>
-            </div>
-        </form>
-        <div v-else class="text-center">
-            <div class="m-3">
-                <font-awesome-icon icon="fa-solid fa-hourglass-end" size="2xl" />
-            </div>
-            <div>
-                <span>Reset Password link has expired, please try again.</span>
+                <div class="row g-2 justify-content-center mb-3">
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </div>            
+            </form>
+            <div v-else class="text-center">
+                <div class="m-3">
+                    <font-awesome-icon icon="fa-solid fa-hourglass-end" size="2xl" />
+                </div>
                 <div>
-                    <a href="#" @click="showResetModal = true">Reset Password</a>
+                    <span>Reset Password link has expired, please try again.</span>
+                    <div>
+                        <a href="/Home/ResetPassword/">Reset Password</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -49,6 +58,7 @@
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, sameAs, helpers } from '@vuelidate/validators';
+    import { Toast } from 'bootstrap';
     const { withAsync } = helpers;
 
     const passwordFormat = helpers.regex(/^(?=.*[A-Za-z])(?=.*\d)[._()-\/#&$@+\w\s]{8,30}$/)
@@ -79,12 +89,15 @@
                 },
                 showResetModal: false,
                 showSuccess: false,
-                errorMessages: []
+                errorMessages: [],
+                successToast: {},
+                errorToasts: []
             }
         },
         computed: {
         },
-        created: function () {
+        mounted: function () {
+            this.successToast = new Toast(this.$refs.successtoast);
         },
         methods: {
             async submitForm() {
@@ -97,9 +110,15 @@
                 axios.post('/Home/ChangePassword', formData)
                     .then((res) => {
                         if (res.data.success) {
-                            this.showSuccess = true;
+                            that.successToast.show();
+                            location.href = '/';
                         } else {
                             that.errorMessages = res.data.errorMessages;
+                            that.$nextTick(function() {
+                                that.$refs.errortoasts?.forEach(el => {
+                                    new Toast(el).show();
+                                });
+                            });
                         }
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
@@ -111,7 +130,7 @@
                     Password: {
                         required: helpers.withMessage('Password is required', required),
                         passwordFormat: helpers.withMessage('Must be between 8 - 30 characters with at least 1 number and letter', passwordFormat),
-                        passwordNotMatches: helpers.withMessage('Username already exists', withAsync(asyncPasswordNotMatches))
+                        passwordNotMatches: helpers.withMessage('Password must differ from previous password', withAsync(asyncPasswordNotMatches))
 
                     },
                     ConfirmPassword: {

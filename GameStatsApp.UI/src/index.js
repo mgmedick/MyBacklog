@@ -1,5 +1,5 @@
 import ComponentLoader from './components/component-loader.js'
-import { Popover } from 'bootstrap';
+import { Popover, Toast } from 'bootstrap';
 import 'bootswatch/dist/litera/bootstrap.min.css'
 // import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
 // import '@fortawesome/fontawesome-free/css/solid.min.css';

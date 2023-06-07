@@ -1,49 +1,54 @@
 ﻿<template>
-    <div>
-        <h2 class="text-center">Welcome to GameStatsApp</h2>
-        <form @submit.prevent="submitForm">
-            <div>
-                <ul class="list-group">
-                    <li class="list-group-item list-group-item-danger" v-for="errorMessage in errorMessages">{{ errorMessage }}</li>
-                </ul>
-            </div>        
-            <div class="mb-3">
-                <label for="txtEmail" class="form-label">Email</label>
-                <input id="txtEmail" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Email" @blur="v$.form.Email.$touch" aria-describedby="spnEmailErrors">
-                <div>
-                    <small id="spnEmailErrors" class="form-text text-danger" v-for="error of v$.form.Email.$errors">{{ error.$message }}</small>
-                </div>
-            </div>
-            <div class="row g-2 justify-content-center mb-3">
-                <button id="btnSignUp" type="submit" class="btn btn-primary">Sign Up</button>
-                <div class="text-center"><small class="fw-bold">OR</small></div>
-                <button type="submit" class="btn btn-primary">Continue with Facebook</button>
-                <div ref="googleLoginBtn"></div>
-            </div>        
-            <div>
-                <div v-if="loading">
-                    <div class="d-flex m-3">
-                        <div class="mx-auto">
-                            <font-awesome-icon icon="fa-solid fa-spinner" spin size="lg" />
+    <div class="mx-auto">
+        <h2 class="text-center mb-3">Welcome to GameStatsApp</h2>
+        <div class="mx-auto" style="max-width:400px;">
+            <form @submit.prevent="submitForm">
+                <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <span>{{ errorMessage }}</span>
                         </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
-                </div>
-                <div v-else-if="showSuccess">
+                </div>     
+                <div class="mb-3">
+                    <label for="txtEmail" class="form-label">Email</label>
+                    <input id="txtEmail" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Email" @blur="v$.form.Email.$touch" aria-describedby="spnEmailErrors">
                     <div>
-                        <div><span>To Activate your account click the activation link in the email we just sent you.</span></div>
-                        <br />
-                        <div class="mx-auto" style="max-width:350px;">
-                            <span>If your email has not arrived try these steps:</span>
-                            <ul class="pl-4">
-                                <li>Wait 30 mins</li>
-                                <li>Check your spam folder</li>
-                                <li>Try Sign Up again</li>
-                            </ul>
+                        <small id="spnEmailErrors" class="form-text text-danger" v-for="error of v$.form.Email.$errors">{{ error.$message }}</small>
+                    </div>
+                </div>
+                <div class="row g-2 justify-content-center mb-3">
+                    <button id="btnSignUp" type="submit" class="btn btn-primary">Sign Up</button>
+                    <div class="text-center"><small class="fw-bold">OR</small></div>
+                    <button type="submit" class="btn btn-primary">Continue with Facebook</button>
+                    <div ref="googleLoginBtn"></div>
+                </div>        
+                <div>
+                    <div v-if="loading">
+                        <div class="d-flex m-3">
+                            <div class="mx-auto">
+                                <font-awesome-icon icon="fa-solid fa-spinner" spin size="lg" />
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else-if="showSuccess">
+                        <div>
+                            <div><span>To Activate your account click the activation link in the email we just sent you.</span></div>
+                            <br />
+                            <div class="mx-auto" style="max-width:350px;">
+                                <span>If your email has not arrived try these steps:</span>
+                                <ul class="pl-4">
+                                    <li>Wait 30 mins</li>
+                                    <li>Check your spam folder</li>
+                                    <li>Try Sign Up again</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </template>
 <script>
@@ -106,20 +111,38 @@
 
                 axios.post('/Home/SignUp', formData)
                     .then((res) => {
-                        that.showSuccess = res.data.success;
-                        that.errorMessages = res.data.errorMessages;
+                        if (res.data.success) {
+                            location.href = '/';
+                        } else {
+                            that.errorMessages = res.data.errorMessages;
+                            that.$nextTick(function() {
+                                that.$refs.errortoasts?.forEach(el => {
+                                    new Toast(el).show();
+                                });
+                            });                             
+                        }
+                        
                         that.loading = false;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },
             async handleCredentialResponse(response) {
+                this.loading = true;
+
                 axios.post('/Home/LoginOrSignUpByGoogle', null,{ params: { token: response.credential } })
                     .then((res) => {
                         if (res.data.success) {
                             location.href = '/';
                         } else {
                             that.errorMessages = res.data.errorMessages;
+                            that.$nextTick(function() {
+                                that.$refs.errortoasts?.forEach(el => {
+                                    new Toast(el).show();
+                                });
+                            });                             
                         }
+
+                        that.loading = false;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },

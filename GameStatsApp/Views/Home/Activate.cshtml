@@ -2,9 +2,8 @@
 
 @{ ViewBag.Title = "Create Account"; }
 
-<div class="mx-auto" style="max-width:400px;">
-    <activate :islinkvalid="@Json.Serialize(Model.IsValid)" :email="'@Model.Email'"></activate>
-</div>
+<activate :islinkvalid="@Json.Serialize(Model.IsValid)" :email="'@Model.Email'"></activate>
+
 
 
 
