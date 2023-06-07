@@ -30,11 +30,11 @@
                         </div>
                     </div>
                     <div v-else-if="showSuccess">
-                        <div class="container p-3" style="max-width: 400px;">
+                        <div class="p-3 alert alert-dismissible alert-light">
                             <div class="mx-auto">
                                 <div><span>To Reset your password click the link in the email we just sent you.</span></div>
                                 <br />
-                                <div class="mx-auto" style="max-width:350px;">
+                                <div>
                                     <span>If your email has not arrived try these steps:</span>
                                     <ul class="pl-4">
                                         <li>Wait 30 mins</li>

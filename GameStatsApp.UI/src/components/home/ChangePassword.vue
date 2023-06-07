@@ -111,7 +111,7 @@
                     .then((res) => {
                         if (res.data.success) {
                             that.successToast.show();
-                            location.href = '/';
+                            //location.href = '/';
                         } else {
                             that.errorMessages = res.data.errorMessages;
                             that.$nextTick(function() {

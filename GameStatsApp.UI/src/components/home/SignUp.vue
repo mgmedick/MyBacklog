@@ -33,16 +33,18 @@
                         </div>
                     </div>
                     <div v-else-if="showSuccess">
-                        <div>
-                            <div><span>To Activate your account click the activation link in the email we just sent you.</span></div>
-                            <br />
-                            <div class="mx-auto" style="max-width:350px;">
-                                <span>If your email has not arrived try these steps:</span>
-                                <ul class="pl-4">
-                                    <li>Wait 30 mins</li>
-                                    <li>Check your spam folder</li>
-                                    <li>Try Sign Up again</li>
-                                </ul>
+                        <div class="p-3 alert alert-dismissible alert-light">
+                            <div class="mx-auto">
+                                <div><span>To Activate your account click the activation link in the email we just sent you.</span></div>
+                                <br />
+                                <div>
+                                    <span>If your email has not arrived try these steps:</span>
+                                    <ul class="pl-4">
+                                        <li>Wait 30 mins</li>
+                                        <li>Check your spam folder</li>
+                                        <li>Try Sign Up again</li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
