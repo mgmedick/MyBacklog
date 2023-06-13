@@ -2,9 +2,9 @@ import { createApp } from "vue";
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner } from '@fortawesome/free-solid-svg-icons'
-import { faGoogle, faFacebook } from '@fortawesome/free-brands-svg-icons'
-library.add(faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner, faGoogle, faFacebook);
+import { faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner, faSquarePen, faAt } from '@fortawesome/free-solid-svg-icons'
+import { faGoogle, faFacebook, faSteam, faXbox } from '@fortawesome/free-brands-svg-icons'
+library.add(faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner, faGoogle, faFacebook, faSquarePen, faAt, faSteam, faXbox);
 
 import buttonDropdown from './shared/ButtonDropdown.vue';
 import autocomplete from './shared/Autocomplete.vue';
@@ -18,6 +18,7 @@ import activate from './home/Activate.vue';
 import login from './home/Login.vue';
 import resetPassword from './home/ResetPassword.vue';
 import changePassword from './home/ChangePassword.vue';
+import changeUsername from './home/ChangeUsername.vue';
 import linkAccounts from './home/LinkAccounts.vue';
 
 import userSettings from './user/UserSettings.vue';
@@ -42,6 +43,7 @@ export default {
         app.component('user-settings', userSettings); 
         app.component("reset-password", resetPassword);
         app.component("change-password", changePassword);
+        app.component("change-username", changeUsername);
         app.component("login", login);
         app.component("signup", signUp);
         app.component("activate", activate);

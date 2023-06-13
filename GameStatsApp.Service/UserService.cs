@@ -147,6 +147,16 @@ namespace GameStatsApp.Service
             _userRepo.SaveUser(user);
         }
 
+        public void ChangeUsername(string email, string username)
+        {
+            var user = _userRepo.GetUsers(i => i.Email == email).FirstOrDefault();
+            user.Username = username; 
+            user.ModifiedBy = user.ID;
+            user.ModifiedDate = DateTime.UtcNow;
+
+            _userRepo.SaveUser(user);
+        }        
+
         public UserViewModel GetUser(int userID)
         {
             var userView = _userRepo.GetUserViews(i => i.UserID == userID).FirstOrDefault();

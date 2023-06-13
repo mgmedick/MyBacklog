@@ -337,6 +337,43 @@ namespace GameStatsApp.Controllers
             return Json(new { success = success, errorMessages = errorMessages });
         }
 
+        [HttpPost]
+        public JsonResult ChangeUsername(ChangeUsernameViewModel changeUsernameVM)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {
+                var email = User.FindFirst(ClaimTypes.Email).Value;
+                if (_userService.UsernameExists(changeUsernameVM.Username, false))
+                {
+                    ModelState.AddModelError("Activate", "Username already exists for another user");
+                }
+
+                if (ModelState.IsValid)
+                {
+                    _userService.ChangeUsername(email, changeUsernameVM.Username);
+                    var userVW = _userService.GetUserViews(i => i.Email == email).FirstOrDefault();
+                    LoginUser(userVW);
+                    success = true;
+                }
+                else
+                {
+                    success = false;
+                    errorMessages = ModelState.Values.SelectMany(i => i.Errors).Select(i => i.ErrorMessage).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "ChangeUsername");
+                success = false;
+                errorMessages = new List<string>() { "Error changing username" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
+        }
+
         private async void LoginUser(UserView userVW)
         {
             var claims = new List<Claim>

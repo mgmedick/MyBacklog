@@ -3,14 +3,16 @@
         <h2 class="text-center mb-3">Welcome to GameStatsApp</h2>
         <div class="mx-auto" style="max-width:400px;">
             <form @submit.prevent="submitForm">
-                <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <span>{{ errorMessage }}</span>
+                <div class="toast-container position-absolute p-3 top-0 end-0" id="toastPlacement"> 
+                    <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <span>{{ errorMessage }}</span>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                </div>     
+                    </div>   
+                </div>  
                 <div class="mb-3">
                     <label for="txtEmail" class="form-label">Email</label>
                     <input id="txtEmail" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Email" @blur="v$.form.Email.$touch" aria-describedby="spnEmailErrors">
@@ -33,7 +35,7 @@
                         </div>
                     </div>
                     <div v-else-if="showSuccess">
-                        <div class="p-3 alert alert-dismissible alert-light">
+                        <div class="p-3 alert alert-light">
                             <div class="mx-auto">
                                 <div><span>To Activate your account click the activation link in the email we just sent you.</span></div>
                                 <br />

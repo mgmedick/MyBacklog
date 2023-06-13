@@ -18,6 +18,7 @@ namespace GameStatsApp.Interfaces.Services
         Task SendResetPasswordEmail(string email);
         ChangePasswordViewModel GetChangePassword(string email, long expirationTime, string token);
         void ChangeUserPassword(string email, string pass);
+        void ChangeUsername(string email, string username);
         bool EmailExists(string email);
         bool PasswordMatches(string password, string email);
         bool UsernameExists(string username, bool activeFilter);

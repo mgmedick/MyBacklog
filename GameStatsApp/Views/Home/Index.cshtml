@@ -7,7 +7,7 @@
 
 @{ ViewBag.Title = "GameStatsApp"; }
 
-<index :linkedaccounts="'@User.FindFirst("linkedaccounts")?.Value'"></index>
+<index :username="'@User.FindFirst(ClaimTypes.Name)?.Value'" :linkedaccounts="'@User.FindFirst("linkedaccounts")?.Value'"></index>
 
 
 
