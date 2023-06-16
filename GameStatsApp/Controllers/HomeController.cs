@@ -14,17 +14,20 @@ using System.Linq;
 using Serilog;
 using Microsoft.AspNetCore.Authorization;
 using Google.Apis.Auth;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace GameStatsApp.Controllers
 {
     public class HomeController : Controller
     {
         private readonly IUserService _userService = null;
+        private readonly IAuthService _authService = null;
         private readonly ILogger _logger = null;
 
-        public HomeController(IUserService userService, ILogger logger)
+        public HomeController(IUserService userService, IAuthService authService, ILogger logger)
         {
             _userService = userService;
+            _authService = authService;
             _logger = logger;
         }
 
@@ -35,7 +38,9 @@ namespace GameStatsApp.Controllers
                 return RedirectToAction("Login");
             }
 
-            return View();
+            var indexVM = new IndexViewModel() { Username = User.FindFirstValue(ClaimTypes.Name), WindowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl() };
+
+            return View(indexVM);
         }
 
         public ViewResult Error()
@@ -197,6 +202,15 @@ namespace GameStatsApp.Controllers
 
             return Json(new { success = success, errorMessages = errorMessages });
         }
+
+        [HttpGet]
+        public void MicrosoftCallback()
+        {
+            var code = Request.Query["code"].ToString();
+            _authService.Authenticate(code);
+            // _authService.SetAccessToken(requestUrl);
+            // await _authService.AuthenticateAsync();
+        }        
 
         [HttpGet]
         public ViewResult Activate(string email, long expirationTime, string token)

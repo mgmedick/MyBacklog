@@ -1,13 +1,14 @@
 ﻿
 @using Microsoft.Extensions.Configuration
-@using System.Security.Claims
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostingEnv
 @inject IConfiguration Configuration
 @using System.Text.Json;
 
+@model GameStatsApp.Model.ViewModels.IndexViewModel
+
 @{ ViewBag.Title = "GameStatsApp"; }
 
-<index :username="'@User.FindFirst(ClaimTypes.Name)?.Value'" :linkedaccounts="'@User.FindFirst("linkedaccounts")?.Value'"></index>
+<index :indexvm="@JsonSerializer.Serialize(Model, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase})" ></index>
 
 
 
