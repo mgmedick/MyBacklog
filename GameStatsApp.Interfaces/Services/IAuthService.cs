@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using GameStatsApp.Model.JSON;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace GameStatsApp.Interfaces.Services
 {
@@ -13,8 +15,10 @@ namespace GameStatsApp.Interfaces.Services
     {
         string GetWindowsLiveAuthUrl();
         void Authenticate(string code);
-        Task<dynamic> ExchangeCodeForAccessToken(string code);
-        Task<dynamic> ExchangeRpsTicketForUserToken(string rpsTicket);
+        Task<JObject> ExchangeCodeForAccessToken(string code);
+        Task<JObject> ExchangeRpsTicketForUserToken(string rpsTicket);
+        Task<JObject> ExchangeTokenForXSTSToken(string userToken);
+        Task<JObject> GetUserInventory(string userHash, string xstsToken, ulong userXuid);
         // string GetRefreshWindowsLiveAuthUrl(AccessToken refreshToken);
         // void SetAccessToken(string url);
         // WindowsLiveResponse ParseWindowsLiveResponse(string url);

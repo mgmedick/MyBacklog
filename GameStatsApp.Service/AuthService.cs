@@ -80,6 +80,8 @@ namespace GameStatsApp.Service
                                                       IssueInstant = (DateTime)xstsResponse.GetValue("IssueInstant"),
                                                       NotAfter = (DateTime)xstsResponse.GetValue("NotAfter"),
                                                       UserInformation = ((JObject)xstsResponse["DisplayClaims"]["xui"][0]).ToObject<XboxUserInformation>() };
+
+            var userInventoryResponse = await GetUserInventory(XSTSTResponse.UserInformation.Userhash, XSTSTResponse.Token, XSTSTResponse.UserInformation.XboxUserId);
         }
 
         public async Task<JObject> ExchangeCodeForAccessToken(string code)
@@ -160,7 +162,8 @@ namespace GameStatsApp.Service
                 var request = new HttpRequestMessage(HttpMethod.Post, "https://xsts.auth.xboxlive.com/xsts/authorize");
 
                 var parameters = new Dictionary<string, object> {
-                    {"RelyingParty", "http://xboxlive.com"},
+                    //{"RelyingParty", "http://xboxlive.com"},
+                    {"RelyingParty", "http://licensing.xboxlive.com"},
                     {"TokenType", "JWT"},
                     {"Properties", new Dictionary<string, object> { {"UserTokens", new string[]{userToken}}, {"SandboxId", "RETAIL"} } }
                 };
@@ -179,6 +182,57 @@ namespace GameStatsApp.Service
             return data;
         }      
 
+        public async Task<JObject> GetUserInventory(string userHash, string xstsToken, ulong userXuid)
+        {
+            JObject data = null;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("XBL3.0", string.Format("x={0};{1}", userHash, xstsToken));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true, NoStore = true, MustRevalidate = true };
+                client.DefaultRequestHeaders.Add("Pragma", "no-cache");
+                client.DefaultRequestHeaders.Add("X-Xbl-Client-Type", "Companion");
+                client.DefaultRequestHeaders.Add("X-Xbl-Client-Version", "2.0");                
+                client.DefaultRequestHeaders.Add("X-Xbl-Contract-Version", "2");
+                client.DefaultRequestHeaders.Add("X-Xbl-Device-Type", "WindowsPhone");
+                client.DefaultRequestHeaders.Add("X-Xbl-IsAutomated-Client", "true");
+
+                var request = new HttpRequestMessage(HttpMethod.Get, "https://inventory.xboxlive.com/users/me/inventory");
+
+                using (var response = await client.SendAsync(request))
+                {
+                    var dataString = await response.Content.ReadAsStringAsync();
+                    data = JObject.Parse(dataString);
+                }
+            }
+
+            return data;
+        }          
+
+        /*
+        public async Task<JObject> GetUserInventory(string userHash, string xstsToken, ulong userXuid)
+        {
+            JObject data = null;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("XBL3.0", string.Format("x={0};{1}", userHash, xstsToken));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("X-Xbl-Contract-Version", "2");
+
+                var request = new HttpRequestMessage(HttpMethod.Get, string.Format("https://achievements.xboxlive.com/users/xuid({0})/history/titles", userXuid));
+
+                using (var response = await client.SendAsync(request))
+                {
+                    var dataString = await response.Content.ReadAsStringAsync();
+                    data = JObject.Parse(dataString);
+                }
+            }
+
+            return data;
+        }   
+        */
         /*
         public async void ExchangeCodeForAccessToken(string code)
         {
