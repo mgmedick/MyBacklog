@@ -24,10 +24,8 @@ namespace GameStatsApp.Service
         private readonly IConfiguration _config = null;
         public string RpsTicket { get; set; }
         public string RefreshToken { get; set; }
-        public AccessToken UserToken { get; set; }
-        public AccessToken XToken { get; set; }
-        public XboxUserInformation UserInformation { get; set; }
-
+        public string UserToken { get; set; }
+        public XSTSTokenResponse XSTSTResponse { get; set; }
         public AuthService(IConfiguration config)
         {
             _config = config;
@@ -51,70 +49,50 @@ namespace GameStatsApp.Service
             return authUrl;
         }
 
-        public string GetRefreshWindowsLiveAuthUrl(AccessToken refreshToken)
-        {
-            var baseUrl = "https://login.live.com/oauth20_authorize.srf";
-            var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientId").Value;
-            
-            var parameters = new Dictionary<string,string>{
-                {"client_id", clientID},
-                {"scope", "XboxLive.signin XboxLive.offline_access"},
-                {"grant_type", "refresh_token"},
-                {"refresh_token", refreshToken.Jwt}
-            };
-
-            var authUrl = QueryHelpers.AddQueryString(baseUrl, parameters);
-            
-            return authUrl;
-        }
-
-        // public async void ExchangeCodeForAccessToken(string code)
+        // public string GetRefreshWindowsLiveAuthUrl(AccessToken refreshToken)
         // {
+        //     var baseUrl = "https://login.live.com/oauth20_authorize.srf";
         //     var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientId").Value;
-        //     var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectUri").Value;
-        //     var clientSecret = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientSecret").Value;
+            
+        //     var parameters = new Dictionary<string,string>{
+        //         {"client_id", clientID},
+        //         {"scope", "XboxLive.signin XboxLive.offline_access"},
+        //         {"grant_type", "refresh_token"},
+        //         {"refresh_token", refreshToken.Jwt}
+        //     };
 
-        //     using (HttpClient client = new HttpClient())
-        //     {
-        //         var request = new HttpRequestMessage(HttpMethod.Post, "https://login.live.com/oauth20_token.srf");
-        //         var parameters = new Dictionary<string,string>{
-        //             {"code", code},
-        //             {"client_id", clientID},
-        //             {"grant_type", "authorization_code"},
-        //             {"redirect_uri", redirectUri},
-        //             {"scope", "XboxLive.signin XboxLive.offline_access"}
-        //         };
-        //         var jsonRequest = JsonConvert.SerializeObject(parameters);
-        //         request.Content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
-        //         request.Headers.Add("Accept", "application/json");
-
-        //         using (var response = await client.SendAsync(request))
-        //         {
-        //             var dataString = await response.Content.ReadAsStringAsync();
-        //             var data = JsonConvert.DeserializeObject(dataString);
-        //             //result = new AccessToken() { Jwt = data.Token, Issued = data.IssueInstant, Expires = data.NotAfter };
-        //         }
-        //     }
+        //     var authUrl = QueryHelpers.AddQueryString(baseUrl, parameters);
+            
+        //     return authUrl;
         // }
 
         public async void Authenticate(string code)
         {
-            var response = await ExchangeCodeForAccessToken(code);
-            var tokens = (IList<string>)response.data.ChildrenTokens;
-            RpsTicket = (string)response.ChildTokens.access_token;
-            RefreshToken = (string)response.ChildTokens.refresh_token;
+            var accessResponse = await ExchangeCodeForAccessToken(code);
+            RpsTicket = (string)accessResponse.GetValue("access_token");
+            RefreshToken = (string)accessResponse.GetValue("refresh_token");
 
+            var userResponse = await ExchangeRpsTicketForUserToken(RpsTicket);
+            UserToken = (string)userResponse.GetValue("Token");
+
+            var xstsResponse = await ExchangeTokenForXSTSToken(UserToken);
+            XSTSTResponse = new XSTSTokenResponse() { Token = (string)xstsResponse.GetValue("Token"),
+                                                      IssueInstant = (DateTime)xstsResponse.GetValue("IssueInstant"),
+                                                      NotAfter = (DateTime)xstsResponse.GetValue("NotAfter"),
+                                                      UserInformation = ((JObject)xstsResponse["DisplayClaims"]["xui"][0]).ToObject<XboxUserInformation>() };
         }
 
-        public async Task<dynamic> ExchangeCodeForAccessToken(string code)
+        public async Task<JObject> ExchangeCodeForAccessToken(string code)
         {
-            object data = null;
+            JObject data = null;
             var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientId").Value;
             var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectUri").Value;
             var clientSecret = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientSecret").Value;
 
             using (HttpClient client = new HttpClient())
             {
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
                 var parameters = new Dictionary<string,string>{
                     {"code", code},
                     {"client_id", clientID},
@@ -128,49 +106,78 @@ namespace GameStatsApp.Service
 
                 using (var response = await client.SendAsync(request))
                 {
-                    var dataString = await response.Content.ReadAsStringAsync();
-                    data = JObject.Parse(dataString);
-                    //result = new AccessToken() { Jwt = data.Token, Issued = data.IssueInstant, Expires = data.NotAfter };
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        data = JObject.Parse(dataString);
+                    }
                 }
             }
 
             return data;
         }
 
-        public async Task<dynamic> ExchangeRpsTicketForUserToken(string rpsTicket)
+        public async Task<JObject> ExchangeRpsTicketForUserToken(string rpsTicket)
         {
-            object data = null;
+            JObject data = null;
 
             using (HttpClient client = new HttpClient())
             {
-                // var request = new HttpRequestMessage(HttpMethod.Post, "https://user.auth.xboxlive.com/user/authenticate");
-                // var xasuRequest = new XASURequest() { RelyingParty = "http://auth.xboxlive.com", TokenType = "JWT", Properties = new XASUProperties() { AuthMethod = "RPS", SiteName = "user.auth.xboxlive.com", RpsTicket = accessToken.Jwt } };               
-                // var jsonRequest = JsonConvert.SerializeObject(xasuRequest);
-                // request.Headers.Add("x-xbl-contract-version", "1");
-                // request.Content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("X-Xbl-Contract-Version", "2");
 
-                var parameters = new Dictionary<string, string> {
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://user.auth.xboxlive.com/user/authenticate");
+
+                var parameters = new Dictionary<string, object> {
                     {"RelyingParty", "http://auth.xboxlive.com"},
                     {"TokenType", "JWT"},
-                    {"grant_type", "authorization_code"},
-                    {"Properties", JsonConvert.SerializeObject(new Dictionary<string, string> { {"AuthMethod", "RPS"}, {"SiteName", "user.auth.xboxlive.com"}, {"RpsTicket", rpsTicket} }) }
+                    {"Properties", new Dictionary<string, string> { {"AuthMethod", "RPS"}, {"SiteName", "user.auth.xboxlive.com"}, {"RpsTicket", "d=" + rpsTicket} } }
                 };
-
-                var request = new HttpRequestMessage(HttpMethod.Post, "https://user.auth.xboxlive.com/user/authenticate") { Content = new FormUrlEncodedContent(parameters) };
-                request.Headers.Add("X-Xbl-Contract-Version", "2");
+                request.Content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8, "application/json");
 
                 using (var response = await client.SendAsync(request))
                 {
-                    if (!response.IsSuccessStatusCode)
+                    if (response.IsSuccessStatusCode)
                     {
                         var dataString = await response.Content.ReadAsStringAsync();
-                        data = JsonConvert.DeserializeObject<dynamic>(dataString);
+                        data = JObject.Parse(dataString);
                     }
                 }
             }
 
             return data;
         }        
+
+        public async Task<JObject> ExchangeTokenForXSTSToken(string userToken)
+        {
+            JObject data = null;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("X-Xbl-Contract-Version", "2");
+
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://xsts.auth.xboxlive.com/xsts/authorize");
+
+                var parameters = new Dictionary<string, object> {
+                    {"RelyingParty", "http://xboxlive.com"},
+                    {"TokenType", "JWT"},
+                    {"Properties", new Dictionary<string, object> { {"UserTokens", new string[]{userToken}}, {"SandboxId", "RETAIL"} } }
+                };
+                request.Content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8, "application/json");
+
+                using (var response = await client.SendAsync(request))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        data = JObject.Parse(dataString);
+                    }
+                }
+            }
+
+            return data;
+        }      
 
         /*
         public async void ExchangeCodeForAccessToken(string code)
@@ -225,7 +232,7 @@ namespace GameStatsApp.Service
                 }
             }
         }
-        */
+        
 
         // public void SetAccessToken(string url)
         // {
@@ -351,5 +358,6 @@ namespace GameStatsApp.Service
 
            return result;
         }
+        */
     }
 }
