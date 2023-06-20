@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GameStatsApp.Model.ViewModels
 {
-    public class IndexViewModel
+    public class LinkAccountsViewModel
     {
         public string Username { get; set; }
         public string WindowsLiveAuthUrl { get; set; }
+        public List<int> LinkedAccounts { get; set; }
+        public bool? Success { get; set; }
     }
 }
 

@@ -1,14 +1,11 @@
-﻿
-@using Microsoft.Extensions.Configuration
+﻿@using Microsoft.Extensions.Configuration
+@using System.Security.Claims
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostingEnv
 @inject IConfiguration Configuration
-@using System.Text.Json;
 
-@model GameStatsApp.Model.ViewModels.IndexViewModel
+@{ ViewBag.Title = "Home"; }
 
-@{ ViewBag.Title = "GameStatsApp"; }
-
-<index :indexvm="@JsonSerializer.Serialize(Model, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase})" ></index>
+<index :isauth="@Json.Serialize(User.Identity.IsAuthenticated)"></index>
 
 
 

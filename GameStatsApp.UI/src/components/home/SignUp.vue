@@ -60,6 +60,7 @@
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, email, helpers } from '@vuelidate/validators';
+    import { Toast } from 'bootstrap';
     const { withAsync } = helpers;
 
     const asyncEmailNotExists = async (value) => {
@@ -136,7 +137,11 @@
                 axios.post('/Home/LoginOrSignUpByGoogle', null,{ params: { token: response.credential } })
                     .then((res) => {
                         if (res.data.success) {
-                            location.href = '/';
+                            if (res.data.isnewuser) {
+                                location.href = '/Home/LinkAccounts';
+                            } else {
+                                location.href = '/';
+                            }
                         } else {
                             that.errorMessages = res.data.errorMessages;
                             that.$nextTick(function() {

@@ -15,6 +15,7 @@ using Serilog;
 using Microsoft.AspNetCore.Authorization;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Http.Extensions;
+using Newtonsoft.Json;
 
 namespace GameStatsApp.Controllers
 {
@@ -33,14 +34,7 @@ namespace GameStatsApp.Controllers
 
         public ActionResult Index()
         {
-            if (User.Identity == null || !User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Login");
-            }
-
-            var indexVM = new IndexViewModel() { Username = User.FindFirstValue(ClaimTypes.Name), WindowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl() };
-
-            return View(indexVM);
+            return View();
         }
 
         public ViewResult Error()
@@ -138,7 +132,8 @@ namespace GameStatsApp.Controllers
             catch (Exception ex)
             {
                 _logger.Error(ex, "SignUp");
-                return Json(new { success = false, message = "Error signing up user" });
+                success = false;
+                errorMessages = new List<string>() { "Error signing up user" };
             }
 
             return Json(new { success = success, errorMessages = errorMessages });
@@ -148,6 +143,7 @@ namespace GameStatsApp.Controllers
         public async Task<JsonResult> LoginOrSignUpByGoogle(string token)
         {
             var success = false;
+            var isNewUser = false;
             List<string> errorMessages = null;
  
             try
@@ -185,6 +181,7 @@ namespace GameStatsApp.Controllers
                         userVW = _userService.GetUserViews(i => i.Email == result.Email).FirstOrDefault();
                         LoginUser(userVW);
                         _ = _userService.SendConfirmRegistrationEmail(userVW.Email, userVW.Username).ContinueWith(t => _logger.Error(t.Exception, "SendConfirmRegistrationEmail"), TaskContinuationOptions.OnlyOnFaulted);
+                        isNewUser = true;
                         success = true;
                     }
                 }
@@ -197,20 +194,12 @@ namespace GameStatsApp.Controllers
             catch (Exception ex)
             {
                 _logger.Error(ex, "LoginOrSignUpByGoogle");
-                return Json(new { success = false, message = "Error logging in with Google" });
+                success = false;
+                errorMessages = new List<string>() { "Error logging in with Google" };
             }
 
-            return Json(new { success = success, errorMessages = errorMessages });
+            return Json(new { success = success, isnewuser = isNewUser, errorMessages = errorMessages });
         }
-
-        [HttpGet]
-        public void MicrosoftCallback()
-        {
-            var code = Request.Query["code"].ToString();
-            _authService.Authenticate(code);
-            // _authService.SetAccessToken(requestUrl);
-            // await _authService.AuthenticateAsync();
-        }        
 
         [HttpGet]
         public ViewResult Activate(string email, long expirationTime, string token)
@@ -405,6 +394,42 @@ namespace GameStatsApp.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(identity));
         }
+
+        [HttpGet]
+        public ViewResult LinkAccounts(bool? success = null)
+        {
+            var redirectUri = string.Format("{0}://{1}{2}{3}", Request.Scheme, Request.Host, Request.Path, Request.QueryString);
+            var linkAccountsVM = new LinkAccountsViewModel() { 
+                                                                Username = User.FindFirstValue(ClaimTypes.Name), 
+                                                                WindowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(),
+                                                                LinkedAccounts = new List<int>(), 
+                                                                Success = success 
+                                                            };
+
+            return View(linkAccountsVM);
+        }
+
+        public ActionResult MicrosoftCallback()
+        {
+            var success = false;
+
+            try
+            {
+                var code = Request.Query["code"].ToString();
+                if (!string.IsNullOrWhiteSpace(code))
+                {
+                    _authService.Authenticate(code);
+                    success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "LinkAccounts");
+                success = false;
+            }            
+
+            return RedirectToAction("LinkAccounts", new { success = success });
+        }     
 
         [AllowAnonymous]
         [HttpGet]

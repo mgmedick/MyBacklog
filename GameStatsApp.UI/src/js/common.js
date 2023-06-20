@@ -128,7 +128,16 @@ const getCookie = (key) => {
     return keyValue ? keyValue[2] : null;
 }
 
-export { getFormData, getIntOrdinalString, getDateDiffList, formatTime, getDateTimeLocalString, isValidDate, escapeHtml, formatFileName, setCookie, getCookie }
+const deleteCookie = (key) => {
+    if (get_cookie(key)) {
+        document.cookie = key + "=" +
+        ((path) ? ";path="+path:"") +
+        ((domain)?";domain="+domain:"") +
+        ";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+    }
+}
+
+export { getFormData, getIntOrdinalString, getDateDiffList, formatTime, getDateTimeLocalString, isValidDate, escapeHtml, formatFileName, setCookie, getCookie, deleteCookie }
 
 
 

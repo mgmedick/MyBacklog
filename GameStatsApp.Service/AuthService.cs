@@ -66,7 +66,7 @@ namespace GameStatsApp.Service
         //     return authUrl;
         // }
 
-        public async void Authenticate(string code)
+        public async Task Authenticate(string code)
         {
             var accessResponse = await ExchangeCodeForAccessToken(code);
             RpsTicket = (string)accessResponse.GetValue("access_token");
@@ -81,7 +81,7 @@ namespace GameStatsApp.Service
                                                       NotAfter = (DateTime)xstsResponse.GetValue("NotAfter"),
                                                       UserInformation = ((JObject)xstsResponse["DisplayClaims"]["xui"][0]).ToObject<XboxUserInformation>() };
 
-            var userInventoryResponse = await GetUserInventory(XSTSTResponse.UserInformation.Userhash, XSTSTResponse.Token, XSTSTResponse.UserInformation.XboxUserId);
+            // var results = await GetUserTitleHistory(XSTSTResponse.UserInformation.Userhash, XSTSTResponse.Token, XSTSTResponse.UserInformation.XboxUserId);
         }
 
         public async Task<JObject> ExchangeCodeForAccessToken(string code)
@@ -162,8 +162,8 @@ namespace GameStatsApp.Service
                 var request = new HttpRequestMessage(HttpMethod.Post, "https://xsts.auth.xboxlive.com/xsts/authorize");
 
                 var parameters = new Dictionary<string, object> {
-                    //{"RelyingParty", "http://xboxlive.com"},
-                    {"RelyingParty", "http://licensing.xboxlive.com"},
+                    {"RelyingParty", "http://xboxlive.com"},
+                    //{"RelyingParty", "http://licensing.xboxlive.com"},
                     {"TokenType", "JWT"},
                     {"Properties", new Dictionary<string, object> { {"UserTokens", new string[]{userToken}}, {"SandboxId", "RETAIL"} } }
                 };
@@ -180,7 +180,51 @@ namespace GameStatsApp.Service
             }
 
             return data;
-        }      
+        }
+
+        public async Task<JArray> GetUserTitleHistory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null)
+        {
+            if (results == null)
+            {
+                results = new JArray();
+            }
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("XBL3.0", string.Format("x={0};{1}", userHash, xstsToken));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("X-Xbl-Contract-Version", "2");
+
+                var requestUrl = string.Format("https://achievements.xboxlive.com/users/xuid({0})/history/titles", userXuid);
+                if (!string.IsNullOrWhiteSpace(continuationToken))
+                {
+                    var parameters = new Dictionary<string, string> {
+                        {"continuationToken", continuationToken }
+                    };
+                    requestUrl = QueryHelpers.AddQueryString(requestUrl, parameters);
+                }
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+
+                using (var response = await client.SendAsync(request))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        var data = JObject.Parse(dataString);
+                        var items = (JArray)data.GetValue("titles");
+                        results.Merge(items);
+
+                        continuationToken = (string)data["pagingInfo"]["continuationToken"];
+                        if (!string.IsNullOrWhiteSpace(continuationToken))
+                        {
+                            await GetUserTitleHistory(userHash, xstsToken, userXuid, results, continuationToken);
+                        }
+                    }
+                }
+            }
+
+            return results;
+        }   
 
         public async Task<JObject> GetUserInventory(string userHash, string xstsToken, ulong userXuid)
         {
@@ -194,11 +238,16 @@ namespace GameStatsApp.Service
                 client.DefaultRequestHeaders.Add("Pragma", "no-cache");
                 client.DefaultRequestHeaders.Add("X-Xbl-Client-Type", "Companion");
                 client.DefaultRequestHeaders.Add("X-Xbl-Client-Version", "2.0");                
-                client.DefaultRequestHeaders.Add("X-Xbl-Contract-Version", "2");
-                client.DefaultRequestHeaders.Add("X-Xbl-Device-Type", "WindowsPhone");
+                client.DefaultRequestHeaders.Add("X-Xbl-Contract-Version", "3");
+                client.DefaultRequestHeaders.Add("X-Xbl-Device-Type", "Xbox360");
                 client.DefaultRequestHeaders.Add("X-Xbl-IsAutomated-Client", "true");
 
                 var request = new HttpRequestMessage(HttpMethod.Get, "https://inventory.xboxlive.com/users/me/inventory");
+
+                // var parameters = new Dictionary<string, object> {
+                //     {"RelyingParty", "http://licensing.xboxlive.com"}
+                // };
+                // request.Content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8, "application/json");
 
                 using (var response = await client.SendAsync(request))
                 {

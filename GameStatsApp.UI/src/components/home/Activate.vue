@@ -57,10 +57,11 @@
     </div>
 </template>
 <script>
-    import { getFormData } from '../../js/common.js';
+    import { getFormData, setCookie } from '../../js/common.js';
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, helpers, sameAs } from '@vuelidate/validators';
+    import { Toast } from 'bootstrap';
     const { withAsync } = helpers;
 
     const usernameFormat = helpers.regex(/^[._()-\/#&$@+\w\s]{3,30}$/)
@@ -113,7 +114,7 @@
                 axios.post('/Home/Activate', formData)
                     .then((res) => {
                         if (res.data.success) {
-                            location.href = '/';
+                            location.href = '/Home/LinkAccounts';
                         } else {
                             that.errorMessages = res.data.errorMessages;
                             that.$nextTick(function() {

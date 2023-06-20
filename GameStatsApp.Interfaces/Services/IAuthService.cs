@@ -14,7 +14,7 @@ namespace GameStatsApp.Interfaces.Services
     public interface IAuthService
     {
         string GetWindowsLiveAuthUrl();
-        void Authenticate(string code);
+        Task Authenticate(string code);
         Task<JObject> ExchangeCodeForAccessToken(string code);
         Task<JObject> ExchangeRpsTicketForUserToken(string rpsTicket);
         Task<JObject> ExchangeTokenForXSTSToken(string userToken);

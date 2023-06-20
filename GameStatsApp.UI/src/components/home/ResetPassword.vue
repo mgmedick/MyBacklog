@@ -57,6 +57,7 @@
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, helpers } from '@vuelidate/validators';
+    import { Toast } from 'bootstrap';
     const { withAsync } = helpers;
 
     const asyncActiveEmailExists = async (value) => {

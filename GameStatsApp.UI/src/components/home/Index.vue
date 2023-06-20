@@ -1,24 +1,23 @@
 ﻿<template>
     <div>
-        <div v-if="!linkedaccounts || linkedaccounts.length == 0">          
-            <link-accounts :indexvm="indexvm"></link-accounts>
-        </div>
+        <div v-if="!isauth">          
+            <span>Not logged in page</span>
+        </div>  
         <div v-else>
-            <span>Accounts are linked</span>
-        </div>            
+            <span>Logged in page</span>
+        </div>         
     </div>   
 </template>
 <script>
     export default {
         name: "Index",
         props: {
-            indexvm: Object
+            isauth: Boolean
         },
         data: function () {
             return {
             };
         },
-        computed: {},
         watch: {},
         created: function () {
         },
