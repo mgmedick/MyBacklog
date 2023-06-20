@@ -424,7 +424,7 @@ namespace GameStatsApp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "LinkAccounts");
+                _logger.Error(ex, "MicrosoftCallback");
                 success = false;
             }            
 
