@@ -57,6 +57,19 @@ namespace GameStatsApp.Repository
             }
         }
 
+        public void SaveUserGameAccount(UserGameAccount userGameAccount)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                using (var tran = db.GetTransaction())
+                {
+                    db.Save<UserGameAccount>(userGameAccount);
+
+                    tran.Complete();
+                }
+            }
+        }
+
         public IEnumerable<SearchResult> SearchUsers(string searchText)
         {
             using (IDatabase db = DBFactory.GetDatabase())
@@ -65,7 +78,7 @@ namespace GameStatsApp.Repository
 
                 return results;
             }
-        }        
+        }                
     }
 }
 

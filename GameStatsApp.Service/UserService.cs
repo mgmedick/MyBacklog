@@ -157,49 +157,27 @@ namespace GameStatsApp.Service
             _userRepo.SaveUser(user);
         }        
 
-        public UserViewModel GetUser(int userID)
+        public void CreateUserGameAccount(int userID, int gameServiceID)
         {
-            var userView = _userRepo.GetUserViews(i => i.UserID == userID).FirstOrDefault();
-            var userVM = new UserViewModel(userView);
+            var uservw = _userRepo.GetUserViews(i => i.UserID == userID).FirstOrDefault();
+            var gameServiceIDs = uservw.GameServiceIDs.Split(",").Cast<int>().ToList();
 
-            return userVM;
-        }
-
-        public void SaveUser(UserViewModel userVM, int currUserID)
-        {
-            var user = _userRepo.GetUsers(i => i.ID == userVM.UserID).FirstOrDefault();
-
-            if (user != null)
+            if (!gameServiceIDs.Contains(gameServiceID))
             {
-                var userSetting = new UserSetting()
+                var userGameAccount = new UserGameAccount()
                 {
-                    UserID = userVM.UserID,
-                    IsDarkTheme = userVM.IsDarkTheme
+                    UserID = userID,
+                    GameServiceID = gameServiceID
                 };
 
-                _userRepo.SaveUserSetting(userSetting);
+                _userRepo.SaveUserGameAccount(userGameAccount);
 
+                var user = uservw.ConvertToUser();
                 user.ModifiedDate = DateTime.UtcNow;
-                user.ModifiedBy = currUserID;
-                _userRepo.SaveUser(user);
+                user.ModifiedBy = userID;
+                _userRepo.SaveUser(user);    
             }
-        }
-
-        public void UpdateIsDarkTheme(int currUserID, bool isDarkTheme)
-        {
-            var user = _userRepo.GetUsers(i => i.ID == currUserID).FirstOrDefault();
-
-            if (user != null)
-            {
-                var userSetting = new UserSetting()
-                {
-                    UserID = user.ID,
-                    IsDarkTheme = isDarkTheme
-                };
-
-                _userRepo.SaveUserSetting(userSetting);
-            }
-        }
+        }        
 
         //jqvalidate
         public bool EmailExists(string email)

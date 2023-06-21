@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using GameStatsApp.Interfaces.Services;
+using GameStatsApp.Model;
 using GameStatsApp.Model.Data;
 using GameStatsApp.Model.ViewModels;
 using GameStatsApp.Common.Extensions;
@@ -23,12 +24,14 @@ namespace GameStatsApp.Controllers
     {
         private readonly IUserService _userService = null;
         private readonly IAuthService _authService = null;
+        private readonly IConfiguration _config = null;
         private readonly ILogger _logger = null;
 
-        public HomeController(IUserService userService, IAuthService authService, ILogger logger)
+        public HomeController(IUserService userService, IAuthService authService, IConfiguration config, ILogger logger)
         {
             _userService = userService;
             _authService = authService;
+            _config = config;
             _logger = logger;
         }
 
@@ -348,7 +351,7 @@ namespace GameStatsApp.Controllers
 
             try
             {
-                var email = User.FindFirst(ClaimTypes.Email).Value;
+                var email = User.FindFirstValue(ClaimTypes.Email);
                 if (_userService.UsernameExists(changeUsernameVM.Username, false))
                 {
                     ModelState.AddModelError("Activate", "Username already exists for another user");
@@ -385,7 +388,7 @@ namespace GameStatsApp.Controllers
                             new Claim(ClaimTypes.Email, userVW.Email),
                             new Claim(ClaimTypes.Name, userVW.Username),
                             new Claim("theme", userVW.IsDarkTheme ? "theme-dark" : "theme-light"),
-                            new Claim("linkedaccounts", string.Empty)
+                            new Claim("gameserviceids", userVW.GameServiceIDs)
                         };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -396,17 +399,16 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpGet]
-        public ViewResult LinkAccounts(bool? success = null)
+        public ViewResult Welcome(bool? success = null)
         {
-            var redirectUri = string.Format("{0}://{1}{2}{3}", Request.Scheme, Request.Host, Request.Path, Request.QueryString);
-            var linkAccountsVM = new LinkAccountsViewModel() { 
-                                                                Username = User.FindFirstValue(ClaimTypes.Name), 
-                                                                WindowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(),
-                                                                LinkedAccounts = new List<int>(), 
-                                                                Success = success 
-                                                            };
+            var username = User.FindFirstValue(ClaimTypes.Name);
+            var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("HomeRedirectUri").Value;
+            var welcomeVM = new WelcomeViewModel() { Username = username,                                              
+                                                     WindowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUri),
+                                                     GameServiceIDs = User.FindFirstValue("gameserviceids").Split(",").Cast<int>().ToList(),
+                                                     Success = success };
 
-            return View(linkAccountsVM);
+            return View(welcomeVM);
         }
 
         public ActionResult MicrosoftCallback()
@@ -418,7 +420,12 @@ namespace GameStatsApp.Controllers
                 var code = Request.Query["code"].ToString();
                 if (!string.IsNullOrWhiteSpace(code))
                 {
-                    _authService.Authenticate(code);
+                    var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("HomeRedirectUri").Value;
+                    _authService.Authenticate(code, redirectUri);
+
+                    var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                    _userService.CreateUserGameAccount(userID, (int)GameService.Xbox);
+
                     success = true;
                 }
             }
@@ -428,7 +435,7 @@ namespace GameStatsApp.Controllers
                 success = false;
             }            
 
-            return RedirectToAction("LinkAccounts", new { success = success });
+            return RedirectToAction("Welcome", new { success = success });
         }     
 
         [AllowAnonymous]

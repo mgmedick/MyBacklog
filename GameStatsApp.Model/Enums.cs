@@ -8,4 +8,10 @@ namespace GameStatsApp.Model
         ResetPasswordEmail = 2,
         ConfirmRegistration = 3
     }       
+
+    public enum GameService
+    {
+        Steam = 1,
+        Xbox = 2
+    }      
 }

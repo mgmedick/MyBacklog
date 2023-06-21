@@ -1,23 +1,5 @@
 ﻿<template>
     <form ref="form" @submit.prevent="submitForm" autocomplete="off">
-        <div class="toast-container position-absolute p-3 top-0 end-0" id="toastPlacement"> 
-            <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <span>{{ errorMessage }}</span>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            </div>
-            <div ref="successtoast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <span>Successfully updated username</span>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            </div>                         
-        </div>     
         <div class="row g-1 justify-content-center align-items-center">   
             <div class="col-auto">
                 <font-awesome-icon icon="fa-solid fa-at" size="xl" />
@@ -40,7 +22,6 @@
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, helpers, sameAs } from '@vuelidate/validators';
-    import { Toast } from 'bootstrap';    
     const { withAsync } = helpers;
 
     const usernameFormat = helpers.regex(/^[._()-\/#&$@+\w\s]{3,30}$/)
@@ -57,6 +38,7 @@
 
     export default {
         name: "ChangeUsername",
+        emits: ["success", "error"],
         props: {
             username: String
         },
@@ -68,16 +50,12 @@
                 form: {
                     Username: this.username
                 },
-                errorMessages: [],
-                successToast: {},
-                showSignUpModal: false,
                 editUsername: false
             }
         },
         computed: {
         },
         mounted: function () {
-            this.successToast = new Toast(this.$refs.successtoast);
         },
         methods: {
             onUserNameBlur() {
@@ -100,14 +78,9 @@
                 axios.post('/Home/ChangeUsername', formData)
                     .then((res) => {
                         if (res.data.success) {
-                            that.successToast.show();
+                            that.$emit('success', "Successfully updated username");                           
                         } else {
-                            that.errorMessages = res.data.errorMessages;
-                            that.$nextTick(function() {
-                                that.$refs.errortoasts?.forEach(el => {
-                                    new Toast(el).show();
-                                });
-                            });                            
+                            that.$emit('error', res.data.errorMessages);                           
                         }
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });

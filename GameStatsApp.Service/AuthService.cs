@@ -31,10 +31,10 @@ namespace GameStatsApp.Service
             _config = config;
         }
 
-        public string GetWindowsLiveAuthUrl()
+        public string GetWindowsLiveAuthUrl(string redirectUri)
         {
             var baseUrl = "https://login.live.com/oauth20_authorize.srf";
-            var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectUri").Value;
+            //var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectUri").Value;
             var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientId").Value;
             
             var parameters = new Dictionary<string,string>{
@@ -66,9 +66,9 @@ namespace GameStatsApp.Service
         //     return authUrl;
         // }
 
-        public async Task Authenticate(string code)
+        public async Task Authenticate(string code, string redirectUri)
         {
-            var accessResponse = await ExchangeCodeForAccessToken(code);
+            var accessResponse = await ExchangeCodeForAccessToken(code, redirectUri);
             RpsTicket = (string)accessResponse.GetValue("access_token");
             RefreshToken = (string)accessResponse.GetValue("refresh_token");
 
@@ -84,11 +84,11 @@ namespace GameStatsApp.Service
             // var results = await GetUserTitleHistory(XSTSTResponse.UserInformation.Userhash, XSTSTResponse.Token, XSTSTResponse.UserInformation.XboxUserId);
         }
 
-        public async Task<JObject> ExchangeCodeForAccessToken(string code)
+        public async Task<JObject> ExchangeCodeForAccessToken(string code, string redirectUri)
         {
             JObject data = null;
             var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientId").Value;
-            var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectUri").Value;
+            //var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectUri").Value;
             var clientSecret = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientSecret").Value;
 
             using (HttpClient client = new HttpClient())

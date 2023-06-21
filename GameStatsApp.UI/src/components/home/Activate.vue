@@ -114,7 +114,7 @@
                 axios.post('/Home/Activate', formData)
                     .then((res) => {
                         if (res.data.success) {
-                            location.href = '/Home/LinkAccounts';
+                            location.href = '/Home/Welcome';
                         } else {
                             that.errorMessages = res.data.errorMessages;
                             that.$nextTick(function() {

@@ -7,11 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GameStatsApp.Model.ViewModels
 {
-    public class LinkAccountsViewModel
+    public class WelcomeViewModel
     {
         public string Username { get; set; }
         public string WindowsLiveAuthUrl { get; set; }
-        public List<int> LinkedAccounts { get; set; }
+        public List<int> GameServiceIDs { get; set; }        
         public bool? Success { get; set; }
     }
 }

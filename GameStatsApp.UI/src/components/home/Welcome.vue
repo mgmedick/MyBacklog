@@ -3,33 +3,33 @@
         <h2 class="text-center mb-1">Welcome to GameStatsApp</h2>
         <div class="mx-auto" style="max-width:400px;">
             <div class="toast-container position-absolute p-3 top-0 end-0" id="toastPlacement"> 
-                <div ref="errortoast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
                     <div class="d-flex">
                         <div class="toast-body">
-                            <span>Error linking account</span>
+                            <span>{{ errorMessage }}</span>
                         </div>
                         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
-                </div>            
+                </div>           
                 <div ref="successtoast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
                     <div class="d-flex">
                         <div class="toast-body">
-                            <span>Successfully linked account</span>
+                            <span>{{ successMessage }}</span>
                         </div>
                         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
                 </div>
             </div>
             <div class="mb-3">
-                <change-username :username="linkaccountsvm.username"></change-username>
+                <change-username :username="welcomevm.username" @success="onChangeUsernameSuccess" @error="onChangeUsernameError"></change-username>
             </div>
             <div class="text-center">
-                <p class="lead text-dark">Link an account to automatically keep your game library up to date</p>
+                <p class="lead text-dark">Link an account to keep your game library up to date automatically</p>
             </div>
             <div class="row g-2 justify-content-center">
                 <button type="button" class="btn btn-outline-dark d-flex"><font-awesome-icon icon="fa-brands fa-steam" size="xl" style="color: #0a3169;" /><span class="mx-auto">Link Steam account</span></button>
                 <button type="button" class="btn btn-outline-dark d-flex" @click="onXboxClick"><font-awesome-icon icon="fa-brands fa-xbox" size="xl" style="color: #107711;" /><span class="mx-auto">Link Xbox account</span></button>
-                <button type="button" class="btn btn-primary" @click="onContinueClick">{{linkaccountsvm.linkedAccounts.length > 0 ? 'Continue' : 'Skip'}}</button>
+                <button type="button" class="btn btn-primary" @click="onContinueClick">{{welcomevm.gameServiceIDs.length > 0 ? 'Continue' : 'Skip'}}</button>
             </div>
         </div>
     </div>
@@ -38,15 +38,15 @@
     import { Toast } from 'bootstrap';
     
     export default {
-        name: "LinkAccounts",
+        name: "Welcome",
         props: {
-            linkaccountsvm: Object
+            welcomevm: Object
         },
         data() {
             return {
-                editUsername: false,
-                errorMessages: [],
                 successToast: {},
+                successMessage: '',
+                errorMessages: [],
                 errorToast: {}
             }
         },
@@ -57,17 +57,34 @@
             that.successToast = new Toast(that.$refs.successtoast);
             that.errorToast = new Toast(that.$refs.errortoast);
 
-            if (that.linkaccountsvm.success != null) {
-                if (that.linkaccountsvm.success) {
+            if (that.welcomevm.success != null) {
+                if (that.welcomevm.success) {
+                    that.successMessage = "Successfully linked account"
                     that.successToast.show();
                 } else {            
-                    that.errorToast.show();
+                    that.errorMessages = ["Error linking account"];
+                    if (that.errorMessages.length > 0) {
+                        that.$nextTick(function() {
+                            that.$refs.errortoasts?.forEach(el => {
+                                new Toast(el).show();
+                            });
+                        }); 
+                    } 
                 }
-            }
+            }            
         },
         methods: {
-            onXboxClick() {
-                location.href = this.linkaccountsvm.windowsLiveAuthUrl;
+            onChangeUsernameSuccess(successMsg) {
+                that.successMessage = successMsg;
+                that.successToast.show();
+            },
+            onChangeUsernameError(errorMsgs) {
+                that.errorMessages = errorMsgs;
+                that.$nextTick(function() {
+                    that.$refs.errortoasts?.forEach(el => {
+                        new Toast(el).show();
+                    });
+                }); 
             },
             onContinueClick() {
                 location.href = "/";

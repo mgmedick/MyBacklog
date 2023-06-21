@@ -138,7 +138,7 @@
                     .then((res) => {
                         if (res.data.success) {
                             if (res.data.isnewuser) {
-                                location.href = '/Home/LinkAccounts';
+                                location.href = '/Home/Welcome';
                             } else {
                                 location.href = '/';
                             }
