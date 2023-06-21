@@ -24,6 +24,6 @@ namespace GameStatsApp.Interfaces.Services
         bool EmailExists(string email, bool activeFilter);
         Task SendConfirmRegistrationEmail(string email, string username);
         IEnumerable<SearchResult> SearchUsers(string searchText);
-        void CreateUserGameAccount(int userID, int gameServiceID);
+        void CreateUserGameService(int userID, int gameServiceID);
     }
 }

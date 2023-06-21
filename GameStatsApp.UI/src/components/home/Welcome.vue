@@ -2,7 +2,7 @@
     <div class="mx-auto">
         <h2 class="text-center mb-1">Welcome to GameStatsApp</h2>
         <div class="mx-auto" style="max-width:400px;">
-            <div class="toast-container position-absolute p-3 top-0 end-0" id="toastPlacement"> 
+            <div class="toast-container position-absolute p-3 top-0 end-0 mt-5" id="toastPlacement"> 
                 <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
                     <div class="d-flex">
                         <div class="toast-body">
@@ -27,8 +27,8 @@
                 <p class="lead text-dark">Link an account to keep your game library up to date automatically</p>
             </div>
             <div class="row g-2 justify-content-center">
-                <button type="button" class="btn btn-outline-dark d-flex"><font-awesome-icon icon="fa-brands fa-steam" size="xl" style="color: #0a3169;" /><span class="mx-auto">Link Steam account</span></button>
-                <button type="button" class="btn btn-outline-dark d-flex" @click="onXboxClick"><font-awesome-icon icon="fa-brands fa-xbox" size="xl" style="color: #107711;" /><span class="mx-auto">Link Xbox account</span></button>
+                <button type="button" class="btn btn-outline-dark d-flex" :disabled="welcomevm.gameServiceIDs.indexOf(1) > -1"><font-awesome-icon icon="fa-brands fa-steam" size="xl" style="color: #0a3169;" /><span class="mx-auto">Link Steam account</span><font-awesome-icon v-if="welcomevm.gameServiceIDs.indexOf(1) > -1" icon="fa-solid fa-circle-check" size="xl" style="color: #02b875;"/></button>
+                <button type="button" class="btn btn-outline-dark d-flex" :disabled="welcomevm.gameServiceIDs.indexOf(2) > -1" @click="onXboxClick"><font-awesome-icon icon="fa-brands fa-xbox" size="xl" style="color: #107711;" /><span class="mx-auto">Link Xbox account</span><font-awesome-icon v-if="welcomevm.gameServiceIDs.indexOf(2) > -1" icon="fa-solid fa-circle-check" size="xl" style="color: #02b875;"/></button>
                 <button type="button" class="btn btn-primary" @click="onContinueClick">{{welcomevm.gameServiceIDs.length > 0 ? 'Continue' : 'Skip'}}</button>
             </div>
         </div>
@@ -86,6 +86,9 @@
                     });
                 }); 
             },
+            onXboxClick() {
+                location.href = this.welcomevm.windowsLiveAuthUrl;
+            },            
             onContinueClick() {
                 location.href = "/";
             }    

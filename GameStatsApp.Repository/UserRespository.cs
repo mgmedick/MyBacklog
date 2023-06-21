@@ -57,13 +57,13 @@ namespace GameStatsApp.Repository
             }
         }
 
-        public void SaveUserGameAccount(UserGameAccount userGameAccount)
+        public void SaveUserGameService(UserGameService userGameService)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
                 using (var tran = db.GetTransaction())
                 {
-                    db.Save<UserGameAccount>(userGameAccount);
+                    db.Save<UserGameService>(userGameService);
 
                     tran.Complete();
                 }

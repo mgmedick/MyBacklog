@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace GameStatsApp.Model.Data
 {
-    public class UserGameAccount
+    public class UserGameService
     {
         public int ID { get; set; }
         public int UserID { get; set; }

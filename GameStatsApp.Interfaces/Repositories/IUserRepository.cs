@@ -13,7 +13,7 @@ namespace GameStatsApp.Interfaces.Repositories
         void SaveUser(User user);
         IEnumerable<UserView> GetUserViews(Expression<Func<UserView, bool>> predicate);
         void SaveUserSetting(UserSetting userSetting);
-        void SaveUserGameAccount(UserGameAccount userGameAccount);
+        void SaveUserGameService(UserGameService userGameService);
         IEnumerable<SearchResult> SearchUsers(string searchText);
     }
 }

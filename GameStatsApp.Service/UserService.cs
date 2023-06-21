@@ -157,22 +157,22 @@ namespace GameStatsApp.Service
             _userRepo.SaveUser(user);
         }        
 
-        public void CreateUserGameAccount(int userID, int gameServiceID)
+        public void CreateUserGameService(int userID, int gameServiceID)
         {
-            var uservw = _userRepo.GetUserViews(i => i.UserID == userID).FirstOrDefault();
-            var gameServiceIDs = uservw.GameServiceIDs.Split(",").Cast<int>().ToList();
+            var userVW = _userRepo.GetUserViews(i => i.UserID == userID).FirstOrDefault();
+            var gameServiceIDs = !string.IsNullOrWhiteSpace(userVW.GameServiceIDs) ? userVW.GameServiceIDs.Split(",").Select(i => Convert.ToInt32(i)).ToList() : new List<int>();
 
             if (!gameServiceIDs.Contains(gameServiceID))
             {
-                var userGameAccount = new UserGameAccount()
+                var userGameService = new UserGameService()
                 {
                     UserID = userID,
                     GameServiceID = gameServiceID
                 };
 
-                _userRepo.SaveUserGameAccount(userGameAccount);
+                _userRepo.SaveUserGameService(userGameService);
 
-                var user = uservw.ConvertToUser();
+                var user = userVW.ConvertToUser();
                 user.ModifiedDate = DateTime.UtcNow;
                 user.ModifiedBy = userID;
                 _userRepo.SaveUser(user);    

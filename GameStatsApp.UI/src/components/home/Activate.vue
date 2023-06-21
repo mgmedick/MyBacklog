@@ -3,7 +3,7 @@
         <h2 class="text-center mb-3">Create Account</h2>
         <div class="mx-auto" style="max-width:400px;">
             <form v-if="islinkvalid" @submit.prevent="submitForm" autocomplete="off">
-                <div class="toast-container position-absolute p-3 top-0 end-0" id="toastPlacement"> 
+                <div class="toast-container position-absolute p-3 top-0 end-0 mt-5" id="toastPlacement"> 
                     <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
                         <div class="d-flex">
                             <div class="toast-body">

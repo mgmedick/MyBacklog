@@ -387,8 +387,7 @@ namespace GameStatsApp.Controllers
                             new Claim(ClaimTypes.NameIdentifier, userVW.UserID.ToString()),
                             new Claim(ClaimTypes.Email, userVW.Email),
                             new Claim(ClaimTypes.Name, userVW.Username),
-                            new Claim("theme", userVW.IsDarkTheme ? "theme-dark" : "theme-light"),
-                            new Claim("gameserviceids", userVW.GameServiceIDs)
+                            new Claim("theme", userVW.IsDarkTheme ? "theme-dark" : "theme-light")
                         };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -401,11 +400,15 @@ namespace GameStatsApp.Controllers
         [HttpGet]
         public ViewResult Welcome(bool? success = null)
         {
-            var username = User.FindFirstValue(ClaimTypes.Name);
+            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
+            var gameServiceIDs = !string.IsNullOrWhiteSpace(userVW.GameServiceIDs) ? userVW.GameServiceIDs.Split(",").Select(i => int.Parse(i)).ToList() : new List<int>();
             var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("HomeRedirectUri").Value;
-            var welcomeVM = new WelcomeViewModel() { Username = username,                                              
-                                                     WindowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUri),
-                                                     GameServiceIDs = User.FindFirstValue("gameserviceids").Split(",").Cast<int>().ToList(),
+            var windowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUri);
+
+            var welcomeVM = new WelcomeViewModel() { Username = userVW.Username,                                              
+                                                     WindowsLiveAuthUrl = windowsLiveAuthUrl,
+                                                     GameServiceIDs = gameServiceIDs,
                                                      Success = success };
 
             return View(welcomeVM);
@@ -424,7 +427,7 @@ namespace GameStatsApp.Controllers
                     _authService.Authenticate(code, redirectUri);
 
                     var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                    _userService.CreateUserGameAccount(userID, (int)GameService.Xbox);
+                    _userService.CreateUserGameService(userID, (int)GameService.Xbox);
 
                     success = true;
                 }
