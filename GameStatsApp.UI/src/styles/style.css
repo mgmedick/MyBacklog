@@ -1,6 +1,27 @@
-﻿.dropdown-item.highlighted {
+﻿
+.dropdown-item.highlighted {
     color: #1e2125;;
     background-color: #e9ecef;
+}
+
+@media (max-width: 767.98px) {
+    .show-md {
+        display: none !important;
+    }
+
+    .show-sm {
+        display: block !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .show-md {
+        display: block !important;
+    }
+
+    .show-sm {
+        display: none !important;
+    }
 }
 
 /* .dropdown-menu{
