@@ -70,6 +70,38 @@ namespace GameStatsApp.Repository
             }
         }
 
+        public IEnumerable<UserGameList> GetDefaultGameLists(Expression<Func<UserGameList, bool>> predicate)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                return db.Query<UserGameList>().Where(predicate).ToList();
+            }
+        }
+
+        public IEnumerable<UserGameList> GetUserGameLists(Expression<Func<UserGameList, bool>> predicate)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                return db.Query<UserGameList>().Where(predicate).ToList();
+            }
+        }
+
+        public void SaveUserGameLists(IEnumerable<UserGameList> userGameLists)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                using (var tran = db.GetTransaction())
+                {
+                    foreach (var userGameList in userGameLists)
+                    {
+                        db.Save<UserGameList>(userGameList);
+                    }
+
+                    tran.Complete();
+                }
+            }
+        }                
+
         public IEnumerable<SearchResult> SearchUsers(string searchText)
         {
             using (IDatabase db = DBFactory.GetDatabase())

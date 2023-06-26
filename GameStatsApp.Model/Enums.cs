@@ -13,5 +13,12 @@ namespace GameStatsApp.Model
     {
         Steam = 1,
         Xbox = 2
-    }      
+    } 
+
+    public enum DefaultGameList
+    {
+        Backlog = 1,
+        Playing = 2,
+        Completed = 3
+    } 
 }

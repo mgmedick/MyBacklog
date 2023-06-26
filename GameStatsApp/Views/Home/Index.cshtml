@@ -5,7 +5,7 @@
 
 @{ ViewBag.Title = "Home"; }
 
-<index :isauth="@Json.Serialize(User.Identity.IsAuthenticated)"></index>
+<index :isauth="@Json.Serialize(User.Identity.IsAuthenticated)" :userid="'User.FindFirstValue(ClaimTypes.NameIdentifier)'"></index>
 
 
 

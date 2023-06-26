@@ -134,7 +134,15 @@ namespace GameStatsApp.Service
                 IsDarkTheme = isdarktheme
             };
 
-            _userRepo.SaveUserSetting(userSetting);
+            _userRepo.SaveUserSetting(userSetting);      
+
+            var gameLists = new List<UserGameList>() {
+                                                        new UserGameList() { Name = DefaultGameList.Backlog.ToString(), IsDefault = true },
+                                                        new UserGameList() { Name = DefaultGameList.Playing.ToString(), IsDefault = true },
+                                                        new UserGameList() { Name = DefaultGameList.Completed.ToString(), IsDefault = true }
+                                                    };
+
+            _userRepo.SaveUserGameLists(gameLists);      
         }
 
         public void ChangeUserPassword(string email, string pass)
@@ -177,6 +185,14 @@ namespace GameStatsApp.Service
                 user.ModifiedBy = userID;
                 _userRepo.SaveUser(user);    
             }
+        }        
+
+        public IEnumerable<UserGameList> GetUserGameLists (int userID)
+        { 
+            var userGameLists = _userRepo.GetUserGameLists(i => i.UserID == userID)
+                                         .ToList();
+
+            return userGameLists;
         }        
 
         //jqvalidate

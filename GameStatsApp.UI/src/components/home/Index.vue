@@ -4,15 +4,16 @@
             <span>Not logged in page</span>
         </div>  
         <div v-else>
-            <span>Logged in page</span>
-        </div>         
-    </div>   
+            <user-game-lists :userid="userid"></user-game-lists>
+        </div>
+    </div>    
 </template>
 <script>
     export default {
         name: "Index",
         props: {
-            isauth: Boolean
+            isauth: Boolean,
+            userid: String
         },
         data: function () {
             return {
