@@ -192,6 +192,8 @@ namespace GameStatsApp.Service
             var userGameLists = _userRepo.GetUserGameLists(i => i.UserID == userID)
                                          .ToList();
 
+            userGameLists.Insert(0, new UserGameList() { ID = 0, UserID = userID, Name = "All Games", IsDefault = true });
+
             return userGameLists;
         }        
 

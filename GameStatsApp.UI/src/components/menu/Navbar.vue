@@ -14,51 +14,57 @@
                         <a class="nav-link" href="/Menu/About">About</a>
                     </li>                    
                 </ul>
-                <div class="d-flex me-2">
-                    <autocomplete v-model="searchText" @change="onChange" @search="onSearch" @selected="onSearchSelected" :options="searchResults" labelby="label" valueby="label" :isasync="true" :loading="searchLoading" :placeholder="'Search users'" style="width:100%"/>                
-                </div>
-                <div v-if="isauth">
-                    <div class="btn-group">
-                        <button class="btn dropdown-toggle btn-secondary" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                            <font-awesome-icon icon="fa-solid fa-user" />
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                            <div class="dropdown-item">
-                                <div class="form-check form-switch">
-                                    <input id="chkNightMode" class="form-check-input" type="checkbox" data-toggle="toggle" v-model="isDarkTheme">
-                                    <label class="form-check-label" for="chkNightMode"><font-awesome-icon icon="fa-solid fa-moon" /><span class="ps-2">Night Mode</span></label>
-                                </div>
-                            </div>
-                            <a href="/User/UserSettings" class="dropdown-item"><font-awesome-icon icon="fa-solid fa-gear" /><span class="ps-2">Settings</span></a>
-                            <a href="/Home/Logout" class="dropdown-item"><font-awesome-icon icon="fa-solid fa-right-from-bracket" /><span class="ps-2">Log out</span></a>
-                        </div>
-                    </div>
-                </div>
-                <ul v-else class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Home/Login">Log In</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Home/SignUp">Sign Up</a>
-                    </li>
-                    <li class="nav-item">
+                <div class="d-flex">
+                    <autocomplete v-model="searchText" class="me-2" @change="onChange" @search="onSearch" @selected="onSearchSelected" :options="searchResults" labelby="label" valueby="label" :isasync="true" :loading="searchLoading" :placeholder="'Search users'" style="width:100%"/>                
+                    <div v-if="isauth">
                         <div class="btn-group">
                             <button class="btn dropdown-toggle btn-secondary" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
                                 <font-awesome-icon icon="fa-solid fa-user" />
                             </button>
-                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                                <div class="dropdown-item">
-                                    <div class="form-check form-switch">
-                                        <input id="chkNightMode" class="form-check-input" type="checkbox" data-toggle="toggle" v-model="isDarkTheme">
-                                        <label class="form-check-label" for="chkNightMode"><font-awesome-icon icon="fa-solid fa-moon" /><span class="ps-2">Night Mode</span></label>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                                <li>
+                                    <div class="dropdown-item">
+                                        <div class="form-check form-switch">
+                                            <input id="chkNightMode" class="form-check-input" type="checkbox" data-toggle="toggle" v-model="isDarkTheme">
+                                            <label class="form-check-label" for="chkNightMode"><font-awesome-icon icon="fa-solid fa-moon" /><span class="ps-2">Night Mode</span></label>
+                                        </div>
                                     </div>
-                                </div>
-                                <a class="dropdown-item" href="/Home/Login"><i class="fa fa-user"></i><span class="pl-2">Log In</span></a>
-                                <a class="dropdown-item" href="/Home/SignUp"><i class="fa fa-clipboard"></i><span class="pl-2">Sign Up</span></a>
-                            </div>
+                                </li>
+                                <li>
+                                    <a href="/User/UserSettings" class="dropdown-item"><font-awesome-icon icon="fa-solid fa-gear" /><span class="ps-2">Settings</span></a>
+                                </li>
+                                <li>
+                                    <a href="/Home/Logout" class="dropdown-item"><font-awesome-icon icon="fa-solid fa-right-from-bracket" /><span class="ps-2">Log out</span></a>
+                                </li>
+                            </ul>
                         </div>
-                    </li>                   
-                </ul>
+                    </div>
+                    <ul v-else class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Home/Login">Log In</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Home/SignUp">Sign Up</a>
+                        </li>
+                        <li class="nav-item">
+                            <div class="btn-group">
+                                <button class="btn dropdown-toggle btn-secondary" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                                    <font-awesome-icon icon="fa-solid fa-user" />
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                                    <div class="dropdown-item">
+                                        <div class="form-check form-switch">
+                                            <input id="chkNightMode" class="form-check-input" type="checkbox" data-toggle="toggle" v-model="isDarkTheme">
+                                            <label class="form-check-label" for="chkNightMode"><font-awesome-icon icon="fa-solid fa-moon" /><span class="ps-2">Night Mode</span></label>
+                                        </div>
+                                    </div>
+                                    <a class="dropdown-item" href="/Home/Login"><i class="fa fa-user"></i><span class="pl-2">Log In</span></a>
+                                    <a class="dropdown-item" href="/Home/SignUp"><i class="fa fa-clipboard"></i><span class="pl-2">Sign Up</span></a>
+                                </div>
+                            </div>
+                        </li>                   
+                    </ul>
+                </div>
             </div>
         </div> 
     </nav>    
