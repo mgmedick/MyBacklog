@@ -3,7 +3,7 @@
         <div>
             <input type="text" class="form-control" :value="model" @input="model = $event.target.value" @click="onClick" @focus="onFocus" @keydown.down="onArrowDown" @keydown.up="onArrowUp" @keydown.enter="onEnter($event)" :placeholder="placeholder"/>
         </div>
-        <ul ref="list" class="dropdown-menu" :style="[ isOpen ? { display:'block' } : { display:'none' } ]">
+        <ul ref="list" class="dropdown-menu" style="width: 100%;" :style="[ isOpen ? { display:'block' } : { display:'none' } ]">
             <li v-for="(result, i) in results" :key="i" class="dropdown-item" :class="{ 'dropdown-header' : result.isGroupHeader, 'highlighted': i === arrowCounter }" @click="onSearchSelected(result)" @mouseover="arrowCounter = i">
                 <span>{{ result[labelby] }}</span>
             </li>
