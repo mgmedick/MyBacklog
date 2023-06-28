@@ -28,11 +28,11 @@
                             <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px; padding-top: 50%; padding-bottom: 50%;"/>
                         </div>
                     </div>                    
-                    <div class="col-2" @focus="onItemFocus" @blur="onItemBlur">
+                    <div class="col-2">
                         <img src="/dist/images/GameCover_yo1ypo1q.jpg" class="img-fluid rounded" alt="Responsive image">
-                        <div class="p-4" style="margin-top: -70px;">
-                            <div class="btn-group btn-group-sm" role="group" style="width: 100%;">
-                                <button v-for="(item, itemIndex) in items.filter(i => i.isDefault)" type="button" class="btn btn-light">
+                        <div style="margin-top: -60px;">
+                            <div class="btn-group btn-group-sm p-3" role="group" style="width: 100%;">
+                                <button v-for="(item, itemIndex) in items.filter(i => i.isDefault && i.id != 0)" type="button" class="btn btn-light">
                                     <font-awesome-icon :icon="getIconClass(item.name)" size="lg"/>
                                 </button>
                             </div>
@@ -138,10 +138,13 @@
                 return iconClass;
             },  
             onItemFocus(e) {
-                e.querySelector('.icons')
+                e.target.nextSibling.classList.remove('d-none');
             },     
             onItemBlur(e) {
-
+                e.target.nextSibling.classList.add('d-none');
+                // if (!(this.$el == e.target || this.$el.contains(e.target)))
+                // {
+                // }
             },                   
         },
     };
