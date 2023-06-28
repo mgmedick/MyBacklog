@@ -1,37 +1,84 @@
 ﻿<template>
-    <div>
-        <div class="show-md d-flex flex-column flex-shrink-0 p-3 position-absolute top-0 start-0 bg-light" style="width: 280px; height: 100vh; margin-top: 63px;">
-            <ul class="nav nav-pills flex-column mb-auto">
-                <li v-for="(item, itemIndex) in items.filter(i => i.isDefault)" key="item.id" class="nav-item">
-                    <a @click="gamelistid = item.id" href="#" class="nav-link" :class="{ 'active' : gamelistid == item.id }">
-                        <font-awesome-icon :icon="getIconClass(item.name)" size="lg" class="me-3"/>
-                        <span>{{ item.name }}</span>
-                    </a>
-                </li>
-                <li v-if="items.filter(i => !i.isDefault).length > 0" class="border-top my-3"></li>
-                <li v-for="(item, itemIndex) in items.filter(i => !i.isDefault)" key="item.id" class="nav-item">
-                    <a @click="gamelistid = item.id" href="#" class="nav-link" :class="{ 'active' : gamelistid == item.id }">
-                        <span>{{ item.name }}</span>
-                    </a>
-                </li>                
-            </ul>
-        </div>
-        <div class="show-sm">
-            <div class="row g-2 justify-content-center">
-                <div class="btn-group">
-                    <button class="btn dropdown-toggle btn-primary d-flex align-items-center" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                        <font-awesome-icon v-if="getIconClass(items.find(i => i.id == gamelistid)?.name)" :icon="getIconClass(items.find(i => i.id == gamelistid)?.name)" size="lg"/>
-                        <span class="mx-auto">{{ items.find(i => i.id == gamelistid)?.name }}</span>
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="width: 100%;">
-                        <li v-for="(item, itemIndex) in items">
-                            <a :key="item.id" @click="gamelistid = item.id" class="dropdown-item" :class="{ 'active' : gamelistid == item.id }" href="#/" data-toggle="pill">{{ item.name }}</a>
-                        </li>
-                    </ul>
-                </div>                
+    <div class="show-md">
+        <div class="d-flex flex-nowrap">
+            <div class="d-flex flex-column flex-shrink-0 p-3 position-absolute top-0 start-0 bg-light" style="width: 280px; height: 100vh; margin-top: 63px;">
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li v-for="(item, itemIndex) in items.filter(i => i.isDefault)" key="item.id" class="nav-item">
+                        <a @click="gamelistid = item.id" href="#" class="nav-link" :class="{ 'active' : gamelistid == item.id }">
+                            <font-awesome-icon :icon="getIconClass(item.name)" size="lg" class="me-3"/>
+                            <span>{{ item.name }}</span>
+                        </a>
+                    </li>
+                    <li v-if="items.filter(i => !i.isDefault).length > 0" class="border-top my-3"></li>
+                    <li v-for="(item, itemIndex) in items.filter(i => !i.isDefault)" key="item.id" class="nav-item">
+                        <a @click="gamelistid = item.id" href="#" class="nav-link" :class="{ 'active' : gamelistid == item.id }">
+                            <span>{{ item.name }}</span>
+                        </a>
+                    </li>                
+                </ul>
+            </div>
+            <div style="width: 280px;"></div>
+            <div class="container">
+                <div class="row">
+                    <!-- <div class="col-2 bg-light d-flex">
+                        <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center p-5" style="font-size: 50px;"/>
+                    </div> -->
+                    <div class="col-2">
+                        <div class="bg-light d-flex" style="height: 100%;">
+                            <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px; padding-top: 50%; padding-bottom: 50%;"/>
+                        </div>
+                    </div>                    
+                    <div class="col-2" @focus="onItemFocus" @blur="onItemBlur">
+                        <img src="/dist/images/GameCover_yo1ypo1q.jpg" class="img-fluid rounded" alt="Responsive image">
+                        <div class="p-4" style="margin-top: -70px;">
+                            <div class="btn-group btn-group-sm" role="group" style="width: 100%;">
+                                <button v-for="(item, itemIndex) in items.filter(i => i.isDefault)" type="button" class="btn btn-light">
+                                    <font-awesome-icon :icon="getIconClass(item.name)" size="lg"/>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>    
+    </div>   
+    <div class="show-sm">
+        <div class="row g-2 justify-content-center">
+            <div class="btn-group">
+                <button class="btn dropdown-toggle btn-primary d-flex align-items-center" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                    <font-awesome-icon v-if="getIconClass(items.find(i => i.id == gamelistid)?.name)" :icon="getIconClass(items.find(i => i.id == gamelistid)?.name)" size="lg"/>
+                    <span class="mx-auto">{{ items.find(i => i.id == gamelistid)?.name }}</span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="width: 100%;">
+                    <li v-for="(item, itemIndex) in items">
+                        <a :key="item.id" @click="gamelistid = item.id" class="dropdown-item" :class="{ 'active' : gamelistid == item.id }" href="#/" data-toggle="pill">{{ item.name }}</a>
+                    </li>
+                </ul>
+            </div>                
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-2">
+                    <div class="box"></div>
+                </div>
+                <div class="col-2">
+                    <img src="/dist/images/GameCover_2680091p.jpg" class="img-fluid img-thumbnail rounded" alt="Responsive image">
+                </div>
+                <div class="col-2">
+                    <img src="/dist/images/GameCover_yo1ypo1q.jpg" class="img-fluid img-thumbnail rounded" alt="Responsive image">
+                </div>
+                <div class="col-2">
+                    <img src="/dist/images/GameCover_yo1yv1q5.jpg" class="img-fluid img-thumbnail rounded" alt="Responsive image">
+                </div>
+                <div class="col-2">
+                    <img src="/dist/images/GameCover_yo1yv41q.jpg" class="img-fluid img-thumbnail rounded" alt="Responsive image">
+                </div>
+                <div class="col-2">
+                    <img src="/dist/images/GameCover_yo1ywodq.jpg" class="img-fluid img-thumbnail rounded" alt="Responsive image">
+                </div>
+            </div>
+        </div>
+    </div>     
 </template>
 <script>
     import axios from 'axios';
@@ -89,7 +136,13 @@
                 }
 
                 return iconClass;
-            },            
+            },  
+            onItemFocus(e) {
+                e.querySelector('.icons')
+            },     
+            onItemBlur(e) {
+
+            },                   
         },
     };
 </script>
