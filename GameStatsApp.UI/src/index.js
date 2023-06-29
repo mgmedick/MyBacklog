@@ -10,6 +10,8 @@ import './fonts/GameCover_yo1ypo1q.jpg';
 import './fonts/GameCover_yo1yv1q5.jpg';
 import './fonts/GameCover_yo1yv41q.jpg';
 import './fonts/GameCover_yo1ywodq.jpg';
+import './fonts/co6lyv.jpg';
+import './fonts/co5w3k.jpg';
 
 ComponentLoader.loadComponents();
 

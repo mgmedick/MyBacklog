@@ -26,5 +26,6 @@ namespace GameStatsApp.Interfaces.Services
         IEnumerable<SearchResult> SearchUsers(string searchText);
         void CreateUserGameService(int userID, int gameServiceID);
         IEnumerable<UserGameList> GetUserGameLists (int userID);
+        IEnumerable<UserGameListViewModel> GetUserGameListVMs (int userID);
     }
 }

@@ -70,7 +70,7 @@ namespace GameStatsApp.Repository
             }
         }
 
-        public IEnumerable<UserGameList> GetDefaultGameLists(Expression<Func<UserGameList, bool>> predicate)
+        public IEnumerable<UserGameList> GetUserGameLists(Expression<Func<UserGameList, bool>> predicate)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
@@ -78,11 +78,11 @@ namespace GameStatsApp.Repository
             }
         }
 
-        public IEnumerable<UserGameList> GetUserGameLists(Expression<Func<UserGameList, bool>> predicate)
+        public IEnumerable<UserGameListView> GetUserGameListViews(Expression<Func<UserGameListView, bool>> predicate)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                return db.Query<UserGameList>().Where(predicate).ToList();
+                return db.Query<UserGameListView>().Where(predicate).ToList();
             }
         }
 

@@ -15,6 +15,7 @@ namespace GameStatsApp.Interfaces.Repositories
         void SaveUserSetting(UserSetting userSetting);
         void SaveUserGameService(UserGameService userGameService);
         IEnumerable<UserGameList> GetUserGameLists(Expression<Func<UserGameList, bool>> predicate);
+        IEnumerable<UserGameListView> GetUserGameListViews(Expression<Func<UserGameListView, bool>> predicate);
         void SaveUserGameLists(IEnumerable<UserGameList> userGameLists);
         IEnumerable<SearchResult> SearchUsers(string searchText);
     }

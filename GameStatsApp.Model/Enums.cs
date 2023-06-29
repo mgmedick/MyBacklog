@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Serialization;
+using System.ComponentModel;
 
 namespace GameStatsApp.Model
 {
@@ -17,8 +18,10 @@ namespace GameStatsApp.Model
 
     public enum DefaultGameList
     {
-        Backlog = 1,
-        Playing = 2,
-        Completed = 3
+        [Description("All Games")]
+        AllGames = 1,
+        Backlog = 2,
+        Playing = 3,
+        Completed = 4
     } 
 }

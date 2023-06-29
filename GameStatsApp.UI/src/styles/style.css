@@ -4,35 +4,9 @@
     background-color: #e9ecef;
 }
 
-/* .box {
-    background: rgba(248,249,250,1) !important;
-    border-radius: 4px;
-    padding-bottom: 100%;
- } */
-
- .mt-n1 {
-    margin-top: -0.25rem !important;
-  }
-  
-  .mt-n2 {
-    margin-top: -0.5rem !important;
-  }
-  
-  .mt-n3 {
-    margin-top: -1rem !important;
-  }
-
-  .mt-n4 {
-    margin-top: -1.5rem !important;
-  }
-  
-  .mt-n5 {
-    margin-top: -3rem !important;
-  }
-
- .box {
-    background: rgba(248,249,250,1) !important;
- }
+.game-image-container.active img {
+    outline: 5px solid rgba(69,130,236,1) !important;
+}
 
 @media (max-width: 767.98px) {
     .show-md {
@@ -42,6 +16,10 @@
     .show-sm {
         display: block !important;
     }
+
+    .games-container {
+        margin-top: 15px;       
+    }   
 }
 
 @media (min-width: 768px) {
@@ -52,6 +30,10 @@
     .show-sm {
         display: none !important;
     }
+
+    .games-container {
+        margin-left: 280px;       
+    }    
 }
 
 /* .dropdown-menu{

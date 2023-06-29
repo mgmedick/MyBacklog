@@ -137,9 +137,10 @@ namespace GameStatsApp.Service
             _userRepo.SaveUserSetting(userSetting);      
 
             var gameLists = new List<UserGameList>() {
-                                                        new UserGameList() { Name = DefaultGameList.Backlog.ToString(), IsDefault = true },
-                                                        new UserGameList() { Name = DefaultGameList.Playing.ToString(), IsDefault = true },
-                                                        new UserGameList() { Name = DefaultGameList.Completed.ToString(), IsDefault = true }
+                                                        new UserGameList() { UserID = user.ID, Name = DefaultGameList.AllGames.GetDescription(), IsDefault = true },
+                                                        new UserGameList() { UserID = user.ID, Name = DefaultGameList.Backlog.ToString(), IsDefault = true },
+                                                        new UserGameList() { UserID = user.ID, Name = DefaultGameList.Playing.ToString(), IsDefault = true },
+                                                        new UserGameList() { UserID = user.ID, Name = DefaultGameList.Completed.ToString(), IsDefault = true }
                                                     };
 
             _userRepo.SaveUserGameLists(gameLists);      
@@ -187,12 +188,19 @@ namespace GameStatsApp.Service
             }
         }        
 
+        public IEnumerable<UserGameListViewModel> GetUserGameListVMs (int userID)
+        { 
+            var userGameListVMs = _userRepo.GetUserGameListViews(i => i.UserID == userID)
+                                           .Select(i => new UserGameListViewModel(i))
+                                           .ToList();
+
+            return userGameListVMs;
+        }  
+
         public IEnumerable<UserGameList> GetUserGameLists (int userID)
         { 
             var userGameLists = _userRepo.GetUserGameLists(i => i.UserID == userID)
                                          .ToList();
-
-            userGameLists.Insert(0, new UserGameList() { ID = 0, UserID = userID, Name = "All Games", IsDefault = true });
 
             return userGameLists;
         }        
