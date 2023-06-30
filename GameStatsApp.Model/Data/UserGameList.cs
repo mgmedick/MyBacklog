@@ -9,6 +9,6 @@ namespace GameStatsApp.Model.Data
         public int ID { get; set; }
         public int UserID { get; set; }
         public string Name { get; set; }
-        public bool IsDefault { get; set; }
+        public int? DefaultGameListID { get; set; }
     }
 } 

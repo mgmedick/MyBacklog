@@ -20,14 +20,14 @@
         </div>
         <div class="show-md d-flex flex-column flex-shrink-0 p-3 position-absolute top-0 start-0 bg-light" style="width: 280px; height: 100vh; margin-top: 63px;">
             <ul class="nav nav-pills flex-column mb-auto">
-                <li v-for="(item, itemIndex) in items.filter(i => i.isDefault)" key="item.id" class="nav-item">
+                <li v-for="(item, itemIndex) in items.filter(i => i.defaultGameListID)" key="item.id" class="nav-item">
                     <a @click="selectedItem = item" href="#" class="nav-link" :class="{ 'active' : selectedItem.id == item.id }">
-                        <font-awesome-icon :icon="getIconClass(item.name)" size="lg" class="me-3"/>
+                        <font-awesome-icon :icon="getIconClass(item.defaultGameListID)" size="lg" class="me-3"/>
                         <span>{{ item.name }}</span>
                     </a>
                 </li>
-                <li v-if="items.filter(i => !i.isDefault).length > 0" class="border-top my-3"></li>
-                <li v-for="(item, itemIndex) in items.filter(i => !i.isDefault)" key="item.id" class="nav-item">
+                <li v-if="items.filter(i => !i.defaultGameListID).length > 0" class="border-top my-3"></li>
+                <li v-for="(item, itemIndex) in items.filter(i => !i.defaultGameListID)" key="item.id" class="nav-item">
                     <a @click="selectedItem = item" href="#" class="nav-link" :class="{ 'active' : selectedItem.id == item.id }">
                         <span>{{ item.name }}</span>
                     </a>
@@ -37,7 +37,7 @@
         <div class="show-sm row g-2 justify-content-center">
             <div class="btn-group">
                 <button class="btn dropdown-toggle btn-primary d-flex align-items-center" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                    <font-awesome-icon v-if="getIconClass(items.find(i => i.id == selectedItem.id)?.name)" :icon="getIconClass(items.find(i => i.id == selectedItem.id)?.name)" size="lg"/>
+                    <font-awesome-icon v-if="selectedItem && selectedItem.defaultGameListID" :icon="getIconClass(selectedItem.defaultGameListID)" size="lg"/>
                     <span class="mx-auto">{{ items.find(i => i.id == selectedItem.id)?.name }}</span>
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="width: 100%;">
@@ -48,25 +48,25 @@
             </div>                
         </div>
         <div class="container games-container">
-            <div v-if="selectedItem" v-for="(gameGroup, gameGroupIndex) in selectedItem.groupedGames" class="row">
-                <div v-if="gameGroupIndex == 0" class="col-2">
+            <div v-if="selectedItem" class="row">
+                <div class="col-lg-2 col-md-3 col-4 mb-3">
                     <div class="bg-light d-flex" style="height: 100%;">
                         <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px; padding-top: 50%; padding-bottom: 50%;"/>
                     </div>
                 </div>
-                <div v-for="(game, gameIndex) in gameGroup" class="col-lg-2 col-md-3 col-5 game-image-container" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
-                    <img :src="game.coverImagePath" class="img-fluid rounded" alt="Responsive image">
+                <div v-for="(game, gameIndex) in selectedItem.gameVMs" class="col-lg-2 col-md-3 col-4 mb-3 game-image-container" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
+                    <img src="/dist/images/gamecovers/GameCover_yo1ypo1q.jpg" class="img-fluid rounded" alt="Responsive image">
                     <div class="game-list-icons" :class="{ 'd-none' : items.filter(i => i.id == selectedItem.id && i.name != 'All Games').length == 0 }" style="margin-top: -60px;">
                         <div class="btn-group btn-group-sm p-3" role="group" style="width: 100%;">
-                            <button v-for="(item, itemIndex) in items.filter(i => i.isDefault && i.name != 'All Games')" @click="onGameListIconClick($event, game, item)" type="button" class="btn btn-light" :class="{ 'active' : selectedItem.id == item.id }">
-                                <font-awesome-icon :icon="getIconClass(item.name)" size="lg"/>
+                            <button v-for="(item, itemIndex) in items.filter(i => i.defaultGameListID && i.defaultGameListID != 1)" @click="onGameListIconClick($event, item, game)" type="button" class="btn btn-light" :class="{ 'active' : selectedItem.id == item.id }">
+                                <font-awesome-icon :icon="getIconClass(item.defaultGameListID)" size="lg"/>
                             </button>
-                            <div v-if="items.filter(i => !i.isDefault).length > 0" class="btn-group btn-group-sm" role="group">
+                            <div v-if="items.filter(i => !i.defaultGameListID).length > 0" class="btn-group btn-group-sm" role="group">
                                 <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                     <font-awesome-icon icon="fa-solid fa-ellipsis" size="lg"/>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li v-for="(item, itemIndex) in items.filter(i => !i.isDefault)" ><a class="dropdown-item" href="#" :class="{ 'active' : selectedItem.id == item.id }">{{ item.name }}</a></li>
+                                    <li v-for="(item, itemIndex) in items.filter(i => !i.defaultGameListID)" ><a class="dropdown-item" href="#" :class="{ 'active' : selectedItem.id == item.id }">{{ item.name }}</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -85,6 +85,7 @@
 </template>
 <script>
     import axios from 'axios';
+    import { Toast } from 'bootstrap';
 
     export default {
         name: "UserGameList",
@@ -106,6 +107,9 @@
             this.loadData();
         },
         mounted: function() {
+            var that = this;
+            that.successToast = new Toast(that.$refs.successtoast);
+            that.errorToast = new Toast(that.$refs.errortoast);
         },
         methods: {
             loadData: function () {
@@ -127,20 +131,20 @@
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },
-            getIconClass: function (name) {
+            getIconClass: function (id) {
                 var iconClass = '';
 
-                switch (name) {
-                    case "All Games":
+                switch (id) {
+                    case 1:
                         iconClass = 'fa-solid fa-list';
                         break;
-                    case "Backlog":
+                    case 2:
                         iconClass = 'fa-solid fa-inbox';
                         break;
-                    case "Playing":
+                    case 3:
                         iconClass = 'fa-solid fa-play';
                         break;
-                    case "Completed":
+                    case 4:
                         iconClass = 'fa-solid fa-check';
                         break;
                 }
@@ -180,16 +184,18 @@
                     container.classList.remove('active');                    
                 }
             },  
-            onGameListIconClick(e, game, userGameList) {
+            onGameListIconClick(e, userGameList, game) {
                 var el = e.target;
                 if (!el.classList.contains('active')) {
-                    addGameToUserGameList(game, userGameList, el)
+                    this.addGameToUserGameList(el, userGameList, game)
                 } else {
-                    removeGameFromUserGameList(game, userGameList, el)
+                    this.removeGameFromUserGameList(el, userGameList, game)
                 }
             },
-            addGameToUserGameList(game, userGameList, el) {
-                return axios.post('/User/AddGameToUserGameList', null,{ params: { gameID: game.id, userGameListID: userGameList.id } })
+            addGameToUserGameList(el, userGameList, game) {
+                var that = this;
+
+                return axios.post('/User/AddGameToUserGameList', null,{ params: { userGameListID: userGameList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {
                             that.successMessage = "Successfully added " + game.name + " to " + userGameList.name;
@@ -206,8 +212,10 @@
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },          
-            removeGameFromUserGameList(game, userGameList, el) {
-                return axios.post('/User/RemoveGameFromUserGameList', null,{ params: { gameID: game.id, userGameListID: userGameList.id } })
+            removeGameFromUserGameList(el, userGameList, game) {
+                var that = this;
+                
+                return axios.post('/User/RemoveGameFromUserGameList', null,{ params: { userGameListID: userGameList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {
                             that.successMessage = "Successfully removed " + game.name + " from " + userGameList.name;

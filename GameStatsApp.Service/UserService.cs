@@ -136,14 +136,9 @@ namespace GameStatsApp.Service
 
             _userRepo.SaveUserSetting(userSetting);      
 
-            var gameLists = new List<UserGameList>() {
-                                                        new UserGameList() { UserID = user.ID, Name = DefaultGameList.AllGames.GetDescription(), IsDefault = true },
-                                                        new UserGameList() { UserID = user.ID, Name = DefaultGameList.Backlog.ToString(), IsDefault = true },
-                                                        new UserGameList() { UserID = user.ID, Name = DefaultGameList.Playing.ToString(), IsDefault = true },
-                                                        new UserGameList() { UserID = user.ID, Name = DefaultGameList.Completed.ToString(), IsDefault = true }
-                                                    };
-
-            _userRepo.SaveUserGameLists(gameLists);      
+            var userGameLists = _userRepo.GetDefaultGameLists().Select(i => new UserGameList() { UserID = user.ID, Name = i.Name, DefaultGameListID = i.ID }).ToList();
+            
+            _userRepo.SaveUserGameLists(userGameLists);      
         }
 
         public void ChangeUserPassword(string email, string pass)
@@ -204,6 +199,46 @@ namespace GameStatsApp.Service
 
             return userGameLists;
         }        
+
+        public void AddGameToUserGameList(int userID, int userGameListID, int gameID)
+        {         
+            var userGameListVM = _userRepo.GetUserGameListViews(i => i.ID == userGameListID).Select(i => new UserGameListViewModel(i)).FirstOrDefault();
+                        
+            if (!userGameListVM.GameVMs.Any(i => i.ID == gameID))
+            {
+                var userGameListGame = new UserGameListGame() { UserGameListID = userGameListVM.ID, GameID = gameID };
+                _userRepo.SaveUserGameListGame(userGameListGame);
+
+                if (userGameListVM.DefaultGameListID != (int)DefaultGameList.AllGames)
+                {
+                    var allUserGameListVM = _userRepo.GetUserGameListViews(i => i.UserID == userID && i.ID == (int)DefaultGameList.AllGames).Select(i => new UserGameListViewModel(i)).FirstOrDefault();   
+                    if (!allUserGameListVM.GameVMs.Any(i => i.ID == gameID))
+                    {
+                        var allUserGameListGame = new UserGameListGame() { UserGameListID = allUserGameListVM.ID, GameID = gameID };
+                        _userRepo.SaveUserGameListGame(allUserGameListGame);
+                    }
+                }
+            }
+        }
+
+        public void RemoveGameFromUserGameList(int userID, int userGameListID, int gameID)
+        {         
+            var userGameListVM = _userRepo.GetUserGameListViews(i => i.ID == userGameListID).Select(i => new UserGameListViewModel(i)).FirstOrDefault();
+                        
+            if (userGameListVM.GameVMs.Any(i => i.ID == gameID))
+            {
+                _userRepo.DeleteUserGameListGame(gameID, userGameListID);
+
+                if (userGameListVM.DefaultGameListID != (int)DefaultGameList.AllGames)
+                {
+                    var allUserGameListVM = _userRepo.GetUserGameListViews(i => i.UserID == userID && i.ID == (int)DefaultGameList.AllGames).Select(i => new UserGameListViewModel(i)).FirstOrDefault();   
+                    if (allUserGameListVM.GameVMs.Any(i => i.ID == gameID))
+                    {
+                        _userRepo.DeleteUserGameListGame(gameID, allUserGameListVM.ID);
+                    }
+                }
+            }
+        }
 
         //jqvalidate
         public bool EmailExists(string email)

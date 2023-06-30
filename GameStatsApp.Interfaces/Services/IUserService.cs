@@ -18,6 +18,8 @@ namespace GameStatsApp.Interfaces.Services
         ChangePasswordViewModel GetChangePassword(string email, long expirationTime, string token);
         void ChangeUserPassword(string email, string pass);
         void ChangeUsername(string email, string username);
+        void AddGameToUserGameList(int userID, int userGameListID, int gameID);
+        void RemoveGameFromUserGameList(int userID, int userGameListID, int gameID);
         bool EmailExists(string email);
         bool PasswordMatches(string password, string email);
         bool UsernameExists(string username, bool activeFilter);

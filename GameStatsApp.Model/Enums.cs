@@ -18,7 +18,6 @@ namespace GameStatsApp.Model
 
     public enum DefaultGameList
     {
-        [Description("All Games")]
         AllGames = 1,
         Backlog = 2,
         Playing = 3,

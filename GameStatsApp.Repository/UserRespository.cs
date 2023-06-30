@@ -70,6 +70,14 @@ namespace GameStatsApp.Repository
             }
         }
 
+        public IEnumerable<IDNamePair> GetDefaultGameLists()
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                return db.Query<IDNamePair>("SELECT ID, Name FROM tbl_DefaultGameList;").ToList();
+            }
+        }
+
         public IEnumerable<UserGameList> GetUserGameLists(Expression<Func<UserGameList, bool>> predicate)
         {
             using (IDatabase db = DBFactory.GetDatabase())
@@ -100,7 +108,39 @@ namespace GameStatsApp.Repository
                     tran.Complete();
                 }
             }
-        }                
+        }
+
+        public void SaveUserGameListGame(UserGameListGame userGameListGame)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                db.Save<UserGameListGame>(userGameListGame);
+            }
+        }     
+
+        public void DeleteUserGameListGame(int userGameListID, int gameID)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                db.DeleteWhere<UserGameListGame>("UserGameListID = @0 AND GameID = @1", userGameListID, gameID);
+            }
+        }            
+
+        public void SaveUserGameListGames(IEnumerable<UserGameListGame> userGameListGames)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                using (var tran = db.GetTransaction())
+                {
+                    foreach (var userGameListGame in userGameListGames)
+                    {
+                        db.Save<UserGameListGame>(userGameListGame);
+                    }
+
+                    tran.Complete();
+                }
+            }
+        }                            
 
         public IEnumerable<SearchResult> SearchUsers(string searchText)
         {
