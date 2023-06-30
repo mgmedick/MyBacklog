@@ -55,10 +55,10 @@
                     </div>
                 </div>
                 <div v-for="(game, gameIndex) in selectedItem.gameVMs" class="col-lg-2 col-md-3 col-4 mb-3 game-image-container" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
-                    <img src="/dist/images/gamecovers/GameCover_yo1ypo1q.jpg" class="img-fluid rounded" alt="Responsive image">
-                    <div class="game-list-icons" :class="{ 'd-none' : items.filter(i => i.id == selectedItem.id && i.name != 'All Games').length == 0 }" style="margin-top: -60px;">
+                    <img :src="game.coverImagePath" class="img-fluid rounded" alt="Responsive image">
+                    <div class="game-list-icons" :class="{ 'd-none' : items.filter(i => i.defaultGameListID != 1 && i.gameVMs.filter(h => h.id == game.id).length > 0).length == 0 }" style="margin-top: -60px;">
                         <div class="btn-group btn-group-sm p-3" role="group" style="width: 100%;">
-                            <button v-for="(item, itemIndex) in items.filter(i => i.defaultGameListID && i.defaultGameListID != 1)" @click="onGameListIconClick($event, item, game)" type="button" class="btn btn-light" :class="{ 'active' : selectedItem.id == item.id }">
+                            <button v-for="(item, itemIndex) in items.filter(i => i.defaultGameListID && i.defaultGameListID != 1)" @click="onGameListIconClick($event, item, game)" type="button" class="btn btn-light" :class="{ 'active' : item.gameVMs.filter(h => h.id == game.id).length > 0 }">
                                 <font-awesome-icon :icon="getIconClass(item.defaultGameListID)" size="lg"/>
                             </button>
                             <div v-if="items.filter(i => !i.defaultGameListID).length > 0" class="btn-group btn-group-sm" role="group">
@@ -66,7 +66,7 @@
                                     <font-awesome-icon icon="fa-solid fa-ellipsis" size="lg"/>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li v-for="(item, itemIndex) in items.filter(i => !i.defaultGameListID)" ><a class="dropdown-item" href="#" :class="{ 'active' : selectedItem.id == item.id }">{{ item.name }}</a></li>
+                                    <li v-for="(item, itemIndex) in items.filter(i => !i.defaultGameListID)" ><a class="dropdown-item" href="#" :class="{ 'active' : item.gameVMs.filter(h => h.id == game.id).length > 0 }">{{ item.name }}</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -170,8 +170,8 @@
             },     
             onGameImageMouseLeave(e) {
                 var container = e.target.closest('.game-image-container');
-                if (!container.classList.contains('active')) {
-                    e.target.closest('.game-image-container').querySelector('.game-list-icons').classList.add('d-none');
+                if (!container.classList.contains('active') && !container.querySelector('.game-list-icons button.active')) {
+                    container.querySelector('.game-list-icons').classList.add('d-none');
                 }
             }, 
             onGameImageClick(e) {
