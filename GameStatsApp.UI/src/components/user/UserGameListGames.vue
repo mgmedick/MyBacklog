@@ -40,11 +40,7 @@
         },
         data: function () {
             return {
-                games: [],
-                successToast: {},
-                successMessage: '',
-                errorMessages: [],
-                errorToast: {}
+                games: []
             };
         },       
         watch: {
@@ -57,8 +53,6 @@
         },
         mounted: function() {
             var that = this;
-            that.successToast = new Toast(that.$refs.successtoast);
-            that.errorToast = new Toast(that.$refs.errortoast);
         },
         methods: {
             loadData: function () {
@@ -113,7 +107,7 @@
                 }
             },  
             onGameListIconClick(e, userGameList, game) {
-                var el = e.target;
+                var el = e.target.closest('button');
                 if (!el.classList.contains('active')) {
                     this.addGameToUserGameList(el, userGameList, game)
                 } else {
@@ -126,17 +120,11 @@
                 return axios.post('/User/AddGameToUserGameList', null,{ params: { userGameListID: userGameList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {
-                            that.successMessage = "Successfully added " + game.name + " to " + userGameList.name;
-                            that.successToast.show();
-                            el.add('active');
+                            el.classList.add('active');                           
+                            that.$emit('success', "Successfully added " + game.name + " to " + userGameList.name);
                         } else {
-                            that.errorMessages = res.data.errorMessages;
-                            that.$nextTick(function() {
-                                that.$refs.errortoasts?.forEach(el => {
-                                    new Toast(el).show();
-                                });
-                            });
-                        }
+                            that.$emit('error', res.data.errorMessages);                           
+                        }                        
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },          
@@ -146,17 +134,11 @@
                 return axios.post('/User/RemoveGameFromUserGameList', null,{ params: { userGameListID: userGameList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {
-                            that.successMessage = "Successfully removed " + game.name + " from " + userGameList.name;
-                            that.successToast.show();
-                            el.remove('active');
+                            el.classList.remove('active');                           
+                            that.$emit('success', "Successfully removed " + game.name + " from " + userGameList.name);
                         } else {
-                            that.errorMessages = res.data.errorMessages;
-                            that.$nextTick(function() {
-                                that.$refs.errortoasts?.forEach(el => {
-                                    new Toast(el).show();
-                                });
-                            });
-                        }
+                            that.$emit('error', res.data.errorMessages);                           
+                        }                        
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             }                

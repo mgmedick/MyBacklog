@@ -47,7 +47,7 @@
                 </ul>
             </div>                
         </div>
-        <user-gamelist-games :userid="userid" :usergamelistid="selectedItemID" :usergamelists="userGameLists"></user-gamelist-games>
+        <user-gamelist-games :userid="userid" :usergamelistid="selectedItemID" :usergamelists="userGameLists" @success="onSuccess" @error="onError"></user-gamelist-games>
     </div>
 </template>
 <script>
@@ -62,7 +62,6 @@
         data: function () {
             return {
                 userGameLists: [],
-                selectedItem: null,
                 selectedItemID: 0,
                 successToast: {},
                 successMessage: '',
@@ -87,7 +86,6 @@
                 axios.get('/User/GetUserGameLists', { params: { userID: this.userid } })
                     .then(res => {
                         that.userGameLists = res.data;
-                        //that.selectedItem = that.userGameLists[0];
                         that.selectedItemID = that.userGameLists[0].id;
                        
                         that.loading = false;
@@ -114,7 +112,23 @@
                 }
 
                 return iconClass;
-            }                
+            },
+            onSuccess(successMsg) {
+                var that = this;
+
+                that.successMessage = successMsg;
+                that.successToast.show();
+            },
+            onError(errorMsgs) {
+                var that = this;
+                
+                that.errorMessages = errorMsgs;
+                that.$nextTick(function() {
+                    that.$refs.errortoasts?.forEach(el => {
+                        new Toast(el).show();
+                    });
+                }); 
+            },                         
         },
     };
 </script>
