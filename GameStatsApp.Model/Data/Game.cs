@@ -4,12 +4,11 @@ using System.Linq;
 
 namespace GameStatsApp.Model.Data
 {
-    public class UserGameListView
+    public class Game
     {
         public int ID { get; set; }
-        public int UserID { get; set; }
         public string Name { get; set; }
-        public int? DefaultGameListID { get; set; }
-        public string GameIDs { get; set; }
+        public string CoverImagePath { get; set; }
+        public string UserGameListIDs { get; set; }
     }
 } 

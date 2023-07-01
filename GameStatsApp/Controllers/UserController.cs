@@ -34,10 +34,18 @@ namespace GameStatsApp.Controllers
         [HttpGet]
         public JsonResult GetUserGameLists(int userID)
         {
-            var userGameLists = _userService.GetUserGameListVMs(userID);
+            var userGameLists = _userService.GetUserGameLists(userID);
 
             return Json(userGameLists);
         }
+
+        [HttpGet]
+        public JsonResult GetUserGameListGames(int userGameListID)
+        {
+            var userGameListGames = _userService.GetUserGameListGames(userGameListID);
+
+            return Json(userGameListGames);
+        }        
 
         [HttpPost]
         public JsonResult AddGameToUserGameList(int userGameListID, int gameID)

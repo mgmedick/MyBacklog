@@ -94,6 +94,16 @@ namespace GameStatsApp.Repository
             }
         }
 
+        public IEnumerable<Game> GetUserGameListGames(int userGameListID)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                var results = db.Query<Game>("CALL GetUserGameListGames (@0);", userGameListID).ToList();
+
+                return results;
+            }
+        }      
+
         public void SaveUserGameLists(IEnumerable<UserGameList> userGameLists)
         {
             using (IDatabase db = DBFactory.GetDatabase())

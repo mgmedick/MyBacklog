@@ -181,16 +181,7 @@ namespace GameStatsApp.Service
                 user.ModifiedBy = userID;
                 _userRepo.SaveUser(user);    
             }
-        }        
-
-        public IEnumerable<UserGameListViewModel> GetUserGameListVMs (int userID)
-        { 
-            var userGameListVMs = _userRepo.GetUserGameListViews(i => i.UserID == userID)
-                                           .Select(i => new UserGameListViewModel(i))
-                                           .ToList();
-
-            return userGameListVMs;
-        }  
+        }
 
         public IEnumerable<UserGameList> GetUserGameLists (int userID)
         { 
@@ -198,13 +189,20 @@ namespace GameStatsApp.Service
                                          .ToList();
 
             return userGameLists;
-        }        
+        }     
+
+        public IEnumerable<GameViewModel> GetUserGameListGames (int userGameListID)
+        { 
+            var gameVMs = _userRepo.GetUserGameListGames(userGameListID).Select(i=>new GameViewModel(i)).ToList();
+
+            return gameVMs;
+        }                
 
         public void AddGameToUserGameList(int userID, int userGameListID, int gameID)
         {         
             var userGameListVM = _userRepo.GetUserGameListViews(i => i.ID == userGameListID).Select(i => new UserGameListViewModel(i)).FirstOrDefault();
                         
-            if (!userGameListVM.GameVMs.Any(i => i.ID == gameID))
+            if (!userGameListVM.GameIDs.Contains(gameID))
             {
                 var userGameListGame = new UserGameListGame() { UserGameListID = userGameListVM.ID, GameID = gameID };
                 _userRepo.SaveUserGameListGame(userGameListGame);
@@ -212,34 +210,34 @@ namespace GameStatsApp.Service
                 if (userGameListVM.DefaultGameListID != (int)DefaultGameList.AllGames)
                 {
                     var allUserGameListVM = _userRepo.GetUserGameListViews(i => i.UserID == userID && i.ID == (int)DefaultGameList.AllGames).Select(i => new UserGameListViewModel(i)).FirstOrDefault();   
-                    if (!allUserGameListVM.GameVMs.Any(i => i.ID == gameID))
+                    if (!allUserGameListVM.GameIDs.Contains(gameID))
                     {
                         var allUserGameListGame = new UserGameListGame() { UserGameListID = allUserGameListVM.ID, GameID = gameID };
                         _userRepo.SaveUserGameListGame(allUserGameListGame);
                     }
                 }
             }
-        }
+        }        
 
         public void RemoveGameFromUserGameList(int userID, int userGameListID, int gameID)
         {         
             var userGameListVM = _userRepo.GetUserGameListViews(i => i.ID == userGameListID).Select(i => new UserGameListViewModel(i)).FirstOrDefault();
                         
-            if (userGameListVM.GameVMs.Any(i => i.ID == gameID))
+            if (userGameListVM.GameIDs.Contains(gameID))
             {
                 _userRepo.DeleteUserGameListGame(gameID, userGameListID);
 
                 if (userGameListVM.DefaultGameListID != (int)DefaultGameList.AllGames)
                 {
                     var allUserGameListVM = _userRepo.GetUserGameListViews(i => i.UserID == userID && i.ID == (int)DefaultGameList.AllGames).Select(i => new UserGameListViewModel(i)).FirstOrDefault();   
-                    if (allUserGameListVM.GameVMs.Any(i => i.ID == gameID))
+                    if (allUserGameListVM.GameIDs.Contains(gameID))
                     {
                         _userRepo.DeleteUserGameListGame(gameID, allUserGameListVM.ID);
                     }
                 }
             }
         }
-
+        
         //jqvalidate
         public bool EmailExists(string email)
         {

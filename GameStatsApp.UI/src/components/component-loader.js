@@ -23,6 +23,7 @@ import welcome from './home/Welcome.vue';
 
 import userSettings from './user/UserSettings.vue';
 import userGameLists from './user/UserGameLists.vue';
+import userGameListGames from './user/UserGameListGames.vue';
 
 export default {
     loadComponents() {
@@ -42,7 +43,8 @@ export default {
         app.component('index', index); 
 
         app.component('user-settings', userSettings); 
-        app.component('user-game-lists', userGameLists); 
+        app.component('user-gamelists', userGameLists); 
+        app.component('user-gamelist-games', userGameListGames); 
 
         app.component("reset-password", resetPassword);
         app.component("change-password", changePassword);

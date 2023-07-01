@@ -20,14 +20,14 @@ namespace GameStatsApp.Model.ViewModels
             UserID = userGameListView.UserID;
             Name = userGameListView.Name;
             DefaultGameListID = userGameListView.DefaultGameListID;
-            GameVMs = JsonConvert.DeserializeObject<List<GameViewModel>>(userGameListView.Games) ?? new List<GameViewModel>();
+            GameIDs = userGameListView.GameIDs.Split(',').Select(i => Convert.ToInt32(i)).ToList();
         }
 
         public int ID { get; set; }
         public int UserID { get; set; }
         public string Name { get; set; }
         public int? DefaultGameListID { get; set; }
-        public List<GameViewModel> GameVMs { get; set; }
+        public List<int> GameIDs { get; set; }
     }
 }
 
