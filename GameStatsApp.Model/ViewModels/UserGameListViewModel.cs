@@ -20,7 +20,7 @@ namespace GameStatsApp.Model.ViewModels
             UserID = userGameListView.UserID;
             Name = userGameListView.Name;
             DefaultGameListID = userGameListView.DefaultGameListID;
-            GameIDs = userGameListView.GameIDs.Split(',').Select(i => Convert.ToInt32(i)).ToList();
+            GameIDs = !string.IsNullOrWhiteSpace(userGameListView.GameIDs) ? userGameListView.GameIDs.Split(',').Select(i => Convert.ToInt32(i)).ToList() : new List<int>();
         }
 
         public int ID { get; set; }

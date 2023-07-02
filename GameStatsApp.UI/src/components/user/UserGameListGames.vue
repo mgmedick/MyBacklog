@@ -9,16 +9,16 @@
             <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-4 mb-3 game-image-container" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
                 <img :src="game.coverImagePath" class="img-fluid rounded" alt="Responsive image">
                 <div class="game-list-icons" :class="{ 'd-none' : usergamelists.filter(i => i.defaultGameListID != 1 && game.userGameListIDs.indexOf(i.id) > -1).length == 0 }" style="margin-top: -60px;">
-                    <div class="btn-group btn-group-sm p-3" role="group" style="width: 100%;">
-                        <button v-for="(userGameList, userGameListIndex) in usergamelists.filter(i => i.defaultGameListID && i.defaultGameListID != 1)" @click="onGameListIconClick($event, userGameList, game)" type="button" class="btn btn-light" :class="{ 'active' : game.userGameListIDs.indexOf(userGameList.id) > -1 }">
+                    <div class="btn-group btn-group-sm p-3 user-gamelist-container" role="group" style="width: 100%;">
+                        <button v-for="(userGameList, userGameListIndex) in usergamelists.filter(i => i.defaultGameListID && i.defaultGameListID != 1)" @click="onUserGameListClick($event, userGameList, game)" type="button" class="btn btn-light user-gamelist" :class="{ 'active' : game.userGameListIDs.indexOf(userGameList.id) > -1 }">
                             <font-awesome-icon :icon="getIconClass(userGameList.defaultGameListID)" size="lg"/>
                         </button>
-                        <div v-if="usergamelists.filter(i => !i.defaultGameListID).length > 0" class="btn-group btn-group-sm" role="group">
-                            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div v-if="usergamelists.filter(i => !i.defaultGameListID).length > 0" class="btn-group btn-group-sm user-gamelist-container" role="group">
+                            <button type="button" class="btn btn-light dropdown-toggle" :class="{ 'active' : usergamelists.filter(i => !i.defaultGameListID && game.userGameListIDs.indexOf(i.id) > -1).length > 0 }" data-bs-toggle="dropdown" aria-expanded="false">
                                 <font-awesome-icon icon="fa-solid fa-ellipsis" size="lg"/>
                             </button>
                             <ul class="dropdown-menu">
-                                <li v-for="(userGameList, userGameListIndex) in usergamelists.filter(i => !i.defaultGameListID)" ><a class="dropdown-item" href="#" :class="{ 'active' : game.userGameListIDs.indexOf(userGameList.id) > -1 }">{{ userGameList.name }}</a></li>
+                                <li v-for="(userGameList, userGameListIndex) in usergamelists.filter(i => !i.defaultGameListID)"><a @click="onUserGameListClick($event, userGameList, game)" href="#" class="dropdown-item user-gamelist" :class="{ 'active' : game.userGameListIDs.indexOf(userGameList.id) > -1 }">{{ userGameList.name }}</a></li>
                             </ul>
                         </div>
                     </div>
@@ -106,12 +106,12 @@
                     container.classList.remove('active');                    
                 }
             },  
-            onGameListIconClick(e, userGameList, game) {
-                var el = e.target.closest('button');
-                if (!el.classList.contains('active')) {
-                    this.addGameToUserGameList(el, userGameList, game)
+            onUserGameListClick(e, userGameList, game) {
+                var el = e.target;//.closest('.user-gamelist-container').querySelector('button');
+                if (!el.closest('.user-gamelist').classList.contains('active')) {
+                    this.addGameToUserGameList(el, userGameList, game);
                 } else {
-                    this.removeGameFromUserGameList(el, userGameList, game)
+                    this.removeGameFromUserGameList(el, userGameList, game);
                 }
             },
             addGameToUserGameList(el, userGameList, game) {
@@ -120,7 +120,8 @@
                 return axios.post('/User/AddGameToUserGameList', null,{ params: { userGameListID: userGameList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {
-                            el.classList.add('active');                           
+                            el.closest('.user-gamelist').classList.add('active');
+                            el.closest('.user-gamelist-container').querySelector('button').classList.add('active');                                                      
                             that.$emit('success', "Successfully added " + game.name + " to " + userGameList.name);
                         } else {
                             that.$emit('error', res.data.errorMessages);                           
@@ -134,7 +135,10 @@
                 return axios.post('/User/RemoveGameFromUserGameList', null,{ params: { userGameListID: userGameList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {
-                            el.classList.remove('active');                           
+                            el.closest('.user-gamelist').classList.remove('active'); 
+                            if (el.closest('.user-gamelist-container').querySelectorAll('.dropdown-item.active').length == 0){
+                                el.closest('.user-gamelist-container').querySelector('button').classList.remove('active');                                                                                      
+                            }                                                                              
                             that.$emit('success', "Successfully removed " + game.name + " from " + userGameList.name);
                         } else {
                             that.$emit('error', res.data.errorMessages);                           
