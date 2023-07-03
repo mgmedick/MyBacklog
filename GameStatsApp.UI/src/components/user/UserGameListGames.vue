@@ -2,7 +2,7 @@
     <div class="container games-container">
         <div class="row g-3">
             <div class="col-lg-2 col-md-3 col-6">
-                <div class="bg-light d-flex" style="height: 100%;">
+                <div class="bg-light d-flex" style="height: 100%; cursor: pointer;" @click="onSearchGamesClick">
                     <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px; padding-top: 50%; padding-bottom: 50%;"/>
                 </div>
             </div>
@@ -44,7 +44,20 @@
                 </div>
                 </div>
             </div>
-        </div>      
+        </div>  
+        <div ref="searchmodal" class="modal modal-lg" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Search Games</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <search-games></search-games>
+                    </div>
+                </div>
+            </div>
+        </div>                
     </div>
 </template>
 <script>
@@ -62,7 +75,8 @@
             return {
                 games: [],
                 game: {},
-                removeModal: {}
+                removeModal: {},
+                searchModal: {}                
             };
         },       
         watch: {
@@ -76,6 +90,7 @@
         mounted: function() {
             var that = this;
             that.removeModal = new Modal(that.$refs.removemodal);
+            that.searchModal = new Modal(that.$refs.searchmodal);
         },
         methods: {
             loadData: function () {
@@ -152,6 +167,9 @@
                         this.removeGameFromUserGameList(el, userGameList, game);
                     }
                 }
+            },
+            onSearchGamesClick(e){
+                this.searchModal.show();
             },
             addGameToUserGameList(el, userGameList, game) {
                 var that = this;
