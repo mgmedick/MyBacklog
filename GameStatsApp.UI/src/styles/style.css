@@ -8,12 +8,12 @@
     outline: 5px solid rgba(69,130,236,1) !important;
 }
 
-@media (max-width: 767.98px) {
-    .show-md {
+@media (max-width: 991.98px) {
+    .show-lg {
         display: none !important;
     }
 
-    .show-sm {
+    .show-md {
         display: block !important;
     }
 
@@ -21,13 +21,13 @@
         margin-top: 15px;       
     }   
 }
-
-@media (min-width: 768px) {
-    .show-md {
+ /*768*/
+@media (min-width: 992px) {
+    .show-lg {
         display: block !important;
     }
 
-    .show-sm {
+    .show-md {
         display: none !important;
     }
 

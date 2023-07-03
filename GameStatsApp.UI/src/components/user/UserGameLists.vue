@@ -18,7 +18,7 @@
                 </div>
             </div>
         </div>
-        <div class="show-md d-flex flex-column flex-shrink-0 p-3 position-absolute top-0 start-0 bg-light" style="width: 280px; height: 100vh; margin-top: 63px;">
+        <div class="show-lg d-flex flex-column flex-shrink-0 p-3 position-absolute top-0 start-0 bg-light" style="width: 280px; height: 100vh; margin-top: 63px;">
             <ul class="nav nav-pills flex-column mb-auto">
                 <li v-for="(userGameList, userGameListIndex) in userGameLists.filter(i => i.defaultGameListID)" key="userGameList.id" class="nav-item">
                     <a @click="selectedItemID = userGameList.id" href="#" class="nav-link" :class="{ 'active' : selectedItemID == userGameList.id }">
@@ -34,7 +34,7 @@
                 </li>                
             </ul>
         </div>
-        <div class="show-sm row g-2 justify-content-center">
+        <div class="show-md row g-2 justify-content-center">
             <div class="btn-group">
                 <button class="btn dropdown-toggle btn-primary d-flex align-items-center" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
                     <font-awesome-icon v-if="userGameLists.find(i => i.id == selectedItemID)?.defaultGameListID" :icon="getIconClass(userGameLists.find(i => i.id == selectedItemID)?.defaultGameListID)" size="lg"/>
@@ -47,7 +47,7 @@
                 </ul>
             </div>                
         </div>
-        <user-gamelist-games :userid="userid" :usergamelistid="selectedItemID" :usergamelists="userGameLists" @success="onSuccess" @error="onError"></user-gamelist-games>
+        <user-gamelist-games :userid="userid" :usergamelistid="selectedItemID" :usergamelists="userGameLists" @success="onSuccess" @error="onError" @delete="onDelete"></user-gamelist-games> 
     </div>
 </template>
 <script>
@@ -121,14 +121,14 @@
             },
             onError(errorMsgs) {
                 var that = this;
-                
+
                 that.errorMessages = errorMsgs;
                 that.$nextTick(function() {
                     that.$refs.errortoasts?.forEach(el => {
                         new Toast(el).show();
                     });
                 }); 
-            },                         
+            }                      
         },
     };
 </script>

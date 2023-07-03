@@ -1,35 +1,55 @@
 ﻿<template>
     <div class="container games-container">
-        <div class="row">
-            <div class="col-lg-2 col-md-3 col-4 mb-3">
+        <div class="row g-3">
+            <div class="col-lg-2 col-md-3 col-6">
                 <div class="bg-light d-flex" style="height: 100%;">
                     <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px; padding-top: 50%; padding-bottom: 50%;"/>
                 </div>
             </div>
-            <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-4 mb-3 game-image-container" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
+            <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-6 game-image-container" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
+                <div class="delete-icon d-none" style="margin-bottom:-35px; margin-top: 8.5px; position: relative;">
+                    <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="d-flex ms-auto me-2" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/>
+                </div>
                 <img :src="game.coverImagePath" class="img-fluid rounded" alt="Responsive image">
-                <div class="game-list-icons" :class="{ 'd-none' : usergamelists.filter(i => i.defaultGameListID != 1 && game.userGameListIDs.indexOf(i.id) > -1).length == 0 }" style="margin-top: -60px;">
-                    <div class="btn-group btn-group-sm p-3 user-gamelist-container" role="group" style="width: 100%;">
-                        <button v-for="(userGameList, userGameListIndex) in usergamelists.filter(i => i.defaultGameListID && i.defaultGameListID != 1)" @click="onUserGameListClick($event, userGameList, game)" type="button" class="btn btn-light user-gamelist" :class="{ 'active' : game.userGameListIDs.indexOf(userGameList.id) > -1 }">
+                <div class="gamelist-icons px-1 d-none" style="margin-top: -40px; margin-bottom: 10px;">
+                    <div class="btn-group btn-group-sm gamelist-container" role="group" style="width: 100%;">
+                        <button v-for="(userGameList, userGameListIndex) in usergamelists.filter(i => i.defaultGameListID && i.defaultGameListID != 1)" @click="onUserGameListClick($event, userGameList, game)" type="button" class="btn btn-light gamelist-item" :class="{ 'active' : game.userGameListIDs.indexOf(userGameList.id) > -1 }">
                             <font-awesome-icon :icon="getIconClass(userGameList.defaultGameListID)" size="lg"/>
                         </button>
-                        <div v-if="usergamelists.filter(i => !i.defaultGameListID).length > 0" class="btn-group btn-group-sm user-gamelist-container" role="group">
+                        <div v-if="usergamelists.filter(i => !i.defaultGameListID).length > 0" class="btn-group btn-group-sm gamelist-container" role="group">
                             <button type="button" class="btn btn-light dropdown-toggle" :class="{ 'active' : usergamelists.filter(i => !i.defaultGameListID && game.userGameListIDs.indexOf(i.id) > -1).length > 0 }" data-bs-toggle="dropdown" aria-expanded="false">
                                 <font-awesome-icon icon="fa-solid fa-ellipsis" size="lg"/>
                             </button>
                             <ul class="dropdown-menu">
-                                <li v-for="(userGameList, userGameListIndex) in usergamelists.filter(i => !i.defaultGameListID)"><a @click="onUserGameListClick($event, userGameList, game)" href="#" class="dropdown-item user-gamelist" :class="{ 'active' : game.userGameListIDs.indexOf(userGameList.id) > -1 }">{{ userGameList.name }}</a></li>
+                                <li v-for="(userGameList, userGameListIndex) in usergamelists.filter(i => !i.defaultGameListID)"><a @click="onUserGameListClick($event, userGameList, game)" href="#" class="dropdown-item gamelist-item" :class="{ 'active' : game.userGameListIDs.indexOf(userGameList.id) > -1 }">{{ userGameList.name }}</a></li>
                             </ul>
                         </div>
                     </div>
                 </div>
+            </div>            
+        </div>  
+        <div ref="removemodal" class="modal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Remove Game</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Remove <strong>{{ game?.name }}</strong> from all lists?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" @click="removeGameFromAllUserGameLists">Continue</button>
+                </div>
+                </div>
             </div>
-        </div>
+        </div>      
     </div>
 </template>
 <script>
     import axios from 'axios';
-    import { Toast } from 'bootstrap';
+    import { Modal } from 'bootstrap';
 
     export default {
         name: "UserGameListGames",
@@ -40,7 +60,9 @@
         },
         data: function () {
             return {
-                games: []
+                games: [],
+                game: {},
+                removeModal: {}
             };
         },       
         watch: {
@@ -53,6 +75,7 @@
         },
         mounted: function() {
             var that = this;
+            that.removeModal = new Modal(that.$refs.removemodal);
         },
         methods: {
             loadData: function () {
@@ -88,30 +111,46 @@
                 return iconClass;
             },      
             onGameImageMouseOver(e) {
-                e.target.closest('.game-image-container').querySelector('.game-list-icons').classList.remove('d-none');
+                var container = e.target.closest('.game-image-container');              
+                container.querySelector('.gamelist-icons').classList.remove('d-none');
+                container.querySelector('.delete-icon').classList.remove('d-none');
             },     
             onGameImageMouseLeave(e) {
                 var container = e.target.closest('.game-image-container');
-                if (!container.classList.contains('active') && !container.querySelector('.game-list-icons button.active')) {
-                    container.querySelector('.game-list-icons').classList.add('d-none');
+                if (!container.classList.contains('active')) {
+                    container.querySelector('.gamelist-icons').classList.add('d-none');
+                    container.querySelector('.delete-icon').classList.add('d-none');
                 }
             }, 
             onGameImageClick(e) {
                 var container = e.target.closest('.game-image-container');
                 if (!container.classList.contains('active')) {
-                    container.querySelector('.game-list-icons').classList.remove('d-none');
+                    container.querySelector('.gamelist-icons').classList.remove('d-none');
+                    container.querySelector('.delete-icon').classList.remove('d-none');
                     container.classList.add('active');
                 } else {
-                    container.querySelector('.game-list-icons').classList.add('d-none');
+                    container.querySelector('.gamelist-icons').classList.add('d-none');
+                    container.querySelector('.delete-icon').classList.add('d-none');
                     container.classList.remove('active');                    
                 }
             },  
+            onDeleteClick(e, game) {
+                var that = this;
+                var el = e.target;
+                
+                if (!el.closest('.delete-icon').contains('d-none')){
+                    that.game = game;
+                    that.removeModal.show();
+                }
+            },
             onUserGameListClick(e, userGameList, game) {
-                var el = e.target;//.closest('.user-gamelist-container').querySelector('button');
-                if (!el.closest('.user-gamelist').classList.contains('active')) {
-                    this.addGameToUserGameList(el, userGameList, game);
-                } else {
-                    this.removeGameFromUserGameList(el, userGameList, game);
+                var el = e.target;
+                if (!el.closest('.gamelist-icons').contains('d-none')) {
+                    if (!el.closest('.gamelist-item').classList.contains('active')) {
+                        this.addGameToUserGameList(el, userGameList, game);
+                    } else {
+                        this.removeGameFromUserGameList(el, userGameList, game);
+                    }
                 }
             },
             addGameToUserGameList(el, userGameList, game) {
@@ -120,8 +159,8 @@
                 return axios.post('/User/AddGameToUserGameList', null,{ params: { userGameListID: userGameList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {
-                            el.closest('.user-gamelist').classList.add('active');
-                            el.closest('.user-gamelist-container').querySelector('button').classList.add('active');                                                      
+                            el.closest('.gamelist-item').classList.add('active');
+                            el.closest('.gamelist-container').querySelector('button').classList.add('active');                                                      
                             that.$emit('success', "Successfully added " + game.name + " to " + userGameList.name);
                         } else {
                             that.$emit('error', res.data.errorMessages);                           
@@ -135,9 +174,9 @@
                 return axios.post('/User/RemoveGameFromUserGameList', null,{ params: { userGameListID: userGameList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {
-                            el.closest('.user-gamelist').classList.remove('active'); 
-                            if (el.closest('.user-gamelist-container').querySelectorAll('.dropdown-item.active').length == 0){
-                                el.closest('.user-gamelist-container').querySelector('button').classList.remove('active');                                                                                      
+                            el.closest('.gamelist-item').classList.remove('active'); 
+                            if (el.closest('.gamelist-container').querySelectorAll('.dropdown-item.active').length == 0){
+                                el.closest('.gamelist-container').querySelector('button').classList.remove('active');                                                                                      
                             }                                                                              
                             that.$emit('success', "Successfully removed " + game.name + " from " + userGameList.name);
                         } else {
@@ -145,7 +184,22 @@
                         }                        
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            }                
+            },
+            removeGameFromAllUserGameLists() {
+                var that = this;
+
+                return axios.post('/User/RemoveGameFromAllUserGameLists', null,{ params: { gameID: that.game.id } })
+                    .then((res) => {
+                        if (res.data.success) {    
+                            that.$emit('success', "Successfully removed " + that.game.name + " from all lists");
+                            that.games = that.games.filter(i => i.id != that.game.id);            
+                        } else {
+                            that.$emit('error', res.data.errorMessages);                           
+                        }   
+                        that.removeModal.hide();  
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });                
+            }                                        
         },
     };
 </script>

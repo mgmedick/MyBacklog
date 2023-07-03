@@ -89,6 +89,28 @@ namespace GameStatsApp.Controllers
             }
 
             return Json(new { success = success, errorMessages = errorMessages });
-        }                  
+        }   
+
+        [HttpPost]
+        public JsonResult RemoveGameFromAllUserGameLists(int gameID)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                _userService.RemoveGameFromAllUserGameLists(userID, gameID);
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "RemoveGameFromUserGameList");
+                success = false;
+                errorMessages = new List<string>() { "Error removing game from list" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
+        }                       
     }
 }

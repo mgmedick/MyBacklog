@@ -237,6 +237,20 @@ namespace GameStatsApp.Service
                 }
             }
         }
+
+        public void RemoveGameFromAllUserGameLists(int userID, int gameID)
+        {         
+            var userGameListIDs = _userRepo.GetUserGameListViews(i => i.UserID == userID)
+                                          .Select(i => new UserGameListViewModel(i))
+                                          .Where(i => i.GameIDs.Contains(gameID))
+                                          .Select(i => i.ID)
+                                          .ToList();
+
+            foreach(var userGameListID in userGameListIDs)
+            {
+                _userRepo.DeleteUserGameListGame(userGameListID, gameID);
+            }
+        }        
         
         //jqvalidate
         public bool EmailExists(string email)
