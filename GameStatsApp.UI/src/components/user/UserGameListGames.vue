@@ -159,14 +159,14 @@
                 var that = this;
                 var el = e.target;
                 
-                if (!el.closest('.delete-icon').contains('d-none')){
+                if (!el.closest('.delete-icon').classList.contains('d-none')){
                     that.game = game;
                     that.removeModal.show();
                 }
             },
             onUserGameListClick(e, userGameList, game) {
                 var el = e.target;
-                if (!el.closest('.gamelist-icons').contains('d-none')) {
+                if (!el.closest('.gamelist-icons').classList.contains('d-none')) {
                     if (!el.closest('.gamelist-item').classList.contains('active')) {
                         this.addGameToUserGameList(userGameList, game, el);
                     } else {
@@ -198,8 +198,13 @@
             },              
             onSearchSelected: function (result) {
                 var that = this;
-                var usergamelist = this.usergamelists.find(item => item.id == that.usergamelistid)
-                var game = { id: result.value, name: result.label };
+                var usergamelist = this.usergamelists.find(item => item.id == that.usergamelistid);
+                var userGameListIDs = [usergamelist.id];
+                if (usergamelist.id != 1) {
+                    userGameListIDs.unshift(1);
+                }
+
+                var game = { id: result.value, name: result.label, coverImagePath: result.coverImagePath, userGameListIDs: userGameListIDs };
                 that.addGameToUserGameList(usergamelist, game);
             },            
             addGameToUserGameList(userGameList, game, el) {
@@ -209,7 +214,10 @@
                     .then((res) => {
                         if (res.data.success) {
                             el?.closest('.gamelist-item').classList.add('active');
-                            el?.closest('.gamelist-container').querySelector('button').classList.add('active');                            
+                            el?.closest('.gamelist-container').querySelector('button').classList.add('active');
+                            if (that.games.filter(i => i.id == game.id).length == 0) {
+                                that.games.push(game);
+                            }                            
                             that.$emit('success', "Successfully added " + game.name + " to " + userGameList.name);
                         } else {
                             that.$emit('error', res.data.errorMessages);                           

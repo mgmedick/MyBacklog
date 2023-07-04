@@ -4,7 +4,7 @@
             <input type="text" class="form-control" :value="model" @input="model = $event.target.value" @click="onClick" @focus="onFocus" @keydown.down="onArrowDown" @keydown.up="onArrowUp" @keydown.enter="onEnter($event)" :placeholder="placeholder"/>
         </div>
         <div v-if="isimgresults" class="container">
-            <div class="row g-2 mt-3">
+            <div class="row g-3 mt-3">
                 <div v-for="(result, i) in results" class="col-lg-2 col-md-3 col-4" @click="onSearchSelected(result)">
                     <img src="/dist/images/gamecovers/GameCover_yo1ypo1q.jpg" class="img-fluid rounded" alt="Responsive image">
                     <div class="text-xs">
