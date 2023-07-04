@@ -13,7 +13,7 @@
                 </div>
             </div>
         </div>
-        <ul v-else ref="list" class="dropdown-menu" style="width: 100%;" :style="[ isOpen ? { display:'block' } : { display:'none' } ]">
+        <ul v-else class="dropdown-menu" style="width: 100%;" :style="[ isOpen ? { display:'block' } : { display:'none' } ]">
             <li v-for="(result, i) in results" :key="i" class="dropdown-item" :class="{ 'dropdown-header' : result.isGroupHeader, 'highlighted': i === arrowCounter }" @click="onSearchSelected(result)" @mouseover="arrowCounter = i">
                 <span>{{ result[labelby] }}</span>
             </li>
@@ -72,7 +72,7 @@
                 this.$emit('update:modelValue', val); 
 
                 this.$nextTick(function() {
-                    if (val != oldVal) {
+                    if (val && val != oldVal) {
                         if (val.length >= that.minlength) {
                             if (that.isasync) {
                                 clearTimeout(that.throttleTimer);
@@ -151,6 +151,13 @@
                     this.arrowCounter = -1;
                 }
             },
+            clear() {
+                this.model = "";
+                this.results = [];
+                // this.$el.querySelectorAll('.results').forEach(el => {
+                //     el.innerHTML = "";
+                // });
+            }
         }
     };
 </script>

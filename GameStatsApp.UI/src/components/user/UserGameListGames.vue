@@ -53,7 +53,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <search-games></search-games>
+                        <autocomplete ref="searchAutocomplete" v-model="searchText" @search="onSearch" @selected="onSearchSelected" :options="searchResults" labelby="label" valueby="value" imageby="coverImagePath" :isasync="true" :isimgresults="true" :loading="searchLoading" :placeholder="'Search games'"/>    
                     </div>
                 </div>
             </div>
@@ -76,7 +76,10 @@
                 games: [],
                 game: {},
                 removeModal: {},
-                searchModal: {}                
+                searchModal: {},
+                searchText: null,
+                searchResults: [],
+                searchLoading: false               
             };
         },       
         watch: {
@@ -91,6 +94,9 @@
             var that = this;
             that.removeModal = new Modal(that.$refs.removemodal);
             that.searchModal = new Modal(that.$refs.searchmodal);
+            that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {
+                that.$refs.searchAutocomplete.clear();
+            });
         },
         methods: {
             loadData: function () {
@@ -162,23 +168,48 @@
                 var el = e.target;
                 if (!el.closest('.gamelist-icons').contains('d-none')) {
                     if (!el.closest('.gamelist-item').classList.contains('active')) {
-                        this.addGameToUserGameList(el, userGameList, game);
+                        this.addGameToUserGameList(userGameList, game, el);
                     } else {
-                        this.removeGameFromUserGameList(el, userGameList, game);
+                        this.removeGameFromUserGameList(userGameList, game, el);
                     }
                 }
             },
             onSearchGamesClick(e){
                 this.searchModal.show();
-            },
-            addGameToUserGameList(el, userGameList, game) {
+            },         
+            onSearch: function() {
+                var that = this;
+                this.searchLoading = true;
+                               
+                axios.get('/Game/SearchGames', { params: { term: this.searchText } })
+                        .then(res => {
+                            that.searchResults = res.data;
+
+                            if(that.searchResults.length == 0)
+                            {
+                                var noResult = { value: "", label: "No results found", disabled: true };
+                                that.searchResults.push(noResult);
+                            }
+
+                            that.searchLoading = false;
+                            return res;
+                        })
+                        .catch(err => { console.error(err); return Promise.reject(err); });
+            },              
+            onSearchSelected: function (result) {
+                var that = this;
+                var usergamelist = this.usergamelists.find(item => item.id == that.usergamelistid)
+                var game = { id: result.value, name: result.label };
+                that.addGameToUserGameList(usergamelist, game);
+            },            
+            addGameToUserGameList(userGameList, game, el) {
                 var that = this;
 
                 return axios.post('/User/AddGameToUserGameList', null,{ params: { userGameListID: userGameList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {
-                            el.closest('.gamelist-item').classList.add('active');
-                            el.closest('.gamelist-container').querySelector('button').classList.add('active');                                                      
+                            el?.closest('.gamelist-item').classList.add('active');
+                            el?.closest('.gamelist-container').querySelector('button').classList.add('active');                            
                             that.$emit('success', "Successfully added " + game.name + " to " + userGameList.name);
                         } else {
                             that.$emit('error', res.data.errorMessages);                           
@@ -186,7 +217,7 @@
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },          
-            removeGameFromUserGameList(el, userGameList, game) {
+            removeGameFromUserGameList(userGameList, game, el) {
                 var that = this;
                 
                 return axios.post('/User/RemoveGameFromUserGameList', null,{ params: { userGameListID: userGameList.id, gameID: game.id } })
