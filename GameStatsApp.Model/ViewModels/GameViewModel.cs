@@ -11,12 +11,12 @@ namespace GameStatsApp.Model.ViewModels
         {
         }
 
-        public GameViewModel(Game game)
+        public GameViewModel(GameView gameVW)
         {
-            ID = game.ID;
-            Name = game.Name;
-            CoverImagePath = game.CoverImagePath;
-            UserGameListIDs = game.UserGameListIDs.Split(",").Select(i => Convert.ToInt32(i)).ToList();
+            ID = gameVW.ID;
+            Name = gameVW.Name;
+            CoverImagePath = gameVW.CoverImagePath;
+            UserGameListIDs = gameVW.UserGameListIDs.Split(",").Select(i => Convert.ToInt32(i)).ToList();
         }
 
         public int ID { get; set; }

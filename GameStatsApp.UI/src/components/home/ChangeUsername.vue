@@ -65,7 +65,6 @@
                 if (this.username != this.form.Username) {
                     this.submitForm().then(i => { that.editUsername = false });
                 }
-
             },
             async submitForm() {
                 const isValid = await this.v$.$validate()
@@ -75,7 +74,7 @@
                 var formData = getFormData(this.form);
                 this.loading = true;
 
-                axios.post('/Home/ChangeUsername', formData)
+                return axios.post('/Home/ChangeUsername', formData)
                     .then((res) => {
                         if (res.data.success) {
                             that.$emit('success', "Successfully updated username");                           

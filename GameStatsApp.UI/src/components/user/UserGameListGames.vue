@@ -49,7 +49,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Search Games</h5>
+                        <h5 class="modal-title">Add Game</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -103,7 +103,7 @@
                 var that = this;
                 this.loading = true;
 
-                axios.get('/User/GetUserGameListGames', { params: { userGameListID: this.usergamelistid } })
+                axios.get('/User/GetGamesByUserGameList', { params: { userGameListID: this.usergamelistid } })
                     .then(res => {
                         that.games = res.data;                        
                         that.loading = false;
@@ -205,7 +205,7 @@
                 }
 
                 var game = { id: result.value, name: result.label, coverImagePath: result.coverImagePath, userGameListIDs: userGameListIDs };
-                that.addGameToUserGameList(usergamelist, game);
+                that.addGameToUserGameList(usergamelist, game).then(i => { that.searchModal.hide() });
             },            
             addGameToUserGameList(userGameList, game, el) {
                 var that = this;

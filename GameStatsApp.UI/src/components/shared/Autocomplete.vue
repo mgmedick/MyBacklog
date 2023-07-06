@@ -128,7 +128,7 @@
                 } else {
                     this.isOpen = false;
                     this.arrowCounter = -1;                     
-                    this.model = result[this.valueby];                   
+                    //this.model = result[this.labelby];                   
                     this.$emit('selected', result);
                 }
             },          
@@ -154,9 +154,6 @@
             clear() {
                 this.model = "";
                 this.results = [];
-                // this.$el.querySelectorAll('.results').forEach(el => {
-                //     el.innerHTML = "";
-                // });
             }
         }
     };

@@ -20,7 +20,7 @@ namespace GameStatsApp.Interfaces.Repositories
         void SaveUserGameLists(IEnumerable<UserGameList> userGameLists);
         void SaveUserGameListGame(UserGameListGame userGameListGame);
         void DeleteUserGameListGame(int userGameListID, int gameID);
-        IEnumerable<Game> GetUserGameListGames(int userGameListID);
+        IEnumerable<GameView> GetGamesByUserGameList(int userGameListID);
         IEnumerable<SearchResult> SearchUsers(string searchText);
     }
 }
