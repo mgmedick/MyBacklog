@@ -41,8 +41,8 @@
                     <span class="mx-auto">{{ userGameLists.find(i => i.id == selectedItemID)?.name }}</span>
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="width: 100%;">
-                    <li v-for="(userGameList, userGameListIndex) in userGameLists">
-                        <a :key="userGameList.id" @click="selectedItemID = userGameList.id" class="dropdown-item" :class="{ 'active' : selectedItemID == userGameList.id }" href="#/" data-toggle="pill">{{ userGameList.name }}</a>
+                    <li v-for="(userGameList, userGameListIndex) in userGameLists" :key="userGameList.id">
+                        <a @click="selectedItemID = userGameList.id" class="dropdown-item" :class="{ 'active' : selectedItemID == userGameList.id }" href="#/" data-toggle="pill">{{ userGameList.name }}</a>
                     </li>
                 </ul>
             </div>                

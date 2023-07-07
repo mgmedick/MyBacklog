@@ -1,5 +1,16 @@
 ﻿<template>
     <div class="container games-container">
+        <div class="row align-items-center mb-3">
+            <div class="col-auto me-auto">
+                <button type="button" class="btn btn-secondary" @click="onOrderByClick">
+                    <font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-caret-up" size="xl"/>
+                    <font-awesome-icon v-else icon="fa-solid fa-caret-down" size="xl"/>
+                </button>          
+            </div>
+            <div class="col-auto ms-auto">
+                <input type="text" class="form-control" autocomplete="off" v-model="filterText" aria-describedby="spnUserNameErrors" placeholder="Filter games">
+            </div>
+        </div>
         <div class="row g-3">
             <div class="col-lg-2 col-md-3 col-6">
                 <div class="bg-light d-flex" style="height: 100%; cursor: pointer;" @click="onSearchGamesClick">
@@ -74,18 +85,27 @@
         data: function () {
             return {
                 games: [],
+                allgames: [],
                 game: {},
                 removeModal: {},
                 searchModal: {},
                 searchText: null,
                 searchResults: [],
-                searchLoading: false               
+                searchLoading: false,
+                filterText: null,
+                orderByDesc: true   
             };
         },       
         watch: {
             usergamelistid: function (val, oldVal) {
                 this.loadData();
-            }           
+            },
+            filterText: function (val, oldVal) {
+                var that = this;
+                if (val != oldVal) {
+                    that.filterResults(val);
+                }
+            }                        
         },  
         created: function () {
             this.loadData();
@@ -105,7 +125,14 @@
 
                 axios.get('/User/GetGamesByUserGameList', { params: { userGameListID: this.usergamelistid } })
                     .then(res => {
-                        that.games = res.data;                        
+                        that.games = res.data;
+                        that.allgames = res.data.slice();
+                        
+                        if (that.orderByDesc) {
+                            that.games = that.games.reverse();
+                            that.allgames = that.allgames.reverse();
+                        }
+
                         that.loading = false;
                         return res;
                     })
@@ -206,7 +233,29 @@
 
                 var game = { id: result.value, name: result.label, coverImagePath: result.coverImagePath, userGameListIDs: userGameListIDs };
                 that.addGameToUserGameList(usergamelist, game).then(i => { that.searchModal.hide() });
-            },            
+            },  
+            onFilterInput: function(e) {
+                var val = e.target.value;
+                if (val) {
+                    this.filterResults(val);
+                }
+            },
+            onOrderByClick(e){
+                this.orderByDesc = !this.orderByDesc;
+                this.games = this.games.reverse();
+                this.allgames = this.allgames.reverse();                
+            },
+            filterResults(val) {
+                var that = this;
+
+                if (val) {
+                    this.games = this.allgames.slice().filter((item) => {
+                        return item.name.toLowerCase().indexOf(val.toLowerCase()) > -1;
+                    });      
+                } else {
+                    this.games = this.allgames.slice();
+                }                
+            },                   
             addGameToUserGameList(userGameList, game, el) {
                 var that = this;
 
