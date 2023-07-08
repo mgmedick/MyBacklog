@@ -3,6 +3,7 @@ using GameStatsApp.Interfaces.Repositories;
 using GameStatsApp.Interfaces.Services;
 using GameStatsApp.Model;
 using GameStatsApp.Model.Data;
+using GameStatsApp.Model.JSON;
 using GameStatsApp.Model.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,13 +23,15 @@ namespace GameStatsApp.Service
     {
         private readonly IUserRepository _userRepo = null;
         private readonly IEmailService _emailService = null;
+        private readonly IAuthService _authService = null;
         private readonly IHttpContextAccessor _context = null;
         private readonly IConfiguration _config = null;
 
-        public UserService(IUserRepository userRepo, IEmailService emailService, IHttpContextAccessor context, IConfiguration config)
+        public UserService(IUserRepository userRepo, IEmailService emailService, IAuthService authService, IHttpContextAccessor context, IConfiguration config)
         {
             _userRepo = userRepo;
             _emailService = emailService;
+            _authService = authService;
             _context = context;
             _config = config;
         }
@@ -54,9 +57,9 @@ namespace GameStatsApp.Service
             var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
             var strToHash = string.Format("email={0}&expirationTime={1}", email, expirationTime);
             var hash = strToHash.GetHMACSHA256Hash(hashKey);
-            var expirationDate = new DateTime(expirationTime);
+            var expireDate = new DateTime(expirationTime);
             var emailExists = _userRepo.GetUsers(i => i.Email == email).Any();
-            var isValid = (hash == token) && expirationDate > DateTime.UtcNow && !emailExists;
+            var isValid = (hash == token) && expireDate > DateTime.UtcNow && !emailExists;
             var activateUserVM = new ActivateViewModel() { Email = email, IsValid = isValid };
 
             return activateUserVM;
@@ -96,8 +99,8 @@ namespace GameStatsApp.Service
             var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
             var strToHash = string.Format("email={0}&expirationTime={1}&password={2}", email, expirationTime, user.Password);
             var hash = strToHash.GetHMACSHA256Hash(hashKey);
-            var expirationDate = new DateTime(expirationTime);
-            var isValid = (hash == token) && expirationDate > DateTime.UtcNow;
+            var expireDate = new DateTime(expirationTime);
+            var isValid = (hash == token) && expireDate > DateTime.UtcNow;
             var changePassVM = new ChangePasswordViewModel() { IsValid = isValid };
 
             return changePassVM;
@@ -161,26 +164,36 @@ namespace GameStatsApp.Service
             _userRepo.SaveUser(user);
         }        
 
-        public void CreateUserGameService(int userID, int gameServiceID)
+        public void SaveUserGameServiceToken(int userID, int gameServiceID, XSTSTokenResponse xstsTokenResponse)
         {
-            var userVW = _userRepo.GetUserViews(i => i.UserID == userID).FirstOrDefault();
-            var gameServiceIDs = !string.IsNullOrWhiteSpace(userVW.GameServiceIDs) ? userVW.GameServiceIDs.Split(",").Select(i => Convert.ToInt32(i)).ToList() : new List<int>();
+            var user = _userRepo.GetUsers(i => i.ID == userID).FirstOrDefault();
+            var userGameServiceToken = _userRepo.GetUserGameServiceTokens(i => i.UserID == userID && i.GameServiceID == gameServiceID).FirstOrDefault();            
 
-            if (!gameServiceIDs.Contains(gameServiceID))
+            if (userGameServiceToken == null)
             {
-                var userGameService = new UserGameService()
+                userGameServiceToken = new UserGameServiceToken()
                 {
                     UserID = userID,
-                    GameServiceID = gameServiceID
+                    GameServiceID = gameServiceID,
+                    Token = xstsTokenResponse.Token,
+                    IssuedDate = xstsTokenResponse.IssueInstant,
+                    ExpireDate = xstsTokenResponse.NotAfter,
+                    CreatedDate = DateTime.UtcNow
                 };
-
-                _userRepo.SaveUserGameService(userGameService);
-
-                var user = userVW.ConvertToUser();
-                user.ModifiedDate = DateTime.UtcNow;
-                user.ModifiedBy = userID;
-                _userRepo.SaveUser(user);    
             }
+            else
+            {
+                userGameServiceToken.Token = xstsTokenResponse.Token;
+                userGameServiceToken.IssuedDate = xstsTokenResponse.IssueInstant;
+                userGameServiceToken.ExpireDate = xstsTokenResponse.NotAfter;
+                userGameServiceToken.ModifiedDate = DateTime.UtcNow;
+            }
+
+            _userRepo.SaveUserGameServiceToken(userGameServiceToken);
+
+            user.ModifiedDate = DateTime.UtcNow;
+            user.ModifiedBy = userID;
+            _userRepo.SaveUser(user);    
         }
 
         public IEnumerable<UserGameList> GetUserGameLists (int userID)
@@ -197,6 +210,19 @@ namespace GameStatsApp.Service
 
             return gameVMs;
         }                
+
+        public async void ImportGamesFromUserGameServices(int userID)
+        {
+            var userGameServiceTokenVWs = _userRepo.GetUserGameServiceTokenViews(i => i.UserID == userID).ToList();
+
+            foreach (var userGameServiceTokenVW in userGameServiceTokenVWs)
+            {
+                if (userGameServiceTokenVW.GameServiceID == (int) GameStatsApp.Model.GameService.Xbox)
+                {
+                    var results = await _authService.GetUserTitleHistory(userGameServiceTokenVW.MicrosoftUserHash, userGameServiceTokenVW.Token, userGameServiceTokenVW.MicrosoftUxid);
+                }
+            }
+        }
 
         public void AddGameToUserGameList(int userID, int userGameListID, int gameID)
         {         

@@ -4,10 +4,10 @@ using System.Linq;
 
 namespace GameStatsApp.Model.Data
 {
-    public class UserGameService
+    public class UserGameServiceTokenDetail
     {
         public int ID { get; set; }
-        public int UserID { get; set; }
-        public int GameServiceID { get; set; }
+        public string Name { get; set; }
+        public string Value { get; set; }
     }
 } 

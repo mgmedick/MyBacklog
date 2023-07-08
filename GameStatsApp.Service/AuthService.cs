@@ -66,7 +66,7 @@ namespace GameStatsApp.Service
         //     return authUrl;
         // }
 
-        public async Task Authenticate(string code, string redirectUri)
+        public async Task<XSTSTokenResponse> Authenticate(string code, string redirectUri)
         {
             var accessResponse = await ExchangeCodeForAccessToken(code, redirectUri);
             RpsTicket = (string)accessResponse.GetValue("access_token");
@@ -81,6 +81,7 @@ namespace GameStatsApp.Service
                                                       NotAfter = (DateTime)xstsResponse.GetValue("NotAfter"),
                                                       UserInformation = ((JObject)xstsResponse["DisplayClaims"]["xui"][0]).ToObject<XboxUserInformation>() };
 
+            return XSTSTResponse;
             // var results = await GetUserTitleHistory(XSTSTResponse.UserInformation.Userhash, XSTSTResponse.Token, XSTSTResponse.UserInformation.XboxUserId);
         }
 

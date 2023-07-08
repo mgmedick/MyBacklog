@@ -414,7 +414,7 @@ namespace GameStatsApp.Controllers
             return View(welcomeVM);
         }
 
-        public ActionResult MicrosoftCallback()
+        public async Task<ActionResult> MicrosoftCallback()
         {
             var success = false;
 
@@ -424,10 +424,10 @@ namespace GameStatsApp.Controllers
                 if (!string.IsNullOrWhiteSpace(code))
                 {
                     var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("HomeRedirectUri").Value;
-                    _authService.Authenticate(code, redirectUri);
+                    var xstsTokenResponse = await _authService.Authenticate(code, redirectUri);
 
                     var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                    _userService.CreateUserGameService(userID, (int)GameService.Xbox);
+                    _userService.SaveUserGameServiceToken(userID, (int)GameService.Xbox, xstsTokenResponse);
 
                     success = true;
                 }

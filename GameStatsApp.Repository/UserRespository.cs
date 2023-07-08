@@ -57,13 +57,29 @@ namespace GameStatsApp.Repository
             }
         }
 
-        public void SaveUserGameService(UserGameService userGameService)
+        public IEnumerable<UserGameServiceToken> GetUserGameServiceTokens(Expression<Func<UserGameServiceToken, bool>>  predicate)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                return db.Query<UserGameServiceToken>().Where(predicate).ToList();
+            }
+        }
+
+        public IEnumerable<UserGameServiceTokenView> GetUserGameServiceTokenViews(Expression<Func<UserGameServiceTokenView, bool>>  predicate)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                return db.Query<UserGameServiceTokenView>().Where(predicate).ToList();
+            }
+        }        
+
+        public void SaveUserGameServiceToken(UserGameServiceToken userGameServiceToken)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
                 using (var tran = db.GetTransaction())
                 {
-                    db.Save<UserGameService>(userGameService);
+                    db.Save<UserGameServiceToken>(userGameServiceToken);
 
                     tran.Complete();
                 }

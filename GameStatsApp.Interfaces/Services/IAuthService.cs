@@ -14,11 +14,12 @@ namespace GameStatsApp.Interfaces.Services
     public interface IAuthService
     {
         string GetWindowsLiveAuthUrl(string redirectUri);
-        Task Authenticate(string code, string redirectUri);
+        Task<XSTSTokenResponse> Authenticate(string code, string redirectUri);
         Task<JObject> ExchangeCodeForAccessToken(string code, string redirectUri);
         Task<JObject> ExchangeRpsTicketForUserToken(string rpsTicket);
         Task<JObject> ExchangeTokenForXSTSToken(string userToken);
         Task<JObject> GetUserInventory(string userHash, string xstsToken, ulong userXuid);
+        Task<JArray> GetUserTitleHistory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null);
         // string GetRefreshWindowsLiveAuthUrl(AccessToken refreshToken);
         // void SetAccessToken(string url);
         // WindowsLiveResponse ParseWindowsLiveResponse(string url);

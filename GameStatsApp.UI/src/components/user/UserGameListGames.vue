@@ -1,14 +1,17 @@
 ﻿<template>
     <div class="container games-container">
         <div class="row align-items-center mb-3">
-            <div class="col-auto me-auto">
-                <button type="button" class="btn btn-secondary" @click="onOrderByClick">
+            <div v-if="usergamelists.find(i => i.defaultGameListID == 1)?.id == usergamelistid" class="col-2 me-auto">
+                <button type="button" class="btn btn-secondary" @click="onUpdateGamesClick">
+                    <font-awesome-icon icon="fa-solid fa-cloud-arrow-down" size="xl"/>
+                </button>          
+            </div>            
+            <div class="col-auto ms-auto d-flex">
+                <button type="button" class="btn btn-secondary me-2" @click="onOrderByClick">
                     <font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-caret-up" size="xl"/>
                     <font-awesome-icon v-else icon="fa-solid fa-caret-down" size="xl"/>
-                </button>          
-            </div>
-            <div class="col-auto ms-auto">
-                <input type="text" class="form-control" autocomplete="off" v-model="filterText" aria-describedby="spnUserNameErrors" placeholder="Filter games">
+                </button>
+                <input type="text" class="form-control" autocomplete="off" v-model="filterText" aria-describedby="spnUserNameErrors" placeholder="Filter games">         
             </div>
         </div>
         <div class="row g-3">
@@ -39,6 +42,23 @@
                 </div>
             </div>            
         </div>  
+        <div ref="updatemodal" class="modal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Games from linked accounts</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Add latest games from your linked accounts?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" @click="addGamesFromLinkedAccounts">Continue</button>
+                </div>
+                </div>
+            </div>
+        </div>          
         <div ref="removemodal" class="modal" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -47,7 +67,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Remove <strong>{{ game?.name }}</strong> from all lists?</p>
+                    <p>Remove <strong>{{ game?.name }}</strong> from all your lists?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -255,7 +275,20 @@
                 } else {
                     this.games = this.allgames.slice();
                 }                
-            },                   
+            },  
+            addGamesFromLinkedAccounts() {
+                var that = this;
+
+                return axios.post('/User/AddGamesFromUserLinkedAccounts')
+                    .then((res) => {
+                        if (res.data.success) {
+                            that.loadData().then(i => { that.$emit('success', "Successfully added games from linked accounts") });                             
+                        } else {
+                            that.$emit('error', res.data.errorMessages);                           
+                        }                        
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
+            },                                
             addGameToUserGameList(userGameList, game, el) {
                 var that = this;
 

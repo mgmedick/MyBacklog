@@ -2,6 +2,7 @@
 using GameStatsApp.Model.ViewModels;
 using GameStatsApp.Model;
 using GameStatsApp.Model.Data;
+using GameStatsApp.Model.JSON;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -18,6 +19,7 @@ namespace GameStatsApp.Interfaces.Services
         ChangePasswordViewModel GetChangePassword(string email, long expirationTime, string token);
         void ChangeUserPassword(string email, string pass);
         void ChangeUsername(string email, string username);
+        void ImportGamesFromUserGameServices(int userID);
         void AddGameToUserGameList(int userID, int userGameListID, int gameID);
         void RemoveGameFromUserGameList(int userID, int userGameListID, int gameID);
         void RemoveGameFromAllUserGameLists(int userID, int gameID);
@@ -27,7 +29,7 @@ namespace GameStatsApp.Interfaces.Services
         bool EmailExists(string email, bool activeFilter);
         Task SendConfirmRegistrationEmail(string email, string username);
         IEnumerable<SearchResult> SearchUsers(string searchText);
-        void CreateUserGameService(int userID, int gameServiceID);
+        void SaveUserGameServiceToken(int userID, int gameServiceID, XSTSTokenResponse xstsTokenResponse);
         IEnumerable<UserGameList> GetUserGameLists (int userID);
         IEnumerable<GameViewModel> GetGamesByUserGameList (int userGameListID);
     }
