@@ -48,7 +48,7 @@ namespace GameStatsApp.Controllers
         }        
 
         [HttpPost]
-        public JsonResult ImportGamesFromUserGameServices()
+        public JsonResult ImportGamesFromUserGameAccounts()
         {
             var success = false;
             List<string> errorMessages = null;
@@ -56,12 +56,12 @@ namespace GameStatsApp.Controllers
             try
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                _userService.ImportGamesFromUserGameServices(userID);
+                _userService.ImportGamesFromUserGameAccounts(userID);
                 success = true;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "ImportGamesFromUserGameServices");
+                _logger.Error(ex, "ImportGamesFromUserGameAccounts");
                 success = false;
                 errorMessages = new List<string>() { "Error adding game to list" };
             }

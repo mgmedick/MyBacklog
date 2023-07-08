@@ -19,7 +19,7 @@ namespace GameStatsApp.Model.Data
         public int? ModifiedBy { get; set; }
         public DateTime? ModifiedDate { get; set; }
         public bool IsDarkTheme { get; set; }
-        public string GameServiceIDs { get; set; }
+        public string GameAccountTypeIDs { get; set; }
 
         public User ConvertToUser()
         {

@@ -66,7 +66,7 @@ namespace GameStatsApp.Service
         //     return authUrl;
         // }
 
-        public async Task<XSTSTokenResponse> Authenticate(string code, string redirectUri)
+        public async Task<TokenResponse> Authenticate(string code, string redirectUri)
         {
             var accessResponse = await ExchangeCodeForAccessToken(code, redirectUri);
             RpsTicket = (string)accessResponse.GetValue("access_token");
@@ -81,8 +81,15 @@ namespace GameStatsApp.Service
                                                       NotAfter = (DateTime)xstsResponse.GetValue("NotAfter"),
                                                       UserInformation = ((JObject)xstsResponse["DisplayClaims"]["xui"][0]).ToObject<XboxUserInformation>() };
 
-            return XSTSTResponse;
-            // var results = await GetUserTitleHistory(XSTSTResponse.UserInformation.Userhash, XSTSTResponse.Token, XSTSTResponse.UserInformation.XboxUserId);
+            var tokenResponse = new TokenResponse() { Token = XSTSTResponse.Token,
+                                                          IssuedDate = XSTSTResponse.IssueInstant,
+                                                          ExpireDate = XSTSTResponse.NotAfter,
+                                                          RefreshToken = RefreshToken,
+                                                          AccountUserID = XSTSTResponse.UserInformation.XboxUserId.ToString(),
+                                                          AccountUserHash = XSTSTResponse.UserInformation.Userhash
+                                                        };
+
+            return tokenResponse;
         }
 
         public async Task<JObject> ExchangeCodeForAccessToken(string code, string redirectUri)
@@ -119,6 +126,39 @@ namespace GameStatsApp.Service
 
             return data;
         }
+
+        public async Task<JObject> RefreshAccessToken(string refreshToken)
+        {
+            JObject data = null;
+            var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientId").Value;
+            //var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectUri").Value;
+            var clientSecret = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientSecret").Value;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var parameters = new Dictionary<string,string>{
+                    {"client_id", clientID},
+                    {"grant_type", "refresh_token"},
+                    {"scope", "XboxLive.signin XboxLive.offline_access"},
+                    {"client_secret", clientSecret}
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://login.live.com/oauth20_token.srf") { Content = new FormUrlEncodedContent(parameters) };
+
+                using (var response = await client.SendAsync(request))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        data = JObject.Parse(dataString);
+                    }
+                }
+            }
+
+            return data;
+        }        
 
         public async Task<JObject> ExchangeRpsTicketForUserToken(string rpsTicket)
         {
@@ -182,6 +222,8 @@ namespace GameStatsApp.Service
 
             return data;
         }
+
+
 
         public async Task<JArray> GetUserTitleHistory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null)
         {

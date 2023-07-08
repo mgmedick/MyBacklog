@@ -11,7 +11,7 @@ namespace GameStatsApp.Model.ViewModels
     {
         public string Username { get; set; }
         public string WindowsLiveAuthUrl { get; set; }
-        public List<int> GameServiceIDs { get; set; }        
+        public List<int> GameAccountTypeIDs { get; set; }        
         public bool? Success { get; set; }
     }
 }

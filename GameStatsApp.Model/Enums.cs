@@ -10,7 +10,7 @@ namespace GameStatsApp.Model
         ConfirmRegistration = 3
     }       
 
-    public enum GameService
+    public enum GameAccountType
     {
         Steam = 1,
         Xbox = 2

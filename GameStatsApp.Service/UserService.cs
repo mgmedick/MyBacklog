@@ -164,36 +164,33 @@ namespace GameStatsApp.Service
             _userRepo.SaveUser(user);
         }        
 
-        public void SaveUserGameServiceToken(int userID, int gameServiceID, XSTSTokenResponse xstsTokenResponse)
+        public void SaveUserGameAccount(int userID, int gameAccountTypeID, TokenResponse tokenResponse)
         {
-            var user = _userRepo.GetUsers(i => i.ID == userID).FirstOrDefault();
-            var userGameServiceToken = _userRepo.GetUserGameServiceTokens(i => i.UserID == userID && i.GameServiceID == gameServiceID).FirstOrDefault();            
+            var userGameAccount = _userRepo.GetUserGameAccounts(i => i.UserID == userID && i.GameAccountTypeID == gameAccountTypeID).FirstOrDefault();            
 
-            if (userGameServiceToken == null)
+            if (userGameAccount == null)
             {
-                userGameServiceToken = new UserGameServiceToken()
+                userGameAccount = new UserGameAccount()
                 {
                     UserID = userID,
-                    GameServiceID = gameServiceID,
-                    Token = xstsTokenResponse.Token,
-                    IssuedDate = xstsTokenResponse.IssueInstant,
-                    ExpireDate = xstsTokenResponse.NotAfter,
+                    GameAccountTypeID = gameAccountTypeID,
+                    Token = tokenResponse.Token,
+                    IssuedDate = tokenResponse.IssuedDate,
+                    ExpireDate = tokenResponse.ExpireDate,
+                    RefreshToken = tokenResponse.RefreshToken,
                     CreatedDate = DateTime.UtcNow
                 };
             }
             else
             {
-                userGameServiceToken.Token = xstsTokenResponse.Token;
-                userGameServiceToken.IssuedDate = xstsTokenResponse.IssueInstant;
-                userGameServiceToken.ExpireDate = xstsTokenResponse.NotAfter;
-                userGameServiceToken.ModifiedDate = DateTime.UtcNow;
+                userGameAccount.Token = userGameAccount.Token;
+                userGameAccount.IssuedDate = userGameAccount.IssuedDate;
+                userGameAccount.ExpireDate = userGameAccount.ExpireDate;
+                userGameAccount.RefreshToken = userGameAccount.Token;
+                userGameAccount.ModifiedDate = DateTime.UtcNow;
             }
 
-            _userRepo.SaveUserGameServiceToken(userGameServiceToken);
-
-            user.ModifiedDate = DateTime.UtcNow;
-            user.ModifiedBy = userID;
-            _userRepo.SaveUser(user);    
+            _userRepo.SaveUserGameAccount(userGameAccount); 
         }
 
         public IEnumerable<UserGameList> GetUserGameLists (int userID)
@@ -211,18 +208,27 @@ namespace GameStatsApp.Service
             return gameVMs;
         }                
 
-        public async void ImportGamesFromUserGameServices(int userID)
+        public async void ImportGamesFromUserGameAccounts(int userID)
         {
-            var userGameServiceTokenVWs = _userRepo.GetUserGameServiceTokenViews(i => i.UserID == userID).ToList();
+            var userGameAccounts = _userRepo.GetUserGameAccounts(i => i.UserID == userID).ToList();
 
-            foreach (var userGameServiceTokenVW in userGameServiceTokenVWs)
+            foreach (var userGameAccount in userGameAccounts)
             {
-                if (userGameServiceTokenVW.GameServiceID == (int) GameStatsApp.Model.GameService.Xbox)
+                if (userGameAccount.GameAccountTypeID == (int)GameAccountType.Xbox)
                 {
-                    var results = await _authService.GetUserTitleHistory(userGameServiceTokenVW.MicrosoftUserHash, userGameServiceTokenVW.Token, userGameServiceTokenVW.MicrosoftUxid);
+                    //var results = await _authService.GetUserTitleHistory(userGameServiceTokenVW.MicrosoftUserHash, userGameServiceTokenVW.Token, userGameServiceTokenVW.MicrosoftUxid);
                 }
             }
         }
+
+        // public async Task<List<string>> GetUserMicrosoftGames(UserGameAccount userGameAccount)
+        // {
+        //     if (userGameAccount.ExpireDate > DateTime.UtcNow && !string.IsNullOrWhiteSpace(userGameAccount.RefreshToken))
+        //     {
+        //         await _authService.RefreshAccessToken(userGameAccount.RefreshToken);
+
+        //     }
+        // }     
 
         public void AddGameToUserGameList(int userID, int userGameListID, int gameID)
         {         

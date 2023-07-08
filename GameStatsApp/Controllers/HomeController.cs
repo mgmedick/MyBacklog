@@ -402,13 +402,13 @@ namespace GameStatsApp.Controllers
         {
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
-            var gameServiceIDs = !string.IsNullOrWhiteSpace(userVW.GameServiceIDs) ? userVW.GameServiceIDs.Split(",").Select(i => int.Parse(i)).ToList() : new List<int>();
+            var gameAccountTypeIDs = !string.IsNullOrWhiteSpace(userVW.GameAccountTypeIDs) ? userVW.GameAccountTypeIDs.Split(",").Select(i => int.Parse(i)).ToList() : new List<int>();
             var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("HomeRedirectUri").Value;
             var windowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUri);
 
             var welcomeVM = new WelcomeViewModel() { Username = userVW.Username,                                              
                                                      WindowsLiveAuthUrl = windowsLiveAuthUrl,
-                                                     GameServiceIDs = gameServiceIDs,
+                                                     GameAccountTypeIDs = gameAccountTypeIDs,
                                                      Success = success };
 
             return View(welcomeVM);
@@ -424,10 +424,10 @@ namespace GameStatsApp.Controllers
                 if (!string.IsNullOrWhiteSpace(code))
                 {
                     var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("HomeRedirectUri").Value;
-                    var xstsTokenResponse = await _authService.Authenticate(code, redirectUri);
+                    var tokenResponse = await _authService.Authenticate(code, redirectUri);
 
                     var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                    _userService.SaveUserGameServiceToken(userID, (int)GameService.Xbox, xstsTokenResponse);
+                    _userService.SaveUserGameAccount(userID, (int)GameAccountType.Xbox, tokenResponse);
 
                     success = true;
                 }
