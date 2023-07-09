@@ -403,7 +403,7 @@ namespace GameStatsApp.Controllers
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
             var gameAccountTypeIDs = !string.IsNullOrWhiteSpace(userVW.GameAccountTypeIDs) ? userVW.GameAccountTypeIDs.Split(",").Select(i => int.Parse(i)).ToList() : new List<int>();
-            var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("HomeRedirectUri").Value;
+            var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
             var windowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUri);
 
             var welcomeVM = new WelcomeViewModel() { Username = userVW.Username,                                              
@@ -414,7 +414,34 @@ namespace GameStatsApp.Controllers
             return View(welcomeVM);
         }
 
-        public async Task<ActionResult> MicrosoftCallback()
+        public async Task<ActionResult> MicrosoftAuthCallbackWelcome()
+        {
+            var success = false;
+
+            try
+            {
+                var code = Request.Query["code"].ToString();
+                if (!string.IsNullOrWhiteSpace(code))
+                {
+                    var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
+                    var tokenResponse = await _authService.Authenticate(code, redirectUri);
+
+                    var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                    _userService.SaveUserGameAccount(userID, (int)GameAccountType.Xbox, tokenResponse);
+
+                    success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "MicrosoftAuthCallbackWelcome");
+                success = false;
+            }            
+
+            return RedirectToAction("Welcome", new { success = success });
+        }
+
+        public async Task<ActionResult> MicrosoftAuthCallbackHome()
         {
             var success = false;
 
@@ -434,12 +461,12 @@ namespace GameStatsApp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "MicrosoftCallback");
+                _logger.Error(ex, "MicrosoftAuthCallbackHome");
                 success = false;
             }            
 
-            return RedirectToAction("Welcome", new { success = success });
-        }     
+            return RedirectToAction("Home", new { success = success });
+        }                  
 
         [AllowAnonymous]
         [HttpGet]

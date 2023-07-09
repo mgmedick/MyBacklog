@@ -32,5 +32,7 @@ namespace GameStatsApp.Interfaces.Services
         void SaveUserGameAccount(int userID, int gameAccountTypeID, TokenResponse tokenResponse);
         IEnumerable<UserGameList> GetUserGameLists (int userID);
         IEnumerable<GameViewModel> GetGamesByUserGameList (int userGameListID);
+        Task<List<UserGameAccountViewModel>> GetUserGameAccountViewModels(int userID);
+        Task ImportGamesFromAllUserGameAccounts(int userID);
     }
 }

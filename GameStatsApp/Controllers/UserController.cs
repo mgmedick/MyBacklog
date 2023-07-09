@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using GameStatsApp.Interfaces.Services;
+using GameStatsApp.Interfaces.Repositories;
 using GameStatsApp.Model;
 using GameStatsApp.Model.Data;
 using GameStatsApp.Model.ViewModels;
@@ -23,11 +24,17 @@ namespace GameStatsApp.Controllers
     public class UserController : Controller
     {
         private readonly IUserService _userService = null;
+        private readonly IAuthService _authService = null;
+        private readonly IUserRepository _userRepo = null;
+         private readonly IConfiguration _config = null;       
         private readonly ILogger _logger = null;
 
-        public UserController(IUserService userService, ILogger logger)
+        public UserController(IUserService userService, IAuthService authService, IUserRepository userRepo, IConfiguration config, ILogger logger)
         {
             _userService = userService;
+            _authService = authService;
+            _userRepo = userRepo;
+            _config = config;
             _logger = logger;
         }
 
@@ -48,7 +55,16 @@ namespace GameStatsApp.Controllers
         }        
 
         [HttpPost]
-        public JsonResult ImportGamesFromUserGameAccounts()
+        public async Task<JsonResult> GetUserGameAccounts()
+        {
+            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userGameAccountVMs = await _userService.GetUserGameAccountViewModels(userID);
+
+            return Json(userGameAccountVMs);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> ImportGamesFromAllUserGameAccounts()
         {
             var success = false;
             List<string> errorMessages = null;
@@ -56,14 +72,14 @@ namespace GameStatsApp.Controllers
             try
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                _userService.ImportGamesFromUserGameAccounts(userID);
+                await _userService.ImportGamesFromAllUserGameAccounts(userID);
                 success = true;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "ImportGamesFromUserGameAccounts");
+                _logger.Error(ex, "ImportGamesFromAllUserGameAccounts");
                 success = false;
-                errorMessages = new List<string>() { "Error adding game to list" };
+                errorMessages = new List<string>() { "Error importing games" };
             }
 
             return Json(new { success = success, errorMessages = errorMessages });

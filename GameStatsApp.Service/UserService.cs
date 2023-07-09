@@ -208,28 +208,6 @@ namespace GameStatsApp.Service
             return gameVMs;
         }                
 
-        public async void ImportGamesFromUserGameAccounts(int userID)
-        {
-            var userGameAccounts = _userRepo.GetUserGameAccounts(i => i.UserID == userID).ToList();
-
-            foreach (var userGameAccount in userGameAccounts)
-            {
-                if (userGameAccount.GameAccountTypeID == (int)GameAccountType.Xbox)
-                {
-                    //var results = await _authService.GetUserTitleHistory(userGameServiceTokenVW.MicrosoftUserHash, userGameServiceTokenVW.Token, userGameServiceTokenVW.MicrosoftUxid);
-                }
-            }
-        }
-
-        // public async Task<List<string>> GetUserMicrosoftGames(UserGameAccount userGameAccount)
-        // {
-        //     if (userGameAccount.ExpireDate > DateTime.UtcNow && !string.IsNullOrWhiteSpace(userGameAccount.RefreshToken))
-        //     {
-        //         await _authService.RefreshAccessToken(userGameAccount.RefreshToken);
-
-        //     }
-        // }     
-
         public void AddGameToUserGameList(int userID, int userGameListID, int gameID)
         {         
             var userGameListVM = _userRepo.GetUserGameListViews(i => i.ID == userGameListID).Select(i => new UserGameListViewModel(i)).FirstOrDefault();
@@ -282,8 +260,47 @@ namespace GameStatsApp.Service
             {
                 _userRepo.DeleteUserGameListGame(userGameListID, gameID);
             }
-        }        
-        
+        }
+
+        public async Task<List<UserGameAccountViewModel>> GetUserGameAccountViewModels(int userID)
+        {
+            var userGameAccountVMs = _userRepo.GetUserGameAccounts(i => i.UserID == userID).Select(i => new UserGameAccountViewModel(i)).ToList();
+
+            foreach (var userGameAccountVM in userGameAccountVMs)
+            {
+                if (userGameAccountVM.GameAccountTypeID == (int)GameAccountType.Xbox)
+                {
+                    var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("HomeRedirectUri").Value;
+                    userGameAccountVM.AuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUri);
+
+                    if (!string.IsNullOrWhiteSpace(userGameAccountVM.RefreshToken))
+                    {
+                        var tokenResponse = await _authService.ReAuthenticate(userGameAccountVM.RefreshToken);
+                        SaveUserGameAccount(userID, (int)GameAccountType.Xbox, tokenResponse);
+                    }
+                    else
+                    {
+                        userGameAccountVM.IsExpired = true;
+                    }
+                }
+            }
+
+            return userGameAccountVMs;
+        }
+
+        public async Task ImportGamesFromAllUserGameAccounts(int userID)
+        {
+            var userGameAccounts = _userRepo.GetUserGameAccounts(i => i.UserID == userID).ToList();
+
+            foreach (var userGameAccount in userGameAccounts)
+            {
+                if (userGameAccount.GameAccountTypeID == (int)GameAccountType.Xbox)
+                {
+                    var gamesNames = await _authService.GetUserGameNames(userGameAccount.AccountUserHash, userGameAccount.Token, Convert.ToUInt64(userGameAccount.AccountUserID));
+                }
+            }
+        }
+
         //jqvalidate
         public bool EmailExists(string email)
         {
