@@ -57,8 +57,8 @@
             that.successToast = new Toast(that.$refs.successtoast);
             that.errorToast = new Toast(that.$refs.errortoast);
 
-            if (that.welcomevm.success != null) {
-                if (that.welcomevm.success) {
+            if (that.welcomevm.authSuccess != null) {
+                if (that.welcomevm.authSuccess) {
                     that.successMessage = "Successfully linked account"
                     that.successToast.show();
                 } else {            

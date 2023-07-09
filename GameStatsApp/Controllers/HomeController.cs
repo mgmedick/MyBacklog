@@ -35,7 +35,7 @@ namespace GameStatsApp.Controllers
             _logger = logger;
         }
 
-        public ActionResult Index()
+        public ActionResult Index(bool? authSuccess)
         {
             return View();
         }
@@ -398,7 +398,7 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpGet]
-        public ViewResult Welcome(bool? success = null)
+        public ViewResult Welcome(bool? authSuccess = null)
         {
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
@@ -409,7 +409,7 @@ namespace GameStatsApp.Controllers
             var welcomeVM = new WelcomeViewModel() { Username = userVW.Username,                                              
                                                      WindowsLiveAuthUrl = windowsLiveAuthUrl,
                                                      GameAccountTypeIDs = gameAccountTypeIDs,
-                                                     Success = success };
+                                                     AuthSuccess = authSuccess };
 
             return View(welcomeVM);
         }
@@ -438,7 +438,7 @@ namespace GameStatsApp.Controllers
                 success = false;
             }            
 
-            return RedirectToAction("Welcome", new { success = success });
+            return RedirectToAction("Welcome", new { authSuccess = success });
         }
 
         public async Task<ActionResult> MicrosoftAuthCallbackHome()
@@ -465,7 +465,7 @@ namespace GameStatsApp.Controllers
                 success = false;
             }            
 
-            return RedirectToAction("Home", new { success = success });
+            return RedirectToAction("Index", new { authSuccess = success });
         }                  
 
         [AllowAnonymous]
