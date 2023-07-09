@@ -19,7 +19,6 @@ namespace GameStatsApp.Interfaces.Services
         ChangePasswordViewModel GetChangePassword(string email, long expirationTime, string token);
         void ChangeUserPassword(string email, string pass);
         void ChangeUsername(string email, string username);
-        void ImportGamesFromUserGameAccounts(int userID);
         void AddGameToUserGameList(int userID, int userGameListID, int gameID);
         void RemoveGameFromUserGameList(int userID, int userGameListID, int gameID);
         void RemoveGameFromAllUserGameLists(int userID, int gameID);
