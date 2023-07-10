@@ -15,6 +15,7 @@ namespace GameStatsApp.Model.Data
             ID = userGameAccount.ID;
             UserID = userGameAccount.UserID;
             GameAccountTypeID = userGameAccount.GameAccountTypeID;
+            GameAccountTypeName = ((GameAccountType)GameAccountTypeID).ToString();
             Token = userGameAccount.Token;
             RefreshToken = userGameAccount.RefreshToken;
             AccountUserHash = userGameAccount.AccountUserHash;
@@ -23,6 +24,7 @@ namespace GameStatsApp.Model.Data
         public int ID { get; set; }
         public int UserID { get; set; }
         public int GameAccountTypeID { get; set; }
+        public string GameAccountTypeName { get; set; }
         public string Token { get; set; }
         public string RefreshToken { get; set; }
         public string AccountUserID { get; set; }
