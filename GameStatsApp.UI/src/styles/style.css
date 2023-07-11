@@ -13,6 +13,14 @@
     line-height: 1rem;
 }
 
+.text-color-blue {
+    color: #0a3169;
+}
+
+.text-color-green {
+    color: #107711;
+}
+
 @media (max-width: 991.98px) {
     .show-lg {
         display: none !important;

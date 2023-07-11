@@ -15,6 +15,8 @@ namespace GameStatsApp.Model.Data
         public string AccountUserHash { get; set; }
         public DateTime? IssuedDate { get; set; }
         public DateTime? ExpireDate { get; set; }
+        public DateTime? ImportLastRunDate { get; set; }
+        public bool IsImportRunning { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }        
     }

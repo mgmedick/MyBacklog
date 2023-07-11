@@ -24,14 +24,16 @@ namespace GameStatsApp.Service
         private readonly IUserRepository _userRepo = null;
         private readonly IEmailService _emailService = null;
         private readonly IAuthService _authService = null;
+        private readonly IGameRepository _gameRepo = null;
         private readonly IHttpContextAccessor _context = null;
         private readonly IConfiguration _config = null;
 
-        public UserService(IUserRepository userRepo, IEmailService emailService, IAuthService authService, IHttpContextAccessor context, IConfiguration config)
+        public UserService(IUserRepository userRepo, IEmailService emailService, IAuthService authService, IGameRepository gameRepo, IHttpContextAccessor context, IConfiguration config)
         {
             _userRepo = userRepo;
             _emailService = emailService;
             _authService = authService;
+            _gameRepo = gameRepo;
             _context = context;
             _config = config;
         }
@@ -183,10 +185,10 @@ namespace GameStatsApp.Service
             }
             else
             {
-                userGameAccount.Token = userGameAccount.Token;
-                userGameAccount.IssuedDate = userGameAccount.IssuedDate;
-                userGameAccount.ExpireDate = userGameAccount.ExpireDate;
-                userGameAccount.RefreshToken = userGameAccount.Token;
+                userGameAccount.Token = tokenResponse.Token;
+                userGameAccount.IssuedDate = tokenResponse.IssuedDate;
+                userGameAccount.ExpireDate = tokenResponse.ExpireDate;
+                userGameAccount.RefreshToken = tokenResponse.Token;
                 userGameAccount.ModifiedDate = DateTime.UtcNow;
             }
 
@@ -262,30 +264,56 @@ namespace GameStatsApp.Service
             }
         }
 
-        public async Task<List<UserGameAccountViewModel>> GetUserGameAccountViewModels(int userID)
+        public IEnumerable<UserGameAccountViewModel> GetUserGameAccounts(int userID)
         {
             var userGameAccountVMs = _userRepo.GetUserGameAccounts(i => i.UserID == userID).Select(i => new UserGameAccountViewModel(i)).ToList();
 
-            foreach (var userGameAccountVM in userGameAccountVMs)
-            {
-                if (userGameAccountVM.GameAccountTypeID == (int)GameAccountType.Xbox)
-                {
-                    var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("HomeRedirectUri").Value;
-                    userGameAccountVM.AuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUri);
+            return userGameAccountVMs;
+        }
 
-                    if (!string.IsNullOrWhiteSpace(userGameAccountVM.RefreshToken))
-                    {
-                        var tokenResponse = await _authService.ReAuthenticate(userGameAccountVM.RefreshToken);
-                        SaveUserGameAccount(userID, (int)GameAccountType.Xbox, tokenResponse);
-                    }
-                    else
-                    {
-                        userGameAccountVM.IsExpired = true;
-                    }
+        public async Task<Tuple<UserGameAccount, string>> GetAndReAuthUserGameAccount(int userID, int userGameAccountID)
+        {
+            var authUrl = string.Empty;
+            var userGameAccount = _userRepo.GetUserGameAccounts(i => i.ID == userGameAccountID).FirstOrDefault();
+
+            if (userGameAccount.ExpireDate > DateTime.UtcNow)
+            {
+                if (!string.IsNullOrWhiteSpace(userGameAccount.RefreshToken))
+                {
+                    var tokenResponse = await _authService.ReAuthenticate(userGameAccount.RefreshToken);
+                    SaveUserGameAccount(userID, userGameAccount.GameAccountTypeID, tokenResponse);
                 }
+                else
+                {
+                    if (userGameAccount.GameAccountTypeID == (int)GameAccountType.Xbox)
+                    {
+                        authUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
+                    }
+                }          
             }
 
-            return userGameAccountVMs;
+            return new Tuple<UserGameAccount, string>(userGameAccount, authUrl);
+        }        
+
+        public async Task ImportGamesFromUserGameAccount(UserGameAccount userGameAccount)
+        {
+            var gameNames = new List<string>();
+            
+            if (userGameAccount.GameAccountTypeID == (int)GameAccountType.Xbox)
+            {
+                await _authService.GetUserGameNames(userGameAccount.AccountUserHash, userGameAccount.Token, Convert.ToUInt64(userGameAccount.AccountUserID));
+            }
+
+            var gameIDs = new List<int>();
+            var maxBatchCount = 500;
+            var batchCount = 0;
+            while (batchCount < gameNames.Count())
+            {
+                var gameNamesBatch = gameNames.Skip(batchCount).Take(maxBatchCount).ToList();
+                var gameIDsBatch = _gameRepo.GetGames(i => gameNamesBatch.Contains(i.Name)).Select(i => i.ID).ToList();
+                gameIDs.AddRange(gameIDsBatch);
+                batchCount += maxBatchCount;
+            }
         }
 
         public async Task ImportGamesFromAllUserGameAccounts(int userID)

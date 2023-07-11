@@ -28,10 +28,11 @@ namespace GameStatsApp.Interfaces.Services
         bool EmailExists(string email, bool activeFilter);
         Task SendConfirmRegistrationEmail(string email, string username);
         IEnumerable<SearchResult> SearchUsers(string searchText);
-        void SaveUserGameAccount(int userID, int gameAccountTypeID, TokenResponse tokenResponse);
         IEnumerable<UserGameList> GetUserGameLists (int userID);
         IEnumerable<GameViewModel> GetGamesByUserGameList (int userGameListID);
-        Task<List<UserGameAccountViewModel>> GetUserGameAccountViewModels(int userID);
-        Task ImportGamesFromAllUserGameAccounts(int userID);
+        void SaveUserGameAccount(int userID, int gameAccountTypeID, TokenResponse tokenResponse);
+        IEnumerable<UserGameAccountViewModel> GetUserGameAccounts(int userID);   
+        Task<Tuple<UserGameAccount, string>> GetAndReAuthUserGameAccount(int userID, int userGameAccountID);
+        Task ImportGamesFromUserGameAccount(UserGameAccount userGameAccount);
     }
 }

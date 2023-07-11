@@ -17,6 +17,8 @@ namespace GameStatsApp.Repository
             For<UserGameListView>().PrimaryKey("ID", false).TableName("vw_UserGameList");
             For<UserGameListGame>().PrimaryKey("ID", false).TableName("tbl_UserGameList_Game");
             For<UserView>().TableName("vw_User");
+            For<Game>().TableName("tbl_Game");
+            For<GameView>().TableName("vw_Game");
             For<Setting>().PrimaryKey("ID").TableName("tbl_Setting");
         }
     }

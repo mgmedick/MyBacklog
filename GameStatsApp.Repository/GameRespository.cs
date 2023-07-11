@@ -15,6 +15,14 @@ namespace GameStatsApp.Repository
 {
     public class GameRespository : BaseRepository, IGameRepository
     {
+        public IEnumerable<Game> GetGames(Expression<Func<Game, bool>>  predicate)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                return db.Query<Game>().Where(predicate).ToList();
+            }
+        }
+
         public IEnumerable<SearchResult> SearchGames(string searchText)
         {
             using (IDatabase db = DBFactory.GetDatabase())

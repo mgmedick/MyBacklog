@@ -54,17 +54,17 @@ namespace GameStatsApp.Controllers
             return Json(userGameListGames);
         }        
 
-        [HttpPost]
-        public async Task<JsonResult> GetUserGameAccounts()
-        {
-            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var userGameAccountVMs = await _userService.GetUserGameAccountViewModels(userID);
+        // [HttpPost]
+        // public JsonResult GetUserGameAccounts()
+        // {
+        //     var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        //     var userGameAccountVMs = _userService.GetUserGameAccounts(userID).ToList();
 
-            return Json(userGameAccountVMs);
-        }
+        //     return Json(userGameAccountVMs);
+        // }
 
         [HttpPost]
-        public async Task<ActionResult> ImportGamesFromAllUserGameAccounts()
+        public async Task<ActionResult> ImportGamesFromUserGameAccount(int userGameAccountID)
         {
             var success = false;
             List<string> errorMessages = null;
@@ -72,7 +72,16 @@ namespace GameStatsApp.Controllers
             try
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                await _userService.ImportGamesFromAllUserGameAccounts(userID);
+                var result = await _userService.GetAndReAuthUserGameAccount(userID, userGameAccountID);
+                if (!string.IsNullOrWhiteSpace(result.Item2))
+                {
+                    Redirect(result.Item2);
+                }
+                else
+                {
+                    await _userService.ImportGamesFromUserGameAccount(result.Item1);
+                }
+
                 success = true;
             }
             catch (Exception ex)
@@ -84,7 +93,7 @@ namespace GameStatsApp.Controllers
 
             return Json(new { success = success, errorMessages = errorMessages });
         }
-
+        
         [HttpPost]
         public JsonResult AddGameToUserGameList(int userGameListID, int gameID)
         {

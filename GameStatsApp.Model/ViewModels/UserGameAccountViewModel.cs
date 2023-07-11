@@ -19,6 +19,9 @@ namespace GameStatsApp.Model.Data
             Token = userGameAccount.Token;
             RefreshToken = userGameAccount.RefreshToken;
             AccountUserHash = userGameAccount.AccountUserHash;
+            ExpireDate = userGameAccount.ImportLastRunDate;
+            ImportLastRunDate = userGameAccount.ImportLastRunDate;
+            IsImportRunning = userGameAccount.IsImportRunning;
         }
         
         public int ID { get; set; }
@@ -29,7 +32,8 @@ namespace GameStatsApp.Model.Data
         public string RefreshToken { get; set; }
         public string AccountUserID { get; set; }
         public string AccountUserHash { get; set; }
-        public bool IsExpired { get; set; }     
-        public string AuthUrl { get; set; }
+        public DateTime? ExpireDate { get; set; }
+        public DateTime? ImportLastRunDate { get; set; }
+        public bool IsImportRunning { get; set; }
     }
 } 

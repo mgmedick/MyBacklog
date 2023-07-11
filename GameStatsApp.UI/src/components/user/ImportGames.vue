@@ -21,13 +21,12 @@
                 </div>
             </div>
             <div class="row g-2 justify-content-center">
-                <button v-for="(userGameAccount, userGameAccountIndex) in userGameAccounts" type="button" class="btn btn-outline-dark d-flex" @click="onImportGamesClick(userGameAccount)">
-                    <font-awesome-icon :icon="getIconClass(userGameAccount.gameAccountTypeID)" size="xl" style="color: #0a3169;" />
-                    <span class="mx-auto">{{ userGameAccountType.isExpired ? 'Re-login to ' + userGameAccountType.gameAccountTypeName + ' account' : 'Import ' + userGameAccountType.gameAccountTypeName + ' games' }}</span>
-                    <font-awesome-icon v-if="userGameAccount.isExpired" icon="fa-solid fa-circle-exclamation" size="xl" style="color: #d9534f;"/>
+                <button v-for="(userGameAccount, userGameAccountIndex) in importgamesvm.userGameAccounts" type="button" class="btn btn-outline-dark d-flex" @click="onImportGamesClick(userGameAccount.id)">
+                    <font-awesome-icon :icon="getIconClass(userGameAccount.gameAccountTypeID)" size="xl"/>
+                    <span class="mx-auto">{{ 'Import ' + userGameAccountType.gameAccountTypeName + ' games' }}</span>
+                    <font-awesome-icon v-if="userGameAccount.isImportRunning" icon="fa-solid fa-spinner" size="xl"/>
                     <font-awesome-icon v-else icon="fa-solid fa-circle-check" size="xl" style="color: #02b875;"/>
                 </button>
-                <button type="button" class="btn btn-primary" @click="onImportAllGamesClick" :disabled="userGameAccounts.filter(i => !i.isExpired).length == 0">Import all games</button>
             </div>
         </div>
     </div>
@@ -37,14 +36,13 @@
     
     export default {
         name: "ImportGames",
+        props: {
+            importgamesvm: Object
+        },
         data() {
             return {
-                userGameAccounts: [],
-                confirmModal: {},                
-                confirmModalText: '',
                 successToast: {},
                 successMessage: '',
-                errorModal: {},
                 errorMessages: [],
                 errorToast: {}
             }
@@ -52,60 +50,69 @@
         computed: {
         },
         created: function () {
-            this.loadData();
         },        
-        mounted: function () {       
+        mounted: function () {
             var that = this;
-            that.errorModal = new Modal(that.$refs.errormodal);  
-            that.confirmModal = new Modal(that.$refs.confirmmodal);  
-        },
+            that.successToast = new Toast(that.$refs.successtoast);
+            that.errorToast = new Toast(that.$refs.errortoast);
+
+            if (that.importgamesvm.authSuccess != null) {
+                if (that.importgamesvm.authSuccess) {
+                    var userGameAccount = that.importgamesvm.userGameAccounts.find(i => i.gameAccountTypeID == that.importgamesvm.authGameAccountTypeID);
+                    that.importGames(userGameAccount);
+                } else {            
+                    that.errorMessages = ["Error authorizing account"];
+                    if (that.errorMessages.length > 0) {
+                        that.$nextTick(function() {
+                            that.$refs.errortoasts?.forEach(el => {
+                                new Toast(el).show();
+                            });
+                        }); 
+                    } 
+                }
+            }            
+        },        
         methods: {
-            loadData: function () {
-                var that = this;
-                this.loading = true;
-
-                axios.get('/User/GetUserGameAccounts')
-                    .then(res => {
-                        that.userGameAccounts = res.data;
-                        that.allgames = res.data.slice();
-                        
-                        if (that.orderByDesc) {
-                            that.games = that.games.reverse();
-                            that.allgames = that.allgames.reverse();
-                        }
-
-                        that.loading = false;
-                        return res;
-                    })
-                    .catch(err => { console.error(err); return Promise.reject(err); });
-            },
             getIconClass: function (gameAccountTypeID) {
                 var iconClass = '';
 
                 switch (gameAccountTypeID) {
                     case 1:
-                        iconClass = 'fa-brands fa-steam';
+                        iconClass = 'fa-brands fa-steam text-color-blue';
                         break;
                     case 2:
-                        iconClass = 'fa-brands fa-xbox';
+                        iconClass = 'fa-brands fa-xbox text-color-green';
                         break;
                 }
 
                 return iconClass;
-            },      
-            onXboxClick() {
-                location.href = this.welcomevm.windowsLiveAuthUrl;
-            },     
-            onImportGamesClick(userGameAccount) {
-                if (userGameAccount.isExpired){
-                    location.href = userGameAccount.authUrl;
-                } else {
-                    this.importGames();
-                }
-            },       
-            onImportAllGamesClick(userGameAccount) {
             },
-                
+            onImportGamesClick(userGameAccount) {
+                this.importGames(userGameAccount);
+            },
+            importGames(userGameAccount) {
+                var that = this;
+                userGameAccount.isImportRunning = true;
+
+                return axios.post('/User/ImportGamesFromUserGameAccount', null,{ params: { userGameAccountID: userGameAccount.id } })
+                    .then((res) => {
+                        if (res.data.success) {
+                            that.successMessage = "Successfully imported " + userGameAccount.name + " games"
+                            that.successToast.show();
+                        } else {
+                            that.errorMessages = ["Error importing " + userGameAccount.name + " games"];
+                            if (that.errorMessages.length > 0) {
+                                that.$nextTick(function() {
+                                    that.$refs.errortoasts?.forEach(el => {
+                                        new Toast(el).show();
+                                    });
+                                }); 
+                            }                           
+                        }
+                        userGameAccount.isImportRunning = false;
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
+            },            
         }
     };
 </script>

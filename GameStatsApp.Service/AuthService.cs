@@ -153,7 +153,7 @@ namespace GameStatsApp.Service
             return data;
         }
 
-        public async Task<JObject> RefreshAccessToken(string refreshToken)
+        public async Task<JObject> RefreshAccessToken(string refreshToken, string redirectUri)
         {
             JObject data = null;
             var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientId").Value;
@@ -166,6 +166,7 @@ namespace GameStatsApp.Service
                 var parameters = new Dictionary<string,string>{
                     {"client_id", clientID},
                     {"grant_type", "refresh_token"},
+                    {"redirect_uri", redirectUri},
                     {"scope", "XboxLive.signin XboxLive.offline_access"},
                     {"client_secret", clientSecret}
                 };
