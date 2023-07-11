@@ -448,8 +448,7 @@ namespace GameStatsApp.Controllers
             var userGameAccountVMs = _userService.GetUserGameAccounts(userID).ToList();
 
             var importGamesVM = new ImportGamesViewModel() { UserGameAccounts = userGameAccountVMs,
-                                                         AuthSuccess = authSuccess,
-                                                         AuthGameAccountTypeID = authGameAccountTypeID };
+                                                             AuthSuccess = authSuccess };
 
             return View(importGamesVM);
         }

@@ -78,6 +78,14 @@ namespace GameStatsApp.Repository
             }
         }
 
+        public void UpdateUserGameAccountIsImportRunning(UserGameAccount userGameAccount)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                db.Update<UserGameAccount>(userGameAccount, i => new { i.IsImportRunning });
+            }
+        }          
+
         public IEnumerable<IDNamePair> GetDefaultGameLists()
         {
             using (IDatabase db = DBFactory.GetDatabase())

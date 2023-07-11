@@ -298,7 +298,10 @@ namespace GameStatsApp.Service
         public async Task ImportGamesFromUserGameAccount(UserGameAccount userGameAccount)
         {
             var gameNames = new List<string>();
-            
+
+            userGameAccount.IsImportRunning = true;
+            _userRepo.UpdateUserGameAccountIsImportRunning(userGameAccount);
+
             if (userGameAccount.GameAccountTypeID == (int)GameAccountType.Xbox)
             {
                 await _authService.GetUserGameNames(userGameAccount.AccountUserHash, userGameAccount.Token, Convert.ToUInt64(userGameAccount.AccountUserID));
@@ -314,6 +317,9 @@ namespace GameStatsApp.Service
                 gameIDs.AddRange(gameIDsBatch);
                 batchCount += maxBatchCount;
             }
+
+            userGameAccount.IsImportRunning = false;
+            _userRepo.UpdateUserGameAccountIsImportRunning(userGameAccount);            
         }
 
         public async Task ImportGamesFromAllUserGameAccounts(int userID)

@@ -11,7 +11,7 @@ namespace GameStatsApp.Model.ViewModels
     {
         public List<UserGameAccountViewModel> UserGameAccounts { get; set; }        
         public bool? AuthSuccess { get; set; }
-        public int? AuthGameAccountTypeID { get; set; }
+        public List<int> ImportingUserGameAccountTypeIDs { get; set; }
     }
 }
 

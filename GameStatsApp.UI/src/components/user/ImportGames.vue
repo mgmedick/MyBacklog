@@ -21,11 +21,10 @@
                 </div>
             </div>
             <div class="row g-2 justify-content-center">
-                <button v-for="(userGameAccount, userGameAccountIndex) in importgamesvm.userGameAccounts" type="button" class="btn btn-outline-dark d-flex" @click="onImportGamesClick(userGameAccount.id)">
+                <button v-for="(userGameAccount, userGameAccountIndex) in importgamesvm.userGameAccounts" type="button" class="btn btn-outline-dark d-flex" @click="onImportGamesClick(userGameAccount.id)" :disabled="userGameAccount.isImportRunning">
                     <font-awesome-icon :icon="getIconClass(userGameAccount.gameAccountTypeID)" size="xl"/>
-                    <span class="mx-auto">{{ 'Import ' + userGameAccountType.gameAccountTypeName + ' games' }}</span>
+                    <span class="mx-auto">{{ (userGameAccount.isImportRunning ? 'Importing ' : 'Import ') + userGameAccountType.gameAccountTypeName + ' games' }}</span>
                     <font-awesome-icon v-if="userGameAccount.isImportRunning" icon="fa-solid fa-spinner" size="xl"/>
-                    <font-awesome-icon v-else icon="fa-solid fa-circle-check" size="xl" style="color: #02b875;"/>
                 </button>
             </div>
         </div>
@@ -44,7 +43,7 @@
                 successToast: {},
                 successMessage: '',
                 errorMessages: [],
-                errorToast: {}
+                errorToast: {}                
             }
         },
         computed: {
