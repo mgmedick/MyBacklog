@@ -275,37 +275,38 @@ namespace GameStatsApp.Service
             return userGameAccountVMs;
         }
 
-        public async Task<Tuple<UserGameAccount, string>> GetAndReAuthUserGameAccount(int userID, int userGameAccountID)
+        public async Task<Tuple<UserGameAccount, string>> GetRefreshedUserGameAccount(int userID, int userGameAccountID)
         {
             var authUrl = string.Empty;
+            var redirectUrl = string.Empty;
             var userGameAccount = _userRepo.GetUserGameAccounts(i => i.ID == userGameAccountID).FirstOrDefault();
-            var redirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
-
+            
+            switch (userGameAccount.GameAccountTypeID)
+            {
+                case (int)GameAccountType.Xbox:
+                    redirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
+                    break;
+            }
+            
             if (userGameAccount.ExpireDate < DateTime.UtcNow)
             {
                 if (!string.IsNullOrWhiteSpace(userGameAccount.RefreshToken))
                 {
-                    var tokenResponse = await _authService.ReAuthenticate(userGameAccount.RefreshToken, redirectUrl);
+                    var tokenResponse = await _authService.ReAuthenticate(userGameAccount.RefreshToken);
                     SaveUserGameAccount(userID, userGameAccount.GameAccountTypeID, tokenResponse);
                 }
                 else
                 {
-                    if (userGameAccount.GameAccountTypeID == (int)GameAccountType.Xbox)
-                    {
-                        authUrl = redirectUrl;
-                    }
+                    authUrl = redirectUrl;
                 }          
             }
 
             return new Tuple<UserGameAccount, string>(userGameAccount, authUrl);
-        }        
+        }
 
         public async Task ImportGamesFromUserGameAccount(int userID, UserGameAccount userGameAccount)
         {
             var gameNames = new List<string>();
-
-            userGameAccount.IsImportRunning = true;
-            _userRepo.UpdateUserGameAccountIsImportRunning(userGameAccount);
 
             if (userGameAccount.GameAccountTypeID == (int)GameAccountType.Xbox)
             {
@@ -332,9 +333,9 @@ namespace GameStatsApp.Service
                                            .ToList();
 
             _userRepo.SaveUserGameListGames(userGameListGames);
-
-            userGameAccount.IsImportRunning = false;
-            _userRepo.UpdateUserGameAccountIsImportRunning(userGameAccount);            
+            
+            userGameAccount.ImportLastRunDate = DateTime.UtcNow;
+            _userRepo.SaveUserGameAccount(userGameAccount);       
         }
 
         public async Task ImportGamesFromAllUserGameAccounts(int userID)

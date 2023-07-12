@@ -31,6 +31,7 @@ namespace GameStatsApp.Service
             _config = config;
         }
 
+        #region MicrosoftAuth
         public string GetWindowsLiveAuthUrl(string redirectUri)
         {
             var baseUrl = "https://login.live.com/oauth20_authorize.srf";
@@ -48,54 +49,24 @@ namespace GameStatsApp.Service
             return authUrl;
         }
 
-        // public string GetRefreshWindowsLiveAuthUrl(AccessToken refreshToken)
-        // {
-        //     var baseUrl = "https://login.live.com/oauth20_authorize.srf";
-        //     var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientId").Value;
-            
-        //     var parameters = new Dictionary<string,string>{
-        //         {"client_id", clientID},
-        //         {"scope", "XboxLive.signin XboxLive.offline_access"},
-        //         {"grant_type", "refresh_token"},
-        //         {"refresh_token", refreshToken.Jwt}
-        //     };
-
-        //     var authUrl = QueryHelpers.AddQueryString(baseUrl, parameters);
-            
-        //     return authUrl;
-        // }
-
         public async Task<TokenResponse> Authenticate(string code, string redirectUri)
         {
             var accessResponse = await ExchangeCodeForAccessToken(code, redirectUri);
+            var result = await GetTokenResponse(accessResponse);
 
-            RpsTicket = (string)accessResponse.GetValue("access_token");
-            RefreshToken = (string)accessResponse.GetValue("refresh_token");
-
-            var userResponse = await ExchangeRpsTicketForUserToken(RpsTicket);
-            UserToken = (string)userResponse.GetValue("Token");
-
-            var xstsResponse = await ExchangeTokenForXSTSToken(UserToken);
-            XSTSTResponse = new XSTSTokenResponse() { Token = (string)xstsResponse.GetValue("Token"),
-                                                      IssueInstant = (DateTime)xstsResponse.GetValue("IssueInstant"),
-                                                      NotAfter = (DateTime)xstsResponse.GetValue("NotAfter"),
-                                                      UserInformation = ((JObject)xstsResponse["DisplayClaims"]["xui"][0]).ToObject<XboxUserInformation>() };
-
-            var tokenResponse = new TokenResponse() { Token = XSTSTResponse.Token,
-                                                          IssuedDate = XSTSTResponse.IssueInstant,
-                                                          ExpireDate = XSTSTResponse.NotAfter,
-                                                          RefreshToken = RefreshToken,
-                                                          AccountUserID = XSTSTResponse.UserInformation.XboxUserId.ToString(),
-                                                          AccountUserHash = XSTSTResponse.UserInformation.Userhash
-                                                        };
-
-            return tokenResponse;
+            return result;
         }
 
-        public async Task<TokenResponse> ReAuthenticate(string refreshToken, string redirectUri)
+        public async Task<TokenResponse> ReAuthenticate(string refreshToken)
         {
-            var accessResponse = await RefreshAccessToken(refreshToken, redirectUri);
+            var accessResponse = await RefreshAccessToken(refreshToken);
+            var result = await GetTokenResponse(accessResponse);
 
+            return result;
+        }
+
+        public async Task<TokenResponse> GetTokenResponse(JObject accessResponse)
+        {
             RpsTicket = (string)accessResponse.GetValue("access_token");
             RefreshToken = (string)accessResponse.GetValue("refresh_token");
 
@@ -153,7 +124,7 @@ namespace GameStatsApp.Service
             return data;
         }
 
-        public async Task<JObject> RefreshAccessToken(string refreshToken, string redirectUri)
+        public async Task<JObject> RefreshAccessToken(string refreshToken)
         {
             JObject data = null;
             var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientId").Value;
@@ -166,9 +137,9 @@ namespace GameStatsApp.Service
                 var parameters = new Dictionary<string,string>{
                     {"client_id", clientID},
                     {"grant_type", "refresh_token"},
-                    {"redirect_uri", redirectUri},
                     {"scope", "XboxLive.signin XboxLive.offline_access"},
-                    {"client_secret", clientSecret}
+                    {"refresh_token", refreshToken},
+                    {"client_secret", clientSecret}                 
                 };
 
                 var request = new HttpRequestMessage(HttpMethod.Post, "https://login.live.com/oauth20_token.srf") { Content = new FormUrlEncodedContent(parameters) };
@@ -253,7 +224,7 @@ namespace GameStatsApp.Service
         {
             var results = new List<string>();
             var items = await GetUserTitleHistory(userHash, xstsToken, userXuid);
-            foreach (JObject item in items) // <-- Note that here we used JObject instead of usual JProperty
+            foreach (JObject item in items)
             {
                 var name = (string)item.GetValue("name");
                 results.Add(name);
@@ -338,5 +309,6 @@ namespace GameStatsApp.Service
 
             return data;
         }
+        #endregion
     }
 }

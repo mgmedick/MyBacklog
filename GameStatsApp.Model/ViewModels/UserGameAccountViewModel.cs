@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameStatsApp.Common.Extensions;
 
 namespace GameStatsApp.Model.Data
 {
@@ -21,7 +22,6 @@ namespace GameStatsApp.Model.Data
             AccountUserHash = userGameAccount.AccountUserHash;
             ExpireDate = userGameAccount.ImportLastRunDate;
             ImportLastRunDate = userGameAccount.ImportLastRunDate;
-            IsImportRunning = userGameAccount.IsImportRunning;
         }
         
         public int ID { get; set; }
@@ -34,6 +34,13 @@ namespace GameStatsApp.Model.Data
         public string AccountUserHash { get; set; }
         public DateTime? ExpireDate { get; set; }
         public DateTime? ImportLastRunDate { get; set; }
-        public bool IsImportRunning { get; set; }
+        
+        public string RelativeImportLastRunDateString
+        {
+            get
+            {
+                return ImportLastRunDate?.ToRealtiveDateString(true);
+            }
+        }        
     }
 } 

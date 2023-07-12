@@ -20,12 +20,28 @@
                     </div>
                 </div>
             </div>
-            <div class="row g-2 justify-content-center">
-                <button v-for="(userGameAccount, userGameAccountIndex) in importgamesvm.userGameAccounts" type="button" class="btn btn-outline-dark d-flex" @click="onImportGamesClick(userGameAccount)" :disabled="userGameAccount.isImportRunning">
+            <div class="row g-2 justify-content-center mb-3">
+                <div class="p-0">
+                    <input type="radio" class="btn-check" name="options-outlined" id="latest-outlined" autocomplete="off" value="0" v-model="isImportAll">
+                    <label class="btn btn-outline-primary me-2" for="latest-outlined">Latest</label>
+                    <input type="radio" class="btn-check" name="options-outlined" id="all-outlined" autocomplete="off" value="1" v-model="isImportAll">
+                    <label class="btn btn-outline-primary" for="all-outlined">All</label>
+                </div>
+                <button v-for="(userGameAccount, userGameAccountIndex) in importgamesvm.userGameAccounts" type="button" class="btn btn-outline-dark d-flex justify-content-center align-items-center" @click="onImportGamesClick(userGameAccount)" :disabled="importingUserGameAccountID">
                     <font-awesome-icon :icon="getIconClass(userGameAccount.gameAccountTypeID)" :class="getIconColorClass(userGameAccount.gameAccountTypeID)" size="xl"/>
-                    <span class="mx-auto">{{ (importingUserGameAccountIDs.indexOf(userGameAccount.id) > -1 || userGameAccount.isImportRunning ? 'Importing ' : 'Import ') + userGameAccount.gameAccountTypeName + ' games' }}</span>
-                    <font-awesome-icon v-if="importingUserGameAccountIDs.indexOf(userGameAccount.id) > -1 || userGameAccount.isImportRunning" icon="fa-solid fa-spinner" spin size="xl"/>
+                    <div class="mx-auto">
+                        <div class="align-self-start">
+                            <span class="mx-auto">{{ (importingUserGameAccountID == userGameAccount.id ? 'Importing ' : 'Import ') + userGameAccount.gameAccountTypeName + ' games' }}</span>
+                        </div>
+                        <div class="align-self-end text-xs">
+                            <span>{{ 'Last imported ' + userGameAccount.relativeImportLastRunDateString }}</span>
+                        </div>
+                    </div>
+                    <font-awesome-icon v-if="importingUserGameAccountID == userGameAccount.id" icon="fa-solid fa-spinner" spin size="xl"/>
                 </button>
+            </div>
+            <div class="row g-2 justify-content-center">
+                <a href="/" class="btn btn-primary mt-3" tabindex="-1" role="button">Back to my games</a>
             </div>
         </div>
     </div>
@@ -41,7 +57,8 @@
         },
         data() {
             return {
-                importingUserGameAccountIDs: [],              
+                importingUserGameAccountID: null,   
+                isImportAll: 0,           
                 successToast: {},
                 successMessage: '',
                 errorMessages: [],
@@ -79,10 +96,10 @@
 
                 switch (gameAccountTypeID) {
                     case 1:
-                        iconClass = 'fa-brands fa-steam text-color-blue';
+                        iconClass = 'fa-brands fa-steam';
                         break;
                     case 2:
-                        iconClass = 'fa-brands fa-xbox text-color-green';
+                        iconClass = 'fa-brands fa-xbox';
                         break;
                 }
 
@@ -107,15 +124,15 @@
             },
             importGames(userGameAccount) {
                 var that = this;
-                that.importingUserGameAccountIDs.push(userGameAccount.id);
+                that.importingUserAccountID = userGameAccount.id;
 
-                return axios.post('/User/ImportGamesFromUserGameAccount', null,{ params: { userGameAccountID: userGameAccount.id } })
+                return axios.post('/Home/ImportGames', null,{ params: { userGameAccountID: userGameAccount.id } })
                     .then((res) => {
                         if (res.data.success) {
-                            that.successMessage = "Successfully imported " + userGameAccount.name + " games"
+                            that.successMessage = "Successfully imported " + userGameAccount.gameAccountTypeName + " games"
                             that.successToast.show();
                         } else {
-                            that.errorMessages = ["Error importing " + userGameAccount.name + " games"];
+                            that.errorMessages = ["Error importing " + userGameAccount.gameAccountTypeName + " games"];
                             if (that.errorMessages.length > 0) {
                                 that.$nextTick(function() {
                                     that.$refs.errortoasts?.forEach(el => {
@@ -124,7 +141,7 @@
                                 }); 
                             }                           
                         }
-                        that.importingUserGameAccountIDs.splice(that.importingUserGameAccountIDs.indexOf(userGameAccount.id), 1);
+                        that.importingUserAccountID = null;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },            

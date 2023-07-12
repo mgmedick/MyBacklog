@@ -52,46 +52,6 @@ namespace GameStatsApp.Controllers
             var userGameListGames = _userService.GetGamesByUserGameList(userGameListID);
 
             return Json(userGameListGames);
-        }        
-
-        // [HttpPost]
-        // public JsonResult GetUserGameAccounts()
-        // {
-        //     var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-        //     var userGameAccountVMs = _userService.GetUserGameAccounts(userID).ToList();
-
-        //     return Json(userGameAccountVMs);
-        // }
-
-        [HttpPost]
-        public async Task<ActionResult> ImportGamesFromUserGameAccount(int userGameAccountID)
-        {
-            var success = false;
-            List<string> errorMessages = null;
-
-            try
-            {
-                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                var result = await _userService.GetAndReAuthUserGameAccount(userID, userGameAccountID);
-                if (!string.IsNullOrWhiteSpace(result.Item2))
-                {
-                    Redirect(result.Item2);
-                }
-                else
-                {
-                    await _userService.ImportGamesFromUserGameAccount(userID, result.Item1);
-                }
-
-                success = true;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "ImportGamesFromUserGameAccount");
-                success = false;
-                errorMessages = new List<string>() { "Error importing games" };
-            }
-
-            return Json(new { success = success, errorMessages = errorMessages });
         }
         
         [HttpPost]

@@ -448,10 +448,43 @@ namespace GameStatsApp.Controllers
             var userGameAccountVMs = _userService.GetUserGameAccounts(userID).ToList();
 
             var importGamesVM = new ImportGamesViewModel() { UserGameAccounts = userGameAccountVMs,
-                                                             AuthSuccess = authSuccess };
+                                                             AuthSuccess = authSuccess,
+                                                             AuthGameAccountTypeID = authGameAccountTypeID };
 
             return View(importGamesVM);
         }
+
+        [HttpPost]
+        public async Task<ActionResult> ImportGames(int userGameAccountID)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var result = await _userService.GetRefreshedUserGameAccount(userID, userGameAccountID);
+                
+                if (!string.IsNullOrWhiteSpace(result.Item2))
+                {
+                    Redirect(result.Item2);
+                }
+                else
+                {
+                    await _userService.ImportGamesFromUserGameAccount(userID, result.Item1);
+                }
+
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "ImportGamesFromUserGameAccount");
+                success = false;
+                errorMessages = new List<string>() { "Error importing games" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
+        }      
 
         public async Task<ActionResult> MicrosoftAuthCallbackImportGames()
         {
@@ -473,7 +506,7 @@ namespace GameStatsApp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "MicrosoftAuthCallbackHome");
+                _logger.Error(ex, "MicrosoftAuthCallbackImportGames");
                 success = false;
             }            
 
