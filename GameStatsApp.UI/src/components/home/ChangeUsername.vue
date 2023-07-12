@@ -1,19 +1,13 @@
 ﻿<template>
     <form ref="form" @submit.prevent="submitForm" autocomplete="off">
-        <div class="row g-1 justify-content-center align-items-center">   
-            <div class="col-auto">
-                <font-awesome-icon icon="fa-solid fa-at" size="xl" />
-            </div> 
-            <div class="col-auto">
-                <input v-if="editUsername" id="txtUserName" type="text" class="form-control fs-3" autocomplete="off" v-model.lazy="form.Username" @blur="onUserNameBlur" aria-describedby="spnUserNameErrors">
-                <label v-else class="form-control fs-3 border-0 ps-0">{{ form.Username }}</label>
-                <div>
-                    <span id="spnUserNameErrors" class="form-text text-danger" v-for="error of v$.form.Username.$errors">{{ error.$message }}</span>
-                </div>
+        <div class="d-flex align-items-center">
+            <font-awesome-icon icon="fa-solid fa-at" size="xl" class="me-2"/>
+            <input v-if="editUsername" id="txtUserName" type="text" class="form-control fs-5" autocomplete="off" v-model.lazy="form.Username" @blur="onUserNameBlur" aria-describedby="spnUserNameErrors">
+            <label v-else class="form-control fs-5 border-0 ps-0">{{ form.Username }}</label>
+            <font-awesome-icon icon="fa-solid fa-square-pen" size="lg" @click="editUsername = !editUsername"/>
+            <div>
+                <span id="spnUserNameErrors" class="form-text text-danger" v-for="error of v$.form.Username.$errors">{{ error.$message }}</span>
             </div>
-            <div class="col-auto">
-                <font-awesome-icon icon="fa-solid fa-square-pen" size="lg" @click="editUsername = !editUsername"/>
-            </div>             
         </div>
     </form>
 </template>

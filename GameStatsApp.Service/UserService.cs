@@ -177,18 +177,22 @@ namespace GameStatsApp.Service
                     UserID = userID,
                     GameAccountTypeID = gameAccountTypeID,
                     Token = tokenResponse.Token,
+                    RefreshToken = tokenResponse.RefreshToken,
+                    AccountUserID = tokenResponse.AccountUserID,
+                    AccountUserHash = tokenResponse.AccountUserHash,
                     IssuedDate = tokenResponse.IssuedDate,
                     ExpireDate = tokenResponse.ExpireDate,
-                    RefreshToken = tokenResponse.RefreshToken,
                     CreatedDate = DateTime.UtcNow
                 };
             }
             else
             {
                 userGameAccount.Token = tokenResponse.Token;
+                userGameAccount.RefreshToken = tokenResponse.RefreshToken;
+                userGameAccount.AccountUserID = tokenResponse.AccountUserID;
+                userGameAccount.AccountUserHash = tokenResponse.AccountUserHash;
                 userGameAccount.IssuedDate = tokenResponse.IssuedDate;
                 userGameAccount.ExpireDate = tokenResponse.ExpireDate;
-                userGameAccount.RefreshToken = tokenResponse.Token;
                 userGameAccount.ModifiedDate = DateTime.UtcNow;
             }
 
@@ -275,19 +279,20 @@ namespace GameStatsApp.Service
         {
             var authUrl = string.Empty;
             var userGameAccount = _userRepo.GetUserGameAccounts(i => i.ID == userGameAccountID).FirstOrDefault();
+            var redirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
 
-            if (userGameAccount.ExpireDate > DateTime.UtcNow)
+            if (userGameAccount.ExpireDate < DateTime.UtcNow)
             {
                 if (!string.IsNullOrWhiteSpace(userGameAccount.RefreshToken))
                 {
-                    var tokenResponse = await _authService.ReAuthenticate(userGameAccount.RefreshToken);
+                    var tokenResponse = await _authService.ReAuthenticate(userGameAccount.RefreshToken, redirectUrl);
                     SaveUserGameAccount(userID, userGameAccount.GameAccountTypeID, tokenResponse);
                 }
                 else
                 {
                     if (userGameAccount.GameAccountTypeID == (int)GameAccountType.Xbox)
                     {
-                        authUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
+                        authUrl = redirectUrl;
                     }
                 }          
             }
@@ -295,7 +300,7 @@ namespace GameStatsApp.Service
             return new Tuple<UserGameAccount, string>(userGameAccount, authUrl);
         }        
 
-        public async Task ImportGamesFromUserGameAccount(UserGameAccount userGameAccount)
+        public async Task ImportGamesFromUserGameAccount(int userID, UserGameAccount userGameAccount)
         {
             var gameNames = new List<string>();
 
@@ -304,7 +309,7 @@ namespace GameStatsApp.Service
 
             if (userGameAccount.GameAccountTypeID == (int)GameAccountType.Xbox)
             {
-                await _authService.GetUserGameNames(userGameAccount.AccountUserHash, userGameAccount.Token, Convert.ToUInt64(userGameAccount.AccountUserID));
+                gameNames = await _authService.GetUserGameNames(userGameAccount.AccountUserHash, userGameAccount.Token, Convert.ToUInt64(userGameAccount.AccountUserID));
             }
 
             var gameIDs = new List<int>();
@@ -317,6 +322,16 @@ namespace GameStatsApp.Service
                 gameIDs.AddRange(gameIDsBatch);
                 batchCount += maxBatchCount;
             }
+
+            var allUserGameListID = _userRepo.GetUserGameLists(i => i.UserID == userID && i.DefaultGameListID == (int)DefaultGameList.AllGames)
+                                             .Select(i => i.ID)
+                                             .FirstOrDefault();
+            var existingGameIDs = _userRepo.GetGamesByUserGameList(allUserGameListID).Select(i => i.ID).ToList();
+            var userGameListGames = gameIDs.Where(i => !existingGameIDs.Contains(i))
+                                           .Select(i => new UserGameListGame() { UserGameListID = allUserGameListID, GameID = i })
+                                           .ToList();
+
+            _userRepo.SaveUserGameListGames(userGameListGames);
 
             userGameAccount.IsImportRunning = false;
             _userRepo.UpdateUserGameAccountIsImportRunning(userGameAccount);            

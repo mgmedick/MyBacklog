@@ -20,6 +20,7 @@ import resetPassword from './home/ResetPassword.vue';
 import changePassword from './home/ChangePassword.vue';
 import changeUsername from './home/ChangeUsername.vue';
 import welcome from './home/Welcome.vue';
+import importGames from './home/ImportGames.vue';
 
 import userSettings from './user/UserSettings.vue';
 import userGameLists from './user/UserGameLists.vue';
@@ -53,6 +54,7 @@ export default {
         app.component("signup", signUp);
         app.component("activate", activate);
         app.component("welcome", welcome);
+        app.component("import-games", importGames);
 
         app.mount('#vue-app');
         app.provide('app', 'Vue3');

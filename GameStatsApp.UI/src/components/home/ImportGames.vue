@@ -1,6 +1,6 @@
 ﻿<template>
     <div class="mx-auto">
-        <h2 class="text-center mb-1">Import Games</h2>
+        <h2 class="text-center mb-3">Import Games</h2>
         <div class="mx-auto" style="max-width:400px;">
             <div class="toast-container position-absolute sticky-top p-3 top-0 end-0" id="toastPlacement" style="margin-top: 70px;"> 
                 <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -21,10 +21,10 @@
                 </div>
             </div>
             <div class="row g-2 justify-content-center">
-                <button v-for="(userGameAccount, userGameAccountIndex) in importgamesvm.userGameAccounts" type="button" class="btn btn-outline-dark d-flex" @click="onImportGamesClick(userGameAccount.id)" :disabled="userGameAccount.isImportRunning">
-                    <font-awesome-icon :icon="getIconClass(userGameAccount.gameAccountTypeID)" size="xl"/>
-                    <span class="mx-auto">{{ (userGameAccount.isImportRunning ? 'Importing ' : 'Import ') + userGameAccountType.gameAccountTypeName + ' games' }}</span>
-                    <font-awesome-icon v-if="userGameAccount.isImportRunning" icon="fa-solid fa-spinner" size="xl"/>
+                <button v-for="(userGameAccount, userGameAccountIndex) in importgamesvm.userGameAccounts" type="button" class="btn btn-outline-dark d-flex" @click="onImportGamesClick(userGameAccount)" :disabled="userGameAccount.isImportRunning">
+                    <font-awesome-icon :icon="getIconClass(userGameAccount.gameAccountTypeID)" :class="getIconColorClass(userGameAccount.gameAccountTypeID)" size="xl"/>
+                    <span class="mx-auto">{{ (importingUserGameAccountIDs.indexOf(userGameAccount.id) > -1 || userGameAccount.isImportRunning ? 'Importing ' : 'Import ') + userGameAccount.gameAccountTypeName + ' games' }}</span>
+                    <font-awesome-icon v-if="importingUserGameAccountIDs.indexOf(userGameAccount.id) > -1 || userGameAccount.isImportRunning" icon="fa-solid fa-spinner" spin size="xl"/>
                 </button>
             </div>
         </div>
@@ -32,6 +32,7 @@
 </template>
 <script>
     import { Toast } from 'bootstrap';
+    import axios from 'axios';
     
     export default {
         name: "ImportGames",
@@ -40,10 +41,11 @@
         },
         data() {
             return {
+                importingUserGameAccountIDs: [],              
                 successToast: {},
                 successMessage: '',
                 errorMessages: [],
-                errorToast: {}                
+                errorToast: {}
             }
         },
         computed: {
@@ -86,12 +88,26 @@
 
                 return iconClass;
             },
+            getIconColorClass: function (gameAccountTypeID) {
+                var iconClass = '';
+
+                switch (gameAccountTypeID) {
+                    case 1:
+                        iconClass = 'text-color-blue';
+                        break;
+                    case 2:
+                        iconClass = 'text-color-green';
+                        break;
+                }
+
+                return iconClass;
+            },            
             onImportGamesClick(userGameAccount) {
                 this.importGames(userGameAccount);
             },
             importGames(userGameAccount) {
                 var that = this;
-                userGameAccount.isImportRunning = true;
+                that.importingUserGameAccountIDs.push(userGameAccount.id);
 
                 return axios.post('/User/ImportGamesFromUserGameAccount', null,{ params: { userGameAccountID: userGameAccount.id } })
                     .then((res) => {
@@ -108,7 +124,7 @@
                                 }); 
                             }                           
                         }
-                        userGameAccount.isImportRunning = false;
+                        that.importingUserGameAccountIDs.splice(that.importingUserGameAccountIDs.indexOf(userGameAccount.id), 1);
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },            

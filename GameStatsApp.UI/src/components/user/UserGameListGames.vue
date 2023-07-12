@@ -2,10 +2,13 @@
     <div class="container games-container">
         <div class="row align-items-center mb-3">
             <div v-if="usergamelists.find(i => i.defaultGameListID == 1)?.id == usergamelistid" class="col-2 me-auto">
-                <button type="button" class="btn btn-secondary" @click="onUpdateGamesClick">
+                <!-- <button type="button" class="btn btn-secondary" @click="onUpdateGamesClick">
                     <font-awesome-icon icon="fa-solid fa-cloud-arrow-down" size="xl"/>
-                </button>          
-            </div>            
+                </button>           -->
+                <a href="/Home/ImportGames" class="btn btn-secondary" tabindex="-1" role="button">
+                    <font-awesome-icon icon="fa-solid fa-cloud-arrow-down" size="xl"/>
+                </a>
+            </div>           
             <div class="col-auto ms-auto d-flex">
                 <button type="button" class="btn btn-secondary me-2" @click="onOrderByClick">
                     <font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-caret-up" size="xl"/>

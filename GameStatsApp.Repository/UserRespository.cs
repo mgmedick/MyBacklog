@@ -142,15 +142,7 @@ namespace GameStatsApp.Repository
             {
                 db.Save<UserGameListGame>(userGameListGame);
             }
-        }     
-
-        public void DeleteUserGameListGame(int userGameListID, int gameID)
-        {
-            using (IDatabase db = DBFactory.GetDatabase())
-            {
-                db.DeleteWhere<UserGameListGame>("UserGameListID = @0 AND GameID = @1", userGameListID, gameID);
-            }
-        }            
+        }
 
         public void SaveUserGameListGames(IEnumerable<UserGameListGame> userGameListGames)
         {
@@ -166,7 +158,15 @@ namespace GameStatsApp.Repository
                     tran.Complete();
                 }
             }
-        }                            
+        }              
+
+        public void DeleteUserGameListGame(int userGameListID, int gameID)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                db.DeleteWhere<UserGameListGame>("UserGameListID = @0 AND GameID = @1", userGameListID, gameID);
+            }
+        }                                       
 
         public IEnumerable<SearchResult> SearchUsers(string searchText)
         {

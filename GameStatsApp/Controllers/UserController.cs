@@ -79,14 +79,14 @@ namespace GameStatsApp.Controllers
                 }
                 else
                 {
-                    await _userService.ImportGamesFromUserGameAccount(result.Item1);
+                    await _userService.ImportGamesFromUserGameAccount(userID, result.Item1);
                 }
 
                 success = true;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "ImportGamesFromAllUserGameAccounts");
+                _logger.Error(ex, "ImportGamesFromUserGameAccount");
                 success = false;
                 errorMessages = new List<string>() { "Error importing games" };
             }

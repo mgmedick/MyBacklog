@@ -92,9 +92,9 @@ namespace GameStatsApp.Service
             return tokenResponse;
         }
 
-        public async Task<TokenResponse> ReAuthenticate(string refreshToken)
+        public async Task<TokenResponse> ReAuthenticate(string refreshToken, string redirectUri)
         {
-            var accessResponse = await RefreshAccessToken(refreshToken);
+            var accessResponse = await RefreshAccessToken(refreshToken, redirectUri);
 
             RpsTicket = (string)accessResponse.GetValue("access_token");
             RefreshToken = (string)accessResponse.GetValue("refresh_token");
@@ -252,8 +252,13 @@ namespace GameStatsApp.Service
         public async Task<List<string>> GetUserGameNames(string userHash, string xstsToken, ulong userXuid)
         {
             var results = new List<string>();
-            var titleHistory = await GetUserTitleHistory(userHash, xstsToken, userXuid);
-            
+            var items = await GetUserTitleHistory(userHash, xstsToken, userXuid);
+            foreach (JObject item in items) // <-- Note that here we used JObject instead of usual JProperty
+            {
+                var name = (string)item.GetValue("name");
+                results.Add(name);
+            }
+
             return results;
         }
 
