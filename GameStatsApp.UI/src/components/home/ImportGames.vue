@@ -27,17 +27,17 @@
                     <input type="radio" class="btn-check" name="options-outlined" id="all-outlined" autocomplete="off" value="1" v-model="isImportAll">
                     <label class="btn btn-outline-primary" for="all-outlined">All</label>
                 </div>
-                <button v-for="(userGameAccount, userGameAccountIndex) in importgamesvm.userGameAccounts" type="button" class="btn btn-outline-dark d-flex justify-content-center align-items-center" @click="onImportGamesClick(userGameAccount)" :disabled="importingUserGameAccountID">
+                <button v-for="(userGameAccount, userGameAccountIndex) in importgamesvm.userGameAccounts" type="button" class="btn btn-outline-dark d-flex justify-content-center align-items-center" @click="onImportGamesClick(userGameAccount)" :disabled="selectedUserGameAccountID">
                     <font-awesome-icon :icon="getIconClass(userGameAccount.gameAccountTypeID)" :class="getIconColorClass(userGameAccount.gameAccountTypeID)" size="xl"/>
                     <div class="mx-auto">
                         <div class="align-self-start">
-                            <span class="mx-auto">{{ (importingUserGameAccountID == userGameAccount.id ? 'Importing ' : 'Import ') + userGameAccount.gameAccountTypeName + ' games' }}</span>
+                            <span class="mx-auto">{{ (selectedUserGameAccountID == userGameAccount.id ? 'Importing ' : 'Import ') + userGameAccount.gameAccountTypeName + ' games' }}</span>
                         </div>
                         <div class="align-self-end text-xs">
                             <span>{{ 'Last imported ' + userGameAccount.relativeImportLastRunDateString }}</span>
                         </div>
                     </div>
-                    <font-awesome-icon v-if="importingUserGameAccountID == userGameAccount.id" icon="fa-solid fa-spinner" spin size="xl"/>
+                    <font-awesome-icon v-if="selectedUserGameAccountID == userGameAccount.id" icon="fa-solid fa-spinner" spin size="xl"/>
                 </button>
             </div>
             <div class="row g-2 justify-content-center">
@@ -57,7 +57,7 @@
         },
         data() {
             return {
-                importingUserGameAccountID: null,   
+                selectedUserGameAccountID: null,   
                 isImportAll: 0,           
                 successToast: {},
                 successMessage: '',
@@ -77,7 +77,7 @@
             if (that.importgamesvm.authSuccess != null) {
                 if (that.importgamesvm.authSuccess) {
                     var userGameAccount = that.importgamesvm.userGameAccounts.find(i => i.gameAccountTypeID == that.importgamesvm.authGameAccountTypeID);
-                    that.importGames(userGameAccount);
+                    that.ImportGames(userGameAccount);
                 } else {            
                     that.errorMessages = ["Error authorizing account"];
                     if (that.errorMessages.length > 0) {
@@ -120,13 +120,13 @@
                 return iconClass;
             },            
             onImportGamesClick(userGameAccount) {
-                this.importGames(userGameAccount);
+                this.ImportGames(userGameAccount);
             },
-            importGames(userGameAccount) {
+            ImportGames(userGameAccount) {
                 var that = this;
-                that.importingUserAccountID = userGameAccount.id;
+                that.selectedUserGameAccountID = userGameAccount.id;
 
-                return axios.post('/Home/ImportGames', null,{ params: { userGameAccountID: userGameAccount.id } })
+                return axios.post('/Home/ImportGames', null,{ params: { userGameAccountID: userGameAccount.id, isImportAll: that.isImportAll == 1 } })
                     .then((res) => {
                         if (res.data.success) {
                             that.successMessage = "Successfully imported " + userGameAccount.gameAccountTypeName + " games"
@@ -141,7 +141,7 @@
                                 }); 
                             }                           
                         }
-                        that.importingUserAccountID = null;
+                        that.selectedUserGameAccountID = null;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },            

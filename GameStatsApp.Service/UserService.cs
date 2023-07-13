@@ -304,13 +304,14 @@ namespace GameStatsApp.Service
             return new Tuple<UserGameAccount, string>(userGameAccount, authUrl);
         }
 
-        public async Task ImportGamesFromUserGameAccount(int userID, UserGameAccount userGameAccount)
+        public async Task ImportGamesFromUserGameAccount(int userID, UserGameAccount userGameAccount, bool isImportAll)
         {
             var gameNames = new List<string>();
 
             if (userGameAccount.GameAccountTypeID == (int)GameAccountType.Xbox)
             {
-                gameNames = await _authService.GetUserGameNames(userGameAccount.AccountUserHash, userGameAccount.Token, Convert.ToUInt64(userGameAccount.AccountUserID));
+                var lastImportDate = isImportAll ? null : userGameAccount.ImportLastRunDate;
+                gameNames = await _authService.GetUserGameNames(userGameAccount.AccountUserHash, userGameAccount.Token, Convert.ToUInt64(userGameAccount.AccountUserID), lastImportDate);
             }
 
             var gameIDs = new List<int>();
@@ -333,24 +334,11 @@ namespace GameStatsApp.Service
                                            .ToList();
 
             _userRepo.SaveUserGameListGames(userGameListGames);
-            
+
             userGameAccount.ImportLastRunDate = DateTime.UtcNow;
             _userRepo.SaveUserGameAccount(userGameAccount);       
         }
-
-        public async Task ImportGamesFromAllUserGameAccounts(int userID)
-        {
-            var userGameAccounts = _userRepo.GetUserGameAccounts(i => i.UserID == userID).ToList();
-
-            foreach (var userGameAccount in userGameAccounts)
-            {
-                if (userGameAccount.GameAccountTypeID == (int)GameAccountType.Xbox)
-                {
-                    var gamesNames = await _authService.GetUserGameNames(userGameAccount.AccountUserHash, userGameAccount.Token, Convert.ToUInt64(userGameAccount.AccountUserID));
-                }
-            }
-        }
-
+        
         //jqvalidate
         public bool EmailExists(string email)
         {

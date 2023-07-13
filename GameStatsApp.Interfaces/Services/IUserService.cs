@@ -33,6 +33,6 @@ namespace GameStatsApp.Interfaces.Services
         void SaveUserGameAccount(int userID, int gameAccountTypeID, TokenResponse tokenResponse);
         IEnumerable<UserGameAccountViewModel> GetUserGameAccounts(int userID);   
         Task<Tuple<UserGameAccount, string>> GetRefreshedUserGameAccount(int userID, int userGameAccountID);
-        Task ImportGamesFromUserGameAccount(int userID, UserGameAccount userGameAccount);
+        Task ImportGamesFromUserGameAccount(int userID, UserGameAccount userGameAccount, bool isImportAll);
     }
 }

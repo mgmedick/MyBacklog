@@ -20,7 +20,7 @@ namespace GameStatsApp.Interfaces.Services
         Task<JObject> ExchangeRpsTicketForUserToken(string rpsTicket);
         Task<JObject> ExchangeTokenForXSTSToken(string userToken);
         Task<JObject> GetUserInventory(string userHash, string xstsToken, ulong userXuid);
-        Task<List<string>> GetUserGameNames(string userHash, string xstsToken, ulong userXuid);
+        Task<List<string>> GetUserGameNames(string userHash, string xstsToken, ulong userXuid, DateTime? importLastRunDate = null);
         Task<JArray> GetUserTitleHistory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null);
     }
 }

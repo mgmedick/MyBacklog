@@ -220,14 +220,24 @@ namespace GameStatsApp.Service
             return data;
         }
 
-        public async Task<List<string>> GetUserGameNames(string userHash, string xstsToken, ulong userXuid)
+        public async Task<List<string>> GetUserGameNames(string userHash, string xstsToken, ulong userXuid, DateTime? importLastRunDate)
         {
             var results = new List<string>();
             var items = await GetUserTitleHistory(userHash, xstsToken, userXuid);
+            var lastImportDate = 
+
             foreach (JObject item in items)
             {
                 var name = (string)item.GetValue("name");
-                results.Add(name);
+                var date = (DateTime)item.GetValue("lastUnlock");
+                if (importLastRunDate.HasValue && date >= importLastRunDate)
+                {
+                    results.Add(name);
+                }
+                else
+                {
+                    results.Add(name);
+                }
             }
 
             return results;

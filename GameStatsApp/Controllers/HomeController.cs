@@ -455,7 +455,7 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> ImportGames(int userGameAccountID)
+        public async Task<ActionResult> ImportGames(int userGameAccountID, bool isImportAll)
         {
             var success = false;
             List<string> errorMessages = null;
@@ -471,14 +471,14 @@ namespace GameStatsApp.Controllers
                 }
                 else
                 {
-                    await _userService.ImportGamesFromUserGameAccount(userID, result.Item1);
+                    await _userService.ImportGamesFromUserGameAccount(userID, result.Item1, isImportAll);
                 }
 
                 success = true;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "ImportGamesFromUserGameAccount");
+                _logger.Error(ex, "ImportGames");
                 success = false;
                 errorMessages = new List<string>() { "Error importing games" };
             }
