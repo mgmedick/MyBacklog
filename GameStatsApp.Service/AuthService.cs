@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace GameStatsApp.Service
 {
@@ -224,22 +225,10 @@ namespace GameStatsApp.Service
         {
             var results = new List<string>();
             var items = await GetUserTitleHistory(userHash, xstsToken, userXuid);
-            var lastImportDate = 
-
-            foreach (JObject item in items)
-            {
-                var name = (string)item.GetValue("name");
-                var date = (DateTime)item.GetValue("lastUnlock");
-                if (importLastRunDate.HasValue && date >= importLastRunDate)
-                {
-                    results.Add(name);
-                }
-                else
-                {
-                    results.Add(name);
-                }
-            }
-
+            results = items.Where(obj => ((string)obj["titleType"]) == "Game" && (!importLastRunDate.HasValue || ((DateTime)obj["lastUnlock"]) >= importLastRunDate))
+                            .OrderBy(obj => (DateTime)obj["lastUnlock"])
+                            .Select(obj => (string)obj["name"]).ToList();
+                            
             return results;
         }
 
