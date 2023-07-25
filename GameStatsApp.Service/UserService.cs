@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using System.Security.Claims;
+using Newtonsoft.Json;
 
 namespace GameStatsApp.Service
 {
@@ -168,7 +169,7 @@ namespace GameStatsApp.Service
 
         public void SaveUserGameAccount(int userID, int gameAccountTypeID, TokenResponse tokenResponse)
         {
-            var userGameAccount = _userRepo.GetUserGameAccounts(i => i.UserID == userID && i.GameAccountTypeID == gameAccountTypeID).FirstOrDefault();            
+            var userGameAccount = _userRepo.GetUserGameAccounts(i => i.UserID == userID && i.GameAccountTypeID == gameAccountTypeID).FirstOrDefault();
 
             if (userGameAccount == null)
             {
@@ -176,27 +177,37 @@ namespace GameStatsApp.Service
                 {
                     UserID = userID,
                     GameAccountTypeID = gameAccountTypeID,
-                    Token = tokenResponse.Token,
-                    RefreshToken = tokenResponse.RefreshToken,
                     AccountUserID = tokenResponse.AccountUserID,
-                    AccountUserHash = tokenResponse.AccountUserHash,
-                    IssuedDate = tokenResponse.IssuedDate,
-                    ExpireDate = tokenResponse.ExpireDate,
+                    AccountUserHash = tokenResponse.AccountUserHash,                   
                     CreatedDate = DateTime.UtcNow
                 };
             }
             else
             {
-                userGameAccount.Token = tokenResponse.Token;
-                userGameAccount.RefreshToken = tokenResponse.RefreshToken;
                 userGameAccount.AccountUserID = tokenResponse.AccountUserID;
                 userGameAccount.AccountUserHash = tokenResponse.AccountUserHash;
-                userGameAccount.IssuedDate = tokenResponse.IssuedDate;
-                userGameAccount.ExpireDate = tokenResponse.ExpireDate;
                 userGameAccount.ModifiedDate = DateTime.UtcNow;
             }
 
-            _userRepo.SaveUserGameAccount(userGameAccount); 
+            var userGameAccountTokens = new List<UserGameAccountToken>() {
+                new UserGameAccountToken() {
+                        TokenTypeID = (int)TokenType.Access,
+                        Token = tokenResponse.Token,
+                        IssuedDate = tokenResponse.IssuedDate,
+                        ExpireDate = tokenResponse.ExpireDate
+                    } 
+                };
+
+            if (!string.IsNullOrWhiteSpace(tokenResponse.RefreshToken))
+            {
+                userGameAccountTokens.Add(new UserGameAccountToken() {
+                    TokenTypeID = (int)TokenType.Refresh,
+                    Token = tokenResponse.RefreshToken
+                });
+            }
+            
+            _userRepo.SaveUserGameAccount(userGameAccount);
+            _userRepo.SaveUserGameAccountTokens(userGameAccount.ID, userGameAccountTokens);
         }
 
         public IEnumerable<UserGameList> GetUserGameLists (int userID)
@@ -270,30 +281,30 @@ namespace GameStatsApp.Service
 
         public IEnumerable<UserGameAccountViewModel> GetUserGameAccounts(int userID)
         {
-            var userGameAccountVMs = _userRepo.GetUserGameAccounts(i => i.UserID == userID).Select(i => new UserGameAccountViewModel(i)).ToList();
+            var userGameAccountVMs = _userRepo.GetUserGameAccountViews(i => i.UserID == userID).Select(i => new UserGameAccountViewModel(i)).ToList();
 
             return userGameAccountVMs;
         }
 
-        public async Task<Tuple<UserGameAccount, string>> GetRefreshedUserGameAccount(int userID, int userGameAccountID)
+        public async Task<Tuple<UserGameAccountView, string>> GetRefreshedUserGameAccount(int userID, int userGameAccountID)
         {
             var authUrl = string.Empty;
             var redirectUrl = string.Empty;
-            var userGameAccount = _userRepo.GetUserGameAccounts(i => i.ID == userGameAccountID).FirstOrDefault();
+            var userGameAccountVW = _userRepo.GetUserGameAccountViews(i => i.ID == userGameAccountID).FirstOrDefault();
             
-            switch (userGameAccount.GameAccountTypeID)
+            switch (userGameAccountVW.GameAccountTypeID)
             {
                 case (int)GameAccountType.Xbox:
                     redirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
                     break;
             }
             
-            if (userGameAccount.ExpireDate < DateTime.UtcNow)
+            if (userGameAccountVW.ExpireDate < DateTime.UtcNow)
             {
-                if (!string.IsNullOrWhiteSpace(userGameAccount.RefreshToken))
+                if (!string.IsNullOrWhiteSpace(userGameAccountVW.RefreshToken))
                 {
-                    var tokenResponse = await _authService.ReAuthenticate(userGameAccount.RefreshToken);
-                    SaveUserGameAccount(userID, userGameAccount.GameAccountTypeID, tokenResponse);
+                    var tokenResponse = await _authService.ReAuthenticate(userGameAccountVW.RefreshToken);
+                    SaveUserGameAccount(userID, userGameAccountVW.GameAccountTypeID, tokenResponse);
                 }
                 else
                 {
@@ -301,17 +312,17 @@ namespace GameStatsApp.Service
                 }          
             }
 
-            return new Tuple<UserGameAccount, string>(userGameAccount, authUrl);
+            return new Tuple<UserGameAccountView, string>(userGameAccountVW, authUrl);
         }
 
-        public async Task ImportGamesFromUserGameAccount(int userID, UserGameAccount userGameAccount, bool isImportAll)
+        public async Task ImportGamesFromUserGameAccount(int userID, UserGameAccountView userGameAccountVW, bool isImportAll)
         {
             var gameNames = new List<string>();
 
-            if (userGameAccount.GameAccountTypeID == (int)GameAccountType.Xbox)
+            if (userGameAccountVW.GameAccountTypeID == (int)GameAccountType.Xbox)
             {
-                var lastImportDate = isImportAll ? null : userGameAccount.ImportLastRunDate;
-                gameNames = await _authService.GetUserGameNames(userGameAccount.AccountUserHash, userGameAccount.Token, Convert.ToUInt64(userGameAccount.AccountUserID), lastImportDate);
+                var lastImportDate = isImportAll ? null : userGameAccountVW.ImportLastRunDate;
+                gameNames = await _authService.GetUserGameNames(userGameAccountVW.AccountUserHash, userGameAccountVW.Token, Convert.ToUInt64(userGameAccountVW.AccountUserID), lastImportDate);
             }
 
             var gameIDs = new List<int>();
@@ -333,10 +344,13 @@ namespace GameStatsApp.Service
                                            .Select(i => new UserGameListGame() { UserGameListID = allUserGameListID, GameID = i })
                                            .ToList();
 
-            _userRepo.SaveUserGameListGames(userGameListGames);
+            if (userGameListGames.Any())
+            {
+                _userRepo.SaveUserGameListGames(userGameListGames);
+            }
 
-            userGameAccount.ImportLastRunDate = DateTime.UtcNow;
-            _userRepo.SaveUserGameAccount(userGameAccount);       
+            userGameAccountVW.ImportLastRunDate = DateTime.UtcNow;
+            _userRepo.SaveUserGameAccount(userGameAccountVW.ConvertToUserGameAccount());       
         }
         
         //jqvalidate

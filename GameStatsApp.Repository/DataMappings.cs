@@ -13,6 +13,8 @@ namespace GameStatsApp.Repository
             For<User>().PrimaryKey("ID").TableName("tbl_User");
             For<UserSetting>().PrimaryKey("UserID", false).TableName("tbl_User_Setting");
             For<UserGameAccount>().PrimaryKey("ID", false).TableName("tbl_UserGameAccount");
+            For<UserGameAccountToken>().PrimaryKey("ID", false).TableName("tbl_UserGameAccount_Token");
+            For<UserGameAccountDetail>().PrimaryKey("ID", false).TableName("tbl_UserGameAccount_Detail");          
             For<UserGameList>().PrimaryKey("ID", false).TableName("tbl_UserGameList");
             For<UserGameListView>().PrimaryKey("ID", false).TableName("vw_UserGameList");
             For<UserGameListGame>().PrimaryKey("ID", false).TableName("tbl_UserGameList_Game");

@@ -9,12 +9,8 @@ namespace GameStatsApp.Model.Data
         public int ID { get; set; }
         public int UserID { get; set; }
         public int GameAccountTypeID { get; set; }
-        public string Token { get; set; }
-        public string RefreshToken { get; set; }
         public string AccountUserID { get; set; }
         public string AccountUserHash { get; set; }
-        public DateTime? IssuedDate { get; set; }
-        public DateTime? ExpireDate { get; set; }
         public DateTime? ImportLastRunDate { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }        

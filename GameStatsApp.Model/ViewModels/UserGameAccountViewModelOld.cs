@@ -2,23 +2,25 @@
 using System.Collections.Generic;
 using System.Linq;
 using GameStatsApp.Common.Extensions;
-using System.Collections.Specialized;
-using Newtonsoft.Json;
 
 namespace GameStatsApp.Model.Data
 {
-    public class UserGameAccountViewModel
+    public class UserGameAccountViewModelOld
     {
-        public UserGameAccountViewModel()
+        public UserGameAccountViewModelOld()
         {
         }
 
-        public UserGameAccountViewModel(UserGameAccountView userGameAccount)
+        public UserGameAccountViewModelOld(UserGameAccount userGameAccount)
         {
             ID = userGameAccount.ID;
             UserID = userGameAccount.UserID;
             GameAccountTypeID = userGameAccount.GameAccountTypeID;
-            GameAccountTypeName = userGameAccount.GameAccountTypeName;
+            GameAccountTypeName = ((GameAccountType)GameAccountTypeID).ToString();
+            Token = userGameAccount.Token;
+            RefreshToken = userGameAccount.RefreshToken;
+            AccountUserHash = userGameAccount.AccountUserHash;
+            ExpireDate = userGameAccount.ImportLastRunDate;
             ImportLastRunDate = userGameAccount.ImportLastRunDate;
         }
         
@@ -26,6 +28,11 @@ namespace GameStatsApp.Model.Data
         public int UserID { get; set; }
         public int GameAccountTypeID { get; set; }
         public string GameAccountTypeName { get; set; }
+        public string Token { get; set; }
+        public string RefreshToken { get; set; }
+        public string AccountUserID { get; set; }
+        public string AccountUserHash { get; set; }
+        public DateTime? ExpireDate { get; set; }
         public DateTime? ImportLastRunDate { get; set; }
         
         public string RelativeImportLastRunDateString

@@ -14,7 +14,13 @@ namespace GameStatsApp.Model
     {
         Steam = 1,
         Xbox = 2
-    } 
+    }
+
+    public enum TokenType
+    {
+        Access = 1,
+        Refresh = 2
+    }      
 
     public enum DefaultGameList
     {

@@ -65,6 +65,14 @@ namespace GameStatsApp.Repository
             }
         }
         
+        public IEnumerable<UserGameAccountView> GetUserGameAccountViews(Expression<Func<UserGameAccountView, bool>>  predicate)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                return db.Query<UserGameAccountView>().Where(predicate).ToList();
+            }
+        }
+
         public void SaveUserGameAccount(UserGameAccount userGameAccount)
         {
             using (IDatabase db = DBFactory.GetDatabase())
@@ -72,6 +80,42 @@ namespace GameStatsApp.Repository
                 using (var tran = db.GetTransaction())
                 {
                     db.Save<UserGameAccount>(userGameAccount);
+                    tran.Complete();
+                }
+            }            
+        }
+
+        public void SaveUserGameAccountTokens(int userGameAccountID, IEnumerable<UserGameAccountToken> userGameAccountTokens)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                using (var tran = db.GetTransaction())
+                {
+                    db.DeleteWhere<UserGameAccountToken>("UserGameAccountID = @0", userGameAccountID);
+                    foreach(var userGameAccountToken in userGameAccountTokens)
+                    {
+                        userGameAccountToken.UserGameAccountID = userGameAccountID;
+                        db.Save<UserGameAccountToken>(userGameAccountToken);
+                    }
+
+                    tran.Complete();
+                }
+            }
+        }
+
+        public void SaveUserGameAccount(UserGameAccount userGameAccount, IEnumerable<UserGameAccountToken> userGameAccountTokens)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                using (var tran = db.GetTransaction())
+                {
+                    db.Save<UserGameAccount>(userGameAccount);
+
+                    foreach(var userGameAccountToken in userGameAccountTokens)
+                    {
+                        userGameAccountToken.UserGameAccountID = userGameAccount.ID;
+                        db.Save<UserGameAccountToken>(userGameAccountToken);
+                    }
 
                     tran.Complete();
                 }
