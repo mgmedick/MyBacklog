@@ -35,9 +35,18 @@ namespace GameStatsApp.Controllers
             _logger = logger;
         }
 
-        public ActionResult Index(bool? authSuccess)
+        public ActionResult Index()
         {
-            return View();
+            var indexVM = new IndexViewModel();
+            indexVM.IsAuth = User.Identity.IsAuthenticated;
+
+            if (indexVM.IsAuth)
+            {
+                indexVM.UserID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                indexVM.UserGameLists = _userService.GetUserGameLists(indexVM.UserID).ToList();
+            }
+
+            return View(indexVM);
         }
 
         public ViewResult Error()
@@ -396,8 +405,9 @@ namespace GameStatsApp.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(identity));
         }
-
+        
         [HttpGet]
+        [Authorize]
         public ViewResult Welcome(bool? authSuccess = null)
         {
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -442,6 +452,7 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpGet]
+        [Authorize] 
         public ViewResult ImportGames(bool? authSuccess = null, int? authGameAccountTypeID = null)
         {
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));

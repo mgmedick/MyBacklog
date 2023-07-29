@@ -34,17 +34,17 @@
                                     <a href="/User/UserSettings" class="dropdown-item"><font-awesome-icon icon="fa-solid fa-gear" /><span class="ps-2">Settings</span></a>
                                 </li>
                                 <li>
-                                    <a href="/Home/Logout" class="dropdown-item"><font-awesome-icon icon="fa-solid fa-right-from-bracket" /><span class="ps-2">Log out</span></a>
+                                    <a href="/Logout" class="dropdown-item"><font-awesome-icon icon="fa-solid fa-right-from-bracket" /><span class="ps-2">Log out</span></a>
                                 </li>
                             </ul>
                         </div>
                     </div>
                     <ul v-else class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link" href="/Home/Login">Log In</a>
+                            <a class="nav-link" href="/Login">Log In</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/Home/SignUp">Sign Up</a>
+                            <a class="nav-link" href="/SignUp">Sign Up</a>
                         </li>                  
                     </ul>
                 </div>

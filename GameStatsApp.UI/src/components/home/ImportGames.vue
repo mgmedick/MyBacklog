@@ -33,7 +33,7 @@
                         <div class="align-self-start">
                             <span class="mx-auto">{{ (selectedUserGameAccountID == userGameAccount.id ? 'Importing ' : 'Import ') + userGameAccount.gameAccountTypeName + ' games' }}</span>
                         </div>
-                        <div class="align-self-end text-xs">
+                        <div v-if="userGameAccount.relativeImportLastRunDateString" class="align-self-end text-xs">
                             <span>{{ 'Last imported ' + userGameAccount.relativeImportLastRunDateString }}</span>
                         </div>
                     </div>

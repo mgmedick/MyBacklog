@@ -231,7 +231,7 @@ namespace GameStatsApp.Service
                             
             return results;
         }
-
+        
         public async Task<JArray> GetUserTitleHistory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null)
         {
             if (results == null)
@@ -276,9 +276,12 @@ namespace GameStatsApp.Service
             return results;
         }   
 
-        public async Task<JObject> GetUserInventory(string userHash, string xstsToken, ulong userXuid)
+        public async Task<JArray> GetUserInventory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null)
         {
-            JObject data = null;
+            if (results == null)
+            {
+                results = new JArray();
+            }
 
             using (HttpClient client = new HttpClient())
             {
@@ -289,24 +292,39 @@ namespace GameStatsApp.Service
                 client.DefaultRequestHeaders.Add("X-Xbl-Client-Type", "Companion");
                 client.DefaultRequestHeaders.Add("X-Xbl-Client-Version", "2.0");                
                 client.DefaultRequestHeaders.Add("X-Xbl-Contract-Version", "3");
-                client.DefaultRequestHeaders.Add("X-Xbl-Device-Type", "Xbox360");
+                client.DefaultRequestHeaders.Add("X-Xbl-Device-Type", "iPhone");
                 client.DefaultRequestHeaders.Add("X-Xbl-IsAutomated-Client", "true");
 
-                var request = new HttpRequestMessage(HttpMethod.Get, "https://inventory.xboxlive.com/users/me/inventory");
-
-                // var parameters = new Dictionary<string, object> {
-                //     {"RelyingParty", "http://licensing.xboxlive.com"}
-                // };
-                // request.Content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8, "application/json");
+                var requestUrl = "https://inventory.xboxlive.com/users/me/inventory";
+                if (!string.IsNullOrWhiteSpace(continuationToken))
+                {
+                    var parameters = new Dictionary<string, string> {
+                        {"continuationToken", continuationToken }
+                    };
+                    requestUrl = QueryHelpers.AddQueryString(requestUrl, parameters);
+                }
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
 
                 using (var response = await client.SendAsync(request))
                 {
-                    var dataString = await response.Content.ReadAsStringAsync();
-                    data = JObject.Parse(dataString);
+                    // if (response.IsSuccessStatusCode)
+                    // {
+                        var blah = response.IsSuccessStatusCode;
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        var data = JObject.Parse(dataString);
+                        var items = (JArray)data.GetValue("titles");
+                        results.Merge(items);
+
+                        continuationToken = (string)data["pagingInfo"]["continuationToken"];
+                        if (!string.IsNullOrWhiteSpace(continuationToken))
+                        {
+                            await GetUserInventory(userHash, xstsToken, userXuid, results, continuationToken);
+                        }
+                    // }
                 }
             }
 
-            return data;
+            return results;
         }
         #endregion
     }

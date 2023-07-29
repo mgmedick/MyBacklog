@@ -46,7 +46,7 @@
                 <div>
                     <span>Reset Password link has expired, please try again.</span>
                     <div>
-                        <a href="/Home/ResetPassword/">Reset Password</a>
+                        <a href="/ResetPassword/">Reset Password</a>
                     </div>
                 </div>
             </div>

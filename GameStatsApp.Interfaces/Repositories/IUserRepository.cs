@@ -14,8 +14,6 @@ namespace GameStatsApp.Interfaces.Repositories
         IEnumerable<UserView> GetUserViews(Expression<Func<UserView, bool>> predicate);
         void SaveUserSetting(UserSetting userSetting);
         IEnumerable<UserGameAccount> GetUserGameAccounts(Expression<Func<UserGameAccount, bool>>  predicate);
-        IEnumerable<UserGameAccountToken> GetUserGameAccountTokens(Expression<Func<UserGameAccountToken, bool>>  predicate);
-        IEnumerable<UserGameAccountDetail> GetUserGameAccountDetails(Expression<Func<UserGameAccountDetail, bool>>  predicate);
         IEnumerable<UserGameAccountView> GetUserGameAccountViews(Expression<Func<UserGameAccountView, bool>>  predicate);
         void SaveUserGameAccount(UserGameAccount userGameAccount);
         void SaveUserGameAccountTokens(int userGameAccountID, IEnumerable<UserGameAccountToken> userGameAccountTokens);

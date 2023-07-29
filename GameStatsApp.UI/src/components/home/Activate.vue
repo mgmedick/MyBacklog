@@ -39,7 +39,10 @@
                     </div>
                 </div>
                 <div class="row g-2 justify-content-center mb-3">
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" class="btn btn-primary d-flex justify-content-center align-items-center" :disabled="loading">
+                        {{loading ? 'Submitting' : 'Submit'}}
+                        <font-awesome-icon v-if="loading" icon="fa-solid fa-spinner" spin size="xl"/>
+                    </button>
                 </div>      
             </form>
             <div v-else class="text-center">
@@ -49,7 +52,7 @@
                 <div>
                     <span>Activation link has expired, please try again.</span>
                     <div>
-                        <a href="/Home/Signup">Sign Up</a>/
+                        <a href="/Signup">Sign Up</a>
                     </div>
                 </div>
             </div>   
@@ -94,6 +97,7 @@
                     Password: '',
                     ConfirmPassword: ''
                 },
+                loading: false,
                 errorMessages: [],
                 errorToasts: []
             }
@@ -114,7 +118,7 @@
                 axios.post('/Home/Activate', formData)
                     .then((res) => {
                         if (res.data.success) {
-                            location.href = '/Home/Welcome';
+                            location.href = '/Welcome';
                         } else {
                             that.errorMessages = res.data.errorMessages;
                             that.$nextTick(function() {
@@ -123,6 +127,8 @@
                                 });
                             });
                         }
+                                                
+                        that.loading = false;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             }          

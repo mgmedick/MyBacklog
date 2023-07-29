@@ -111,7 +111,7 @@
                     .then((res) => {
                         if (res.data.success) {
                             if (res.data.isnewuser) {
-                                location.href = '/Home/Welcome';
+                                location.href = '/Welcome';
                             } else {
                                 location.href = '/';
                             }

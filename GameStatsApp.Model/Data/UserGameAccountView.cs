@@ -19,7 +19,7 @@ namespace GameStatsApp.Model.Data
         public DateTime? ImportLastRunDate { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }
-
+        
         public UserGameAccount ConvertToUserGameAccount()
         {
             return new UserGameAccount {

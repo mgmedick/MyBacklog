@@ -1,10 +1,10 @@
 ﻿<template>
     <div>
-        <div v-if="!isauth">          
+        <div v-if="!indexvm.isAuth">          
             <span>Not logged in page</span>
         </div>  
         <div v-else>
-            <user-gamelists :userid="userid"></user-gamelists>
+            <user-gamelists :indexvm="indexvm"></user-gamelists>
         </div>
     </div>    
 </template>
@@ -12,8 +12,7 @@
     export default {
         name: "Index",
         props: {
-            isauth: Boolean,
-            userid: String
+            indexvm: Object
         },
         data: function () {
             return {

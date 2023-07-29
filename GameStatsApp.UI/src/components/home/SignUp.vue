@@ -23,7 +23,6 @@
                 <div class="row g-2 justify-content-center mb-3">
                     <button id="btnSignUp" type="submit" class="btn btn-primary">Sign Up</button>
                     <div class="text-center"><small class="fw-bold">OR</small></div>
-                    <button type="submit" class="btn btn-primary">Continue with Facebook</button>
                     <div ref="googleLoginBtn"></div>
                 </div>        
                 <div>
@@ -138,7 +137,7 @@
                     .then((res) => {
                         if (res.data.success) {
                             if (res.data.isnewuser) {
-                                location.href = '/Home/Welcome';
+                                location.href = '/Welcome';
                             } else {
                                 location.href = '/';
                             }

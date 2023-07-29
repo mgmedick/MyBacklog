@@ -1,11 +1,12 @@
-﻿@using Microsoft.Extensions.Configuration
-@using System.Security.Claims
-@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostingEnv
-@inject IConfiguration Configuration
+﻿@using Microsoft.Extensions.Configuration;
+@using System.Text.Json;
+@inject IConfiguration Configuration;
+
+@model GameStatsApp.Model.ViewModels.IndexViewModel
 
 @{ ViewBag.Title = "Home"; }
 
-<index :isauth="@Json.Serialize(User.Identity.IsAuthenticated)" :userid="'@User.FindFirstValue(ClaimTypes.NameIdentifier)'"></index>
+<index :indexvm="@JsonSerializer.Serialize(Model, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase})"></index>
 
 
 

@@ -2,7 +2,7 @@
     <div class="container games-container">
         <div class="row align-items-center mb-3">
             <div v-if="usergamelists.find(i => i.defaultGameListID == 1)?.id == usergamelistid" class="col-2 me-auto">
-                <a href="/Home/ImportGames" class="btn btn-secondary" tabindex="-1" role="button">
+                <a href="/ImportGames" class="btn btn-secondary" tabindex="-1" role="button">
                     <font-awesome-icon icon="fa-solid fa-cloud-arrow-down" size="xl"/>
                 </a>
             </div>           
@@ -14,7 +14,10 @@
                 <input type="text" class="form-control" autocomplete="off" v-model="filterText" aria-describedby="spnUserNameErrors" placeholder="Filter games">         
             </div>
         </div>
-        <div class="row g-3">
+        <div v-if="loading" class="center" style="font-size: 25px;">
+            <font-awesome-icon icon="fa-solid fa-spinner" spin size="2xl"/>
+        </div>
+        <div v-else class="row g-3">
             <div class="col-lg-2 col-md-3 col-6">
                 <div class="bg-light d-flex" style="height: 100%; cursor: pointer;" @click="onSearchGamesClick">
                     <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px; padding-top: 50%; padding-bottom: 50%;"/>
@@ -107,6 +110,7 @@
                 games: [],
                 allgames: [],
                 game: {},
+                loading: false,
                 removeModal: {},
                 searchModal: {},
                 searchText: null,
@@ -153,7 +157,7 @@
                             that.allgames = that.allgames.reverse();
                         }
 
-                        that.loading = false;
+                        //that.loading = false;
                         return res;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });

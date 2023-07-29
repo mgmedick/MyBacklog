@@ -49,7 +49,7 @@ namespace GameStatsApp.Service
             var activateUser = new
             {
                 Email = email,
-                ActivateLink = string.Format("{0}/Home/Activate?{1}&token={2}", baseUrl, queryParams, token)
+                ActivateLink = string.Format("{0}/Activate?{1}&token={2}", baseUrl, queryParams, token)
             };
 
             await _emailService.SendEmailTemplate(email, "Create your gamestatsapp.com account", Template.ActivateEmail.ToString(), activateUser);
@@ -98,13 +98,18 @@ namespace GameStatsApp.Service
         
         public ChangePasswordViewModel GetChangePassword(string email, long expirationTime, string token)
         {
+            var changePassVM = new ChangePasswordViewModel();
+            
             var user = _userRepo.GetUsers(i => i.Email == email).FirstOrDefault();
-            var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
-            var strToHash = string.Format("email={0}&expirationTime={1}&password={2}", email, expirationTime, user.Password);
-            var hash = strToHash.GetHMACSHA256Hash(hashKey);
-            var expireDate = new DateTime(expirationTime);
-            var isValid = (hash == token) && expireDate > DateTime.UtcNow;
-            var changePassVM = new ChangePasswordViewModel() { IsValid = isValid };
+            if (user != null)
+            {
+                var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
+                var strToHash = string.Format("email={0}&expirationTime={1}&password={2}", email, expirationTime, user.Password);
+                var hash = strToHash.GetHMACSHA256Hash(hashKey);
+                var expireDate = new DateTime(expirationTime);
+                var isValid = (hash == token) && expireDate > DateTime.UtcNow;
+                changePassVM.IsValid = isValid;
+            }
 
             return changePassVM;
         }
