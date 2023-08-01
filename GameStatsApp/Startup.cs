@@ -91,6 +91,7 @@ namespace GameStatsApp
                 endpoints.MapControllerRoute("ChangePassword", "ChangePassword", new { controller = "Home", action = "ChangePassword" });
                 endpoints.MapControllerRoute("ImportGames", "ImportGames", new { controller = "Home", action = "ImportGames" });
                 endpoints.MapControllerRoute("Login", "Login", new { controller = "Home", action = "Login" });
+                endpoints.MapControllerRoute("Logout", "Logout", new { controller = "Home", action = "Logout" });
                 endpoints.MapControllerRoute("ResetPassword", "ResetPassword", new { controller = "Home", action = "ResetPassword" });
                 endpoints.MapControllerRoute("SignUp", "SignUp", new { controller = "Home", action = "SignUp" });
                 endpoints.MapControllerRoute("Welcome", "Welcome", new { controller = "Home", action = "Welcome" });

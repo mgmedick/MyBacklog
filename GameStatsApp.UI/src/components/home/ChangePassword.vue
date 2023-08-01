@@ -35,7 +35,7 @@
                         <span id="spnConfirmPasswordErrors" class="form-text text-danger" v-for="error of v$.form.ConfirmPassword.$errors">{{ error.$message }}</span>
                     </div>
                 </div>
-                <div class="row g-2 justify-content-center mb-3">
+                <div class="row g-2 justify-content-center mb-3 mx-auto">
                     <button type="submit" class="btn btn-primary">Change Password</button>
                 </div>            
             </form>

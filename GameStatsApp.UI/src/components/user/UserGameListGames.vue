@@ -157,7 +157,7 @@
                             that.allgames = that.allgames.reverse();
                         }
 
-                        //that.loading = false;
+                        that.loading = false;
                         return res;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });

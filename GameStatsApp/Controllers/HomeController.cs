@@ -57,7 +57,13 @@ namespace GameStatsApp.Controllers
         [HttpGet]
         public ActionResult Login()
         {
-            return View();
+            var loginVM = new LoginViewModel() {
+                GClientID = _config.GetSection("SiteSettings").GetSection("GClientID").Value,
+                FBAppID = _config.GetSection("SiteSettings").GetSection("FBAppID").Value,
+                FBApiVer = _config.GetSection("SiteSettings").GetSection("FBApiVer").Value
+            };
+
+            return View(loginVM);
         }
 
         [HttpPost]
@@ -212,6 +218,33 @@ namespace GameStatsApp.Controllers
 
             return Json(new { success = success, isnewuser = isNewUser, errorMessages = errorMessages });
         }
+
+        public async Task<ActionResult> FacebookAuthCallback()
+        {
+            var success = false;
+
+            try
+            {
+                var code = Request.Query["code"].ToString();
+                if (!string.IsNullOrWhiteSpace(code))
+                {
+                    var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
+                    var tokenResponse = await _authService.Authenticate(code, redirectUri);
+
+                    var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                    _userService.SaveUserGameAccount(userID, (int)GameAccountType.Xbox, tokenResponse);
+
+                    success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "FacebookAuthCallbackWelcome");
+                success = false;
+            }            
+
+            return RedirectToAction("Welcome", new { authSuccess = success });
+        }              
 
         [HttpGet]
         public ViewResult Activate(string email, long expirationTime, string token)

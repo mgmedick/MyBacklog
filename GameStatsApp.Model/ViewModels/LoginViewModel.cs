@@ -9,6 +9,10 @@ namespace GameStatsApp.Model.ViewModels
 {
     public class LoginViewModel
     {
+        public string GClientID { get; set; }
+        public string FBAppID { get; set; }
+        public string FBApiVer { get; set; }
+        
         [Required(AllowEmptyStrings = false, ErrorMessage = "Email required")]
         public string Email { get; set; }
 

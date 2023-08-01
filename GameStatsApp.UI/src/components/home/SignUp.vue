@@ -20,10 +20,10 @@
                         <small id="spnEmailErrors" class="form-text text-danger" v-for="error of v$.form.Email.$errors">{{ error.$message }}</small>
                     </div>
                 </div>
-                <div class="row g-2 justify-content-center mb-3">
+                <div class="row g-2 justify-content-center mb-3 mx-auto">
                     <button id="btnSignUp" type="submit" class="btn btn-primary">Sign Up</button>
                     <div class="text-center"><small class="fw-bold">OR</small></div>
-                    <div ref="googleLoginBtn"></div>
+                    <div ref="googleLoginBtn" class="p-0"></div>
                 </div>        
                 <div>
                     <div v-if="loading">
@@ -94,13 +94,16 @@
         computed: {
         },
         mounted: function () {
-            window.google.accounts.id.initialize({
-                client_id: this.gclientid,
-                callback: this.handleCredentialResponse,
-                auto_select: true
-            });
+            var that = this;
+            this.createGoogleLoginScript().then(function() {
+                window.google.accounts.id.initialize({
+                    client_id: that.gclientid,
+                    callback: that.handleCredentialResponse,
+                    auto_select: true
+                });
 
-            this.renderGoogleButton();
+                that.renderGoogleButton();
+            });
 
             window.addEventListener('resize', this.resizeButtons); 
         },     
@@ -161,8 +164,21 @@
                     that.renderGoogleButton();
                 }                 
             },
+            createGoogleLoginScript() {
+                return new Promise((resolve, reject) => {
+                    let scriptHTML = document.createElement('script');
+                    scriptHTML.type = 'text/javascript';
+                    scriptHTML.async = true;
+                    scriptHTML.defer = true;
+                    scriptHTML.src = 'https://accounts.google.com/gsi/client';
+                    document.getElementsByTagName('head')[0].appendChild(scriptHTML);
+                    scriptHTML.onload = function () {
+                        resolve();
+                    }
+                });
+            },             
             renderGoogleButton() {
-                var btnwidth = document.getElementById("btnSignUp").clientWidth;   
+                var btnwidth = document.getElementById("btnSignUp").offsetWidth;   
 
                 const options = {
                     type: 'standard',

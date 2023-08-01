@@ -30,11 +30,11 @@
                         <a :href="'/Home/ResetPassword?email=' + form.Email" class="link-dark small">Forgot your password?</a>
                     </div>
                 </div>   
-                <div class="row g-2 justify-content-center">
+                <div class="row g-2 justify-content-center mx-auto">
                     <button id="btnLogin" type="submit" class="btn btn-primary">Log In</button>
                     <div class="text-center"><small class="fw-bold">OR</small></div>
-                    <button type="submit" class="btn btn-outline-dark d-flex"><font-awesome-icon icon="fa-brands fa-facebook" size="xl" /><span class="mx-auto">Continue with Facebook</span></button>
-                    <div ref="googleLoginBtn"></div>
+                    <div class="fb-login-button" data-width="100%" data-size="large" data-button-type="continue_with" data-layout="rounded" data-auto-logout-link="false" data-use-continue-as="true" data-scope="public_profile" onlogin="checkFBLoginState();"></div>
+                    <div ref="googleLoginBtn" class="p-0"></div>
                 </div>
             </form>
         </div>
@@ -64,7 +64,7 @@
             return { v$: useVuelidate() }
         },
         props: {
-            gclientid: String
+            loginvm: Object
         },           
         data() {
             return {
@@ -78,13 +78,36 @@
             }
         },
         mounted: function () {
-            window.google.accounts.id.initialize({
-                client_id: this.gclientid,
-                callback: this.handleCredentialResponse,
-                auto_select: true
+            var that = this;
+            this.createGoogleLoginScript().then(function() {
+                window.google.accounts.id.initialize({
+                    client_id: that.loginvm.gClientID,
+                    callback: that.handleGoogleCredentialResponse,
+                    auto_select: true
+                });
+
+                that.renderGoogleButton();
             });
 
-            this.renderGoogleButton();
+            this.createFBLoginScript().then(function() {
+                window.checkFBLoginState = that.checkFBLoginState;
+
+                window.fbAsyncInit = function() {
+                    FB.init({
+                        appId: that.loginvm.fbAppID,
+                        status: true,
+                        cookie: true,
+                        xfbml: true,
+                        version: that.loginvm.fbApiVer
+                    });
+                    
+                    // FB.AppEvents.logPageView();   
+                    
+                    // FB.getLoginStatus(function(response) {
+                    //     handleFBCredentialResponse(response);
+                    // });
+                };
+            });            
 
             window.addEventListener('resize', this.resizeButtons); 
         },          
@@ -106,7 +129,7 @@
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },
-            async handleCredentialResponse(response) {
+            async handleGoogleCredentialResponse(response) {
                 axios.post('/Home/LoginOrSignUpByGoogle', null,{ params: { token: response.credential } })
                     .then((res) => {
                         if (res.data.success) {
@@ -126,15 +149,69 @@
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },
+            checkFBLoginState() {
+                var that = this;
+                FB.getLoginStatus(function(response) {
+                    that.handleFBCredentialResponse(response);
+                });
+            },            
+            handleFBCredentialResponse(response) {
+                if (response.status == 'connected') {
+                    axios.post('/Home/LoginOrSignUpByFacebook', null,{ params: { token: response.credential } })
+                        .then((res) => {
+                            if (res.data.success) {
+                                if (res.data.isnewuser) {
+                                    location.href = '/Welcome';
+                                } else {
+                                    location.href = '/';
+                                }
+                            } else {
+                                that.errorMessages = res.data.errorMessages;
+                                that.$nextTick(function() {
+                                    that.$refs.errortoasts?.forEach(el => {
+                                        new Toast(el).show();
+                                    });
+                                });                            
+                            }
+                        })
+                        .catch(err => { console.error(err); return Promise.reject(err); });
+                }
+            },            
             resizeButtons() {
                 var that = this;
                 if (that.width != document.documentElement.clientWidth) {  
                     that.width = document.documentElement.clientWidth;         
                     that.renderGoogleButton();
                 }                 
-            },            
+            },   
+            createGoogleLoginScript() {
+                return new Promise((resolve, reject) => {
+                    let scriptHTML = document.createElement('script');
+                    scriptHTML.type = 'text/javascript';
+                    scriptHTML.async = true;
+                    scriptHTML.defer = true;
+                    scriptHTML.src = 'https://accounts.google.com/gsi/client';
+                    document.getElementsByTagName('head')[0].appendChild(scriptHTML);
+                    scriptHTML.onload = function () {
+                        resolve();
+                    }
+                });
+            }, 
+            createFBLoginScript() {
+                return new Promise((resolve, reject) => {
+                    let scriptHTML = document.createElement('script');
+                    scriptHTML.type = 'text/javascript';
+                    scriptHTML.async = true;
+                    scriptHTML.defer = true;
+                    scriptHTML.src = 'https://connect.facebook.net/en_US/sdk.js';
+                    document.getElementsByTagName('head')[0].appendChild(scriptHTML);
+                    scriptHTML.onload = function () {
+                        resolve();
+                    }
+                });
+            },                                 
             renderGoogleButton() {
-                var btnwidth = document.getElementById("btnLogin").clientWidth;   
+                var btnwidth = document.getElementById("btnLogin").offsetWidth;   
 
                 const options = {
                     type: 'standard',
