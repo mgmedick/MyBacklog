@@ -21,7 +21,7 @@
                     </div>
                 </div>
                 <div class="row g-2 justify-content-center mb-3 mx-auto">
-                    <button id="btnSignUp" type="submit" class="btn btn-primary">Sign Up</button>
+                    <button id="btnSignUp" type="submit" class="btn btn-primary" :disabled="loading">Sign Up</button>
                     <div class="text-center"><small class="fw-bold">OR</small></div>
                     <div class="fb-login-button" data-width="100%" data-size="large" data-button-type="continue_with" data-layout="rounded" data-auto-logout-link="false" data-use-continue-as="true" data-scope="public_profile,email" onlogin="checkFBLoginState();"></div>
                     <div ref="googleLoginBtn" class="p-0"></div>
@@ -30,7 +30,7 @@
                     <div v-if="loading">
                         <div class="d-flex m-3">
                             <div class="mx-auto">
-                                <font-awesome-icon icon="fa-solid fa-spinner" spin size="lg" />
+                                <font-awesome-icon icon="fa-solid fa-spinner" spin size="2xl" />
                             </div>
                         </div>
                     </div>

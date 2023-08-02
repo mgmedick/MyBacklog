@@ -39,7 +39,7 @@
                 <div v-if="loading">
                     <div class="d-flex m-3">
                         <div class="mx-auto">
-                            <font-awesome-icon icon="fa-solid fa-spinner" spin size="lg" />
+                            <font-awesome-icon icon="fa-solid fa-spinner" spin size="2xl" />
                         </div>
                     </div>
                 </div>                
@@ -79,7 +79,7 @@
                     Email: '',
                     Password: ''
                 },
-                loading: false,
+                loading: true,
                 errorMessages: [],
                 errorToasts: [],
                 width: document.documentElement.clientWidth
