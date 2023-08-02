@@ -31,11 +31,18 @@
                     </div>
                 </div>   
                 <div class="row g-2 justify-content-center mx-auto">
-                    <button id="btnLogin" type="submit" class="btn btn-primary">Log In</button>
+                    <button id="btnLogin" type="submit" class="btn btn-primary" :disabled="loading">Log In</button>
                     <div class="text-center"><small class="fw-bold">OR</small></div>
                     <div class="fb-login-button" data-width="100%" data-size="large" data-button-type="continue_with" data-layout="rounded" data-auto-logout-link="false" data-use-continue-as="true" data-scope="public_profile,email" onlogin="checkFBLoginState();"></div>
                     <div ref="googleLoginBtn" class="p-0"></div>
                 </div>
+                <div v-if="loading">
+                    <div class="d-flex m-3">
+                        <div class="mx-auto">
+                            <font-awesome-icon icon="fa-solid fa-spinner" spin size="lg" />
+                        </div>
+                    </div>
+                </div>                
             </form>
         </div>
     </div>
@@ -72,6 +79,7 @@
                     Email: '',
                     Password: ''
                 },
+                loading: false,
                 errorMessages: [],
                 errorToasts: [],
                 width: document.documentElement.clientWidth
@@ -94,18 +102,12 @@
 
                 window.fbAsyncInit = function() {
                     FB.init({
-                        appId: that.loginvm.fbAppID,
+                        appId: that.loginvm.fbClientID,
                         status: true,
                         cookie: true,
                         xfbml: true,
                         version: that.loginvm.fbApiVer
-                    });
-                    
-                    // FB.AppEvents.logPageView();   
-                    
-                    // FB.getLoginStatus(function(response) {
-                    //     handleFBCredentialResponse(response);
-                    // });
+                    });                                        
                 };
             });            
 
@@ -131,19 +133,34 @@
             },
             checkFBLoginState() {
                 var that = this;
+                this.loading = true;
+
                 FB.getLoginStatus(function(response) {
-                    if (response.status == 'connected') { 
-                        that.handleFacebookCredentialResponse(response);
-                    }
+                    that.handleFacebookCredentialResponse(response);
                 });
             },
             async handleFacebookCredentialResponse(response) {
-                this.loginOrSignUpWithSocial(response.authResponse.accessToken, 2);
+                var that = this;
+
+                if (response && response.status == 'connected') { 
+                        this.loginOrSignUpWithSocial(response.authResponse.accessToken, 2);
+                } else {
+                    that.errorMessages = ['Failed to connect']
+                    that.$nextTick(function() {
+                        that.$refs.errortoasts?.forEach(el => {
+                            new Toast(el).show();
+                        });
+                    });   
+                    that.loading = false;                       
+                }
             },            
             async handleGoogleCredentialResponse(response) {
                 this.loginOrSignUpWithSocial(response.credential, 1);
             },
             async loginOrSignUpWithSocial(accessToken, socialAccountTypeID) {
+                var that = this;
+                this.loading = true;
+
                 axios.post('/Home/LoginOrSignUpWithSocial', null,{ params: { accessToken: accessToken, socialAccountTypeID: socialAccountTypeID } })
                     .then((res) => {
                         if (res.data.success) {
@@ -160,6 +177,7 @@
                                 });
                             });                            
                         }
+                        that.loading = false;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },        
@@ -170,19 +188,6 @@
                     that.renderGoogleButton();
                 }                 
             },   
-            createGoogleLoginScript() {
-                return new Promise((resolve, reject) => {
-                    let scriptHTML = document.createElement('script');
-                    scriptHTML.type = 'text/javascript';
-                    scriptHTML.async = true;
-                    scriptHTML.defer = true;
-                    scriptHTML.src = 'https://accounts.google.com/gsi/client';
-                    document.getElementsByTagName('head')[0].appendChild(scriptHTML);
-                    scriptHTML.onload = function () {
-                        resolve();
-                    }
-                });
-            }, 
             createFBLoginScript() {
                 return new Promise((resolve, reject) => {
                     let scriptHTML = document.createElement('script');
@@ -195,7 +200,20 @@
                         resolve();
                     }
                 });
-            },                                 
+            },              
+            createGoogleLoginScript() {
+                return new Promise((resolve, reject) => {
+                    let scriptHTML = document.createElement('script');
+                    scriptHTML.type = 'text/javascript';
+                    scriptHTML.async = true;
+                    scriptHTML.defer = true;
+                    scriptHTML.src = 'https://accounts.google.com/gsi/client';
+                    document.getElementsByTagName('head')[0].appendChild(scriptHTML);
+                    scriptHTML.onload = function () {
+                        resolve();
+                    }
+                });
+            },                    
             renderGoogleButton() {
                 var btnwidth = document.getElementById("btnLogin").offsetWidth;   
 

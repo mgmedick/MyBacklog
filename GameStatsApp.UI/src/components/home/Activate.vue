@@ -39,11 +39,15 @@
                     </div>
                 </div>
                 <div class="row g-2 justify-content-center mb-3 mx-auto">
-                    <button type="submit" class="btn btn-primary d-flex justify-content-center align-items-center" :disabled="loading">
-                        {{loading ? 'Submitting' : 'Submit'}}
-                        <font-awesome-icon v-if="loading" icon="fa-solid fa-spinner" spin size="xl"/>
-                    </button>
-                </div>      
+                    <button type="submit" class="btn btn-primary d-flex justify-content-center align-items-center" :disabled="loading">Submit</button>
+                </div>  
+                <div v-if="loading">
+                    <div class="d-flex m-3">
+                        <div class="mx-auto">
+                            <font-awesome-icon icon="fa-solid fa-spinner" spin size="lg" />
+                        </div>
+                    </div>
+                </div>                      
             </form>
             <div v-else class="text-center">
                 <div class="m-3">

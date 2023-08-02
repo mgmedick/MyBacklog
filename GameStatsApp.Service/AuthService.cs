@@ -37,7 +37,7 @@ namespace GameStatsApp.Service
         public string GetWindowsLiveAuthUrl(string redirectUri)
         {
             var baseUrl = "https://login.live.com/oauth20_authorize.srf";
-            var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientId").Value;
+            var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientID").Value;
             
             var parameters = new Dictionary<string,string>{
                 {"client_id", clientID},
@@ -95,7 +95,7 @@ namespace GameStatsApp.Service
         public async Task<JObject> ExchangeCodeForAccessToken(string code, string redirectUri)
         {
             JObject data = null;
-            var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientId").Value;
+            var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientID").Value;
             var clientSecret = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientSecret").Value;
 
             using (HttpClient client = new HttpClient())
@@ -129,7 +129,7 @@ namespace GameStatsApp.Service
         public async Task<JObject> RefreshAccessToken(string refreshToken)
         {
             JObject data = null;
-            var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientId").Value;
+            var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientID").Value;
             var clientSecret = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientSecret").Value;
 
             using (HttpClient client = new HttpClient())
@@ -329,6 +329,7 @@ namespace GameStatsApp.Service
         }
         #endregion
 
+        #region SocialAuth
         public async Task<SocialTokenResponse> ValidateSocialToken(string accessToken, int socialAccountTypeID)
         {
             SocialTokenResponse result = null;
@@ -380,77 +381,6 @@ namespace GameStatsApp.Service
 
             return data;
         }  
-
-        // public async Task<JObject> ValidateFacebookToken(string accessToken, string userID)
-        // {
-        //     var accessResponse = await GetFacebookClientAccessToken();
-        //     var clientAccessToken = (string)accessResponse.GetValue("access_token");
-        //     var response = await GetFacebookResponse(accessToken, clientAccessToken);
-
-        //     return response;
-        // }    
-
-        // public async Task<JObject> GetFacebookClientAccessToken()
-        // {
-        //     JObject data = null;
-        //     var clientID = _config.GetSection("SiteSettings").GetSection("FBAppID").Value;
-        //     var clientSecret = _config.GetSection("SiteSettings").GetSection("FBAppSecret").Value;
-
-        //     using (HttpClient client = new HttpClient())
-        //     {
-        //         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-        //         var parameters = new Dictionary<string,string>{
-        //             {"client_id", clientID},
-        //             {"grant_type", "client_credentials"},
-        //             {"client_secret", clientSecret}
-        //         };
-
-        //         var request = new HttpRequestMessage(HttpMethod.Post, "https://graph.facebook.com/oauth/access_token") { Content = new FormUrlEncodedContent(parameters) };
-
-        //         using (var response = await client.SendAsync(request))
-        //         {
-        //             if (response.IsSuccessStatusCode)
-        //             {
-        //                 var dataString = await response.Content.ReadAsStringAsync();
-        //                 data = JObject.Parse(dataString);
-        //             }
-        //         }
-        //     }
-
-        //     return data;
-        // }      
-
-        // public async Task<JObject> GetFacebookResponse(string accessToken, string clientAccessToken)
-        // {
-        //     JObject data = null;
-        //     var clientID = _config.GetSection("Auth").GetSection("Facebook").GetSection("ClientID").Value;
-        //     var clientSecret = _config.GetSection("Auth").GetSection("Facebook").GetSection("ClientSecret").Value;
-
-        //     using (HttpClient client = new HttpClient())
-        //     {
-        //         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-        //         var requestUrl = "https://graph.facebook.com/";
-        //         var parameters = new Dictionary<string, string> {
-        //             {"input_token", accessToken },
-        //             {"access_token", clientAccessToken }                  
-        //         };                
-        //         requestUrl = QueryHelpers.AddQueryString(requestUrl, parameters);
-        //         var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
-
-        //         using (var response = await client.SendAsync(request))
-        //         {
-        //             if (response.IsSuccessStatusCode)
-        //             {
-        //                 var dataString = await response.Content.ReadAsStringAsync();
-        //                 data = JObject.Parse(dataString);
-        //             }
-        //         }
-        //     }
-
-        //     return data;
-        // }                
-
+        #endregion
    }
 }

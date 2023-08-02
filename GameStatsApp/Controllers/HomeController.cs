@@ -58,9 +58,9 @@ namespace GameStatsApp.Controllers
         public ActionResult Login()
         {
             var loginVM = new LoginViewModel() {
-                GClientID = _config.GetSection("SiteSettings").GetSection("GClientID").Value,
-                FBAppID = _config.GetSection("SiteSettings").GetSection("FBAppID").Value,
-                FBApiVer = _config.GetSection("SiteSettings").GetSection("FBApiVer").Value
+                GClientID = _config.GetSection("Auth").GetSection("Google").GetSection("ClientID").Value,
+                FBClientID = _config.GetSection("Auth").GetSection("Facebook").GetSection("ClientID").Value,
+                FBApiVer = _config.GetSection("Auth").GetSection("Facebook").GetSection("ApiVersion").Value,
             };
 
             return View(loginVM);
@@ -120,7 +120,13 @@ namespace GameStatsApp.Controllers
         [HttpGet]
         public ActionResult SignUp()
         {
-            return View();
+            var signUpVM = new SignUpViewModel() {
+                GClientID = _config.GetSection("Auth").GetSection("Google").GetSection("ClientID").Value,
+                FBClientID = _config.GetSection("Auth").GetSection("Facebook").GetSection("ClientID").Value,
+                FBApiVer = _config.GetSection("Auth").GetSection("Facebook").GetSection("ApiVersion").Value,
+            };
+
+            return View(signUpVM);
         }
 
         [HttpPost]

@@ -1,10 +1,12 @@
-﻿@model GameStatsApp.Model.ViewModels.SignUpViewModel;
-@using Microsoft.Extensions.Configuration
-@inject IConfiguration Configuration
+﻿@using Microsoft.Extensions.Configuration;
+@using System.Text.Json;
+@inject IConfiguration Configuration;
+
+@model GameStatsApp.Model.ViewModels.SignUpViewModel
 
 @{ ViewBag.Title = "SignUp"; }
 
-<signup :gclientid="'@(Configuration.GetSection("SiteSettings").GetSection("GoogleClientID").Value)'"/>
+<signup :signupvm="@JsonSerializer.Serialize(Model, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase})"/>
 
 
         

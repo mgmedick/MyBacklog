@@ -23,6 +23,7 @@
                 <div class="row g-2 justify-content-center mb-3 mx-auto">
                     <button id="btnSignUp" type="submit" class="btn btn-primary">Sign Up</button>
                     <div class="text-center"><small class="fw-bold">OR</small></div>
+                    <div class="fb-login-button" data-width="100%" data-size="large" data-button-type="continue_with" data-layout="rounded" data-auto-logout-link="false" data-use-continue-as="true" data-scope="public_profile,email" onlogin="checkFBLoginState();"></div>
                     <div ref="googleLoginBtn" class="p-0"></div>
                 </div>        
                 <div>
@@ -78,7 +79,7 @@
             return { v$: useVuelidate() }
         },
         props: {
-            gclientid: String
+            signupvm: Object
         },        
         data() {
             return {
@@ -97,13 +98,27 @@
             var that = this;
             this.createGoogleLoginScript().then(function() {
                 window.google.accounts.id.initialize({
-                    client_id: that.gclientid,
-                    callback: that.handleCredentialResponse,
+                    client_id: that.signupvm.gClientID,
+                    callback: that.handleGoogleCredentialResponse,
                     auto_select: true
                 });
 
                 that.renderGoogleButton();
             });
+
+            this.createFBLoginScript().then(function() {
+                window.checkFBLoginState = that.checkFBLoginState;
+
+                window.fbAsyncInit = function() {
+                    FB.init({
+                        appId: that.signupvm.fbClientID,
+                        status: true,
+                        cookie: true,
+                        xfbml: true,
+                        version: that.signupvm.fbApiVer
+                    });                                                         
+                };
+            });           
 
             window.addEventListener('resize', this.resizeButtons); 
         },     
@@ -133,10 +148,37 @@
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },
-            async handleCredentialResponse(response) {
+            checkFBLoginState() {
+                var that = this;
                 this.loading = true;
 
-                axios.post('/Home/LoginOrSignUpByGoogle', null,{ params: { token: response.credential } })
+                FB.getLoginStatus(function(response) {
+                    that.handleFacebookCredentialResponse(response);
+                });
+            },
+            async handleFacebookCredentialResponse(response) {
+                var that = this;
+
+                if (response && response.status == 'connected') { 
+                        this.loginOrSignUpWithSocial(response.authResponse.accessToken, 2);
+                } else {
+                    that.errorMessages = ['Failed to connect']
+                    that.$nextTick(function() {
+                        that.$refs.errortoasts?.forEach(el => {
+                            new Toast(el).show();
+                        });
+                    });   
+                    that.loading = false;                       
+                }
+            },           
+            async handleGoogleCredentialResponse(response) {
+                this.loginOrSignUpWithSocial(response.credential, 1);
+            },            
+            async loginOrSignUpWithSocial(accessToken, socialAccountTypeID) {
+                var that = this;
+                this.loading = true;
+
+                axios.post('/Home/LoginOrSignUpWithSocial', null,{ params: { accessToken: accessToken, socialAccountTypeID: socialAccountTypeID } })
                     .then((res) => {
                         if (res.data.success) {
                             if (res.data.isnewuser) {
@@ -150,13 +192,12 @@
                                 that.$refs.errortoasts?.forEach(el => {
                                     new Toast(el).show();
                                 });
-                            });                             
+                            });                            
                         }
-
                         that.loading = false;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            },
+            },        
             resizeButtons() {
                 var that = this;
                 if (that.width != document.documentElement.clientWidth) {  
@@ -164,6 +205,19 @@
                     that.renderGoogleButton();
                 }                 
             },
+            createFBLoginScript() {
+                return new Promise((resolve, reject) => {
+                    let scriptHTML = document.createElement('script');
+                    scriptHTML.type = 'text/javascript';
+                    scriptHTML.async = true;
+                    scriptHTML.defer = true;
+                    scriptHTML.src = 'https://connect.facebook.net/en_US/sdk.js';
+                    document.getElementsByTagName('head')[0].appendChild(scriptHTML);
+                    scriptHTML.onload = function () {
+                        resolve();
+                    }
+                });
+            },                 
             createGoogleLoginScript() {
                 return new Promise((resolve, reject) => {
                     let scriptHTML = document.createElement('script');
@@ -176,7 +230,7 @@
                         resolve();
                     }
                 });
-            },             
+            },                   
             renderGoogleButton() {
                 var btnwidth = document.getElementById("btnSignUp").offsetWidth;   
 
