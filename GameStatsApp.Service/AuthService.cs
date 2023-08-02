@@ -17,6 +17,7 @@ using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
 using System.Linq;
+using Google.Apis.Auth;
 
 namespace GameStatsApp.Service
 {
@@ -327,5 +328,129 @@ namespace GameStatsApp.Service
             return results;
         }
         #endregion
-    }
+
+        public async Task<SocialTokenResponse> ValidateSocialToken(string accessToken, int socialAccountTypeID)
+        {
+            SocialTokenResponse result = null;
+            if (socialAccountTypeID == (int)SocialAccountType.Google)
+            {
+                var response = await GoogleJsonWebSignature.ValidateAsync(accessToken);
+                if (response != null)
+                {
+                    result = new SocialTokenResponse() { Email = response.Email };
+                }
+            }
+            else
+            {
+                var response = await GetFacebookResponse(accessToken);
+                if (response != null)
+                {
+                    result = new SocialTokenResponse() { Email = (string)response.GetValue("email") };
+                }
+            }
+
+            return result;
+        }
+        
+        public async Task<JObject> GetFacebookResponse(string accessToken)
+        {
+            JObject data = null;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var requestUrl = "https://graph.facebook.com/me";
+                var parameters = new Dictionary<string, string> {
+                    {"access_token", accessToken },
+                    {"fields", "name,email"}            
+                };                
+                requestUrl = QueryHelpers.AddQueryString(requestUrl, parameters);
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+
+                using (var response = await client.SendAsync(request))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        data = JObject.Parse(dataString);
+                    }
+                }
+            }
+
+            return data;
+        }  
+
+        // public async Task<JObject> ValidateFacebookToken(string accessToken, string userID)
+        // {
+        //     var accessResponse = await GetFacebookClientAccessToken();
+        //     var clientAccessToken = (string)accessResponse.GetValue("access_token");
+        //     var response = await GetFacebookResponse(accessToken, clientAccessToken);
+
+        //     return response;
+        // }    
+
+        // public async Task<JObject> GetFacebookClientAccessToken()
+        // {
+        //     JObject data = null;
+        //     var clientID = _config.GetSection("SiteSettings").GetSection("FBAppID").Value;
+        //     var clientSecret = _config.GetSection("SiteSettings").GetSection("FBAppSecret").Value;
+
+        //     using (HttpClient client = new HttpClient())
+        //     {
+        //         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+        //         var parameters = new Dictionary<string,string>{
+        //             {"client_id", clientID},
+        //             {"grant_type", "client_credentials"},
+        //             {"client_secret", clientSecret}
+        //         };
+
+        //         var request = new HttpRequestMessage(HttpMethod.Post, "https://graph.facebook.com/oauth/access_token") { Content = new FormUrlEncodedContent(parameters) };
+
+        //         using (var response = await client.SendAsync(request))
+        //         {
+        //             if (response.IsSuccessStatusCode)
+        //             {
+        //                 var dataString = await response.Content.ReadAsStringAsync();
+        //                 data = JObject.Parse(dataString);
+        //             }
+        //         }
+        //     }
+
+        //     return data;
+        // }      
+
+        // public async Task<JObject> GetFacebookResponse(string accessToken, string clientAccessToken)
+        // {
+        //     JObject data = null;
+        //     var clientID = _config.GetSection("Auth").GetSection("Facebook").GetSection("ClientID").Value;
+        //     var clientSecret = _config.GetSection("Auth").GetSection("Facebook").GetSection("ClientSecret").Value;
+
+        //     using (HttpClient client = new HttpClient())
+        //     {
+        //         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+        //         var requestUrl = "https://graph.facebook.com/";
+        //         var parameters = new Dictionary<string, string> {
+        //             {"input_token", accessToken },
+        //             {"access_token", clientAccessToken }                  
+        //         };                
+        //         requestUrl = QueryHelpers.AddQueryString(requestUrl, parameters);
+        //         var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+
+        //         using (var response = await client.SendAsync(request))
+        //         {
+        //             if (response.IsSuccessStatusCode)
+        //             {
+        //                 var dataString = await response.Content.ReadAsStringAsync();
+        //                 data = JObject.Parse(dataString);
+        //             }
+        //         }
+        //     }
+
+        //     return data;
+        // }                
+
+   }
 }

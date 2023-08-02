@@ -33,7 +33,7 @@
                 <div class="row g-2 justify-content-center mx-auto">
                     <button id="btnLogin" type="submit" class="btn btn-primary">Log In</button>
                     <div class="text-center"><small class="fw-bold">OR</small></div>
-                    <div class="fb-login-button" data-width="100%" data-size="large" data-button-type="continue_with" data-layout="rounded" data-auto-logout-link="false" data-use-continue-as="true" data-scope="public_profile" onlogin="checkFBLoginState();"></div>
+                    <div class="fb-login-button" data-width="100%" data-size="large" data-button-type="continue_with" data-layout="rounded" data-auto-logout-link="false" data-use-continue-as="true" data-scope="public_profile,email" onlogin="checkFBLoginState();"></div>
                     <div ref="googleLoginBtn" class="p-0"></div>
                 </div>
             </form>
@@ -129,8 +129,22 @@
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },
+            checkFBLoginState() {
+                var that = this;
+                FB.getLoginStatus(function(response) {
+                    if (response.status == 'connected') { 
+                        that.handleFacebookCredentialResponse(response);
+                    }
+                });
+            },
+            async handleFacebookCredentialResponse(response) {
+                this.loginOrSignUpWithSocial(response.authResponse.accessToken, 2);
+            },            
             async handleGoogleCredentialResponse(response) {
-                axios.post('/Home/LoginOrSignUpByGoogle', null,{ params: { token: response.credential } })
+                this.loginOrSignUpWithSocial(response.credential, 1);
+            },
+            async loginOrSignUpWithSocial(accessToken, socialAccountTypeID) {
+                axios.post('/Home/LoginOrSignUpWithSocial', null,{ params: { accessToken: accessToken, socialAccountTypeID: socialAccountTypeID } })
                     .then((res) => {
                         if (res.data.success) {
                             if (res.data.isnewuser) {
@@ -148,35 +162,7 @@
                         }
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            },
-            checkFBLoginState() {
-                var that = this;
-                FB.getLoginStatus(function(response) {
-                    that.handleFBCredentialResponse(response);
-                });
-            },            
-            handleFBCredentialResponse(response) {
-                if (response.status == 'connected') {
-                    axios.post('/Home/LoginOrSignUpByFacebook', null,{ params: { token: response.credential } })
-                        .then((res) => {
-                            if (res.data.success) {
-                                if (res.data.isnewuser) {
-                                    location.href = '/Welcome';
-                                } else {
-                                    location.href = '/';
-                                }
-                            } else {
-                                that.errorMessages = res.data.errorMessages;
-                                that.$nextTick(function() {
-                                    that.$refs.errortoasts?.forEach(el => {
-                                        new Toast(el).show();
-                                    });
-                                });                            
-                            }
-                        })
-                        .catch(err => { console.error(err); return Promise.reject(err); });
-                }
-            },            
+            },        
             resizeButtons() {
                 var that = this;
                 if (that.width != document.documentElement.clientWidth) {  

@@ -157,8 +157,7 @@ namespace GameStatsApp.Controllers
             return Json(new { success = success, errorMessages = errorMessages });
         }
 
-        [HttpPost]
-        public async Task<JsonResult> LoginOrSignUpByGoogle(string token)
+        public async Task<JsonResult> LoginOrSignUpWithSocial(string accessToken, int socialAccountTypeID)
         {
             var success = false;
             var isNewUser = false;
@@ -166,17 +165,17 @@ namespace GameStatsApp.Controllers
  
             try
             {
-                var result = await GoogleJsonWebSignature.ValidateAsync(token);
+                var result = await _authService.ValidateSocialToken(accessToken, socialAccountTypeID);
 
                 if (result == null)
                 {
-                    ModelState.AddModelError("LoginOrSignUpByGoogle", "Invalid Token");
+                    ModelState.AddModelError("LoginOrSignUpWithSocial", "Invalid Token");
                 }
 
                 var userVW = _userService.GetUserViews(i => i.Email == result.Email && i.Active).FirstOrDefault();              
                 if (_userService.EmailExists(result.Email, false) && userVW == null)
                 {
-                    ModelState.AddModelError("LoginOrSignUpByGoogle", "Email not found");
+                    ModelState.AddModelError("LoginOrSignUpWithSocial", "Email not found");
                 }
 
                 if (ModelState.IsValid)           
@@ -218,33 +217,6 @@ namespace GameStatsApp.Controllers
 
             return Json(new { success = success, isnewuser = isNewUser, errorMessages = errorMessages });
         }
-
-        public async Task<ActionResult> FacebookAuthCallback()
-        {
-            var success = false;
-
-            try
-            {
-                var code = Request.Query["code"].ToString();
-                if (!string.IsNullOrWhiteSpace(code))
-                {
-                    var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
-                    var tokenResponse = await _authService.Authenticate(code, redirectUri);
-
-                    var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                    _userService.SaveUserGameAccount(userID, (int)GameAccountType.Xbox, tokenResponse);
-
-                    success = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "FacebookAuthCallbackWelcome");
-                success = false;
-            }            
-
-            return RedirectToAction("Welcome", new { authSuccess = success });
-        }              
 
         [HttpGet]
         public ViewResult Activate(string email, long expirationTime, string token)

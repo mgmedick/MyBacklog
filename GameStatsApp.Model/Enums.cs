@@ -16,6 +16,12 @@ namespace GameStatsApp.Model
         Xbox = 2
     }
 
+    public enum SocialAccountType
+    {
+        Google = 1,
+        Facebook = 2
+    }    
+
     public enum TokenType
     {
         Access = 1,

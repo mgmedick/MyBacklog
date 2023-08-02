@@ -21,5 +21,8 @@ namespace GameStatsApp.Interfaces.Services
         Task<JObject> ExchangeTokenForXSTSToken(string userToken);
         Task<List<string>> GetUserGameNames(string userHash, string xstsToken, ulong userXuid, DateTime? importLastRunDate = null);
         Task<JArray> GetUserTitleHistory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null);
+        Task<SocialTokenResponse> ValidateSocialToken(string accessToken, int socialAccountTypeID);
+        Task<string> ValidateFacebookToken(string accessToken);
+        Task<JObject> GetFacebookResponse(string accessToken);
     }
 }
