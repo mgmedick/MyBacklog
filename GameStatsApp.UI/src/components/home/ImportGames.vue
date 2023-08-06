@@ -27,17 +27,17 @@
                     <input type="radio" class="btn-check" name="options-outlined" id="all-outlined" autocomplete="off" value="1" v-model="isImportAll">
                     <label class="btn btn-outline-primary" for="all-outlined">All</label>
                 </div>
-                <button v-for="(userGameAccount, userGameAccountIndex) in importgamesvm.userGameAccounts" type="button" class="btn btn-outline-dark d-flex justify-content-center align-items-center" @click="onImportGamesClick(userGameAccount)" :disabled="selectedUserGameAccountID">
-                    <font-awesome-icon :icon="getIconClass(userGameAccount.gameAccountTypeID)" :class="getIconColorClass(userGameAccount.gameAccountTypeID)" size="xl"/>
+                <button v-for="(userAccount, userAccountIndex) in importgamesvm.userAccounts" type="button" class="btn btn-outline-dark d-flex justify-content-center align-items-center" @click="onImportGamesClick(userAccount)" :disabled="selectedUserAccountID">
+                    <font-awesome-icon :icon="getIconClass(userAccount.accountTypeID)" :class="getIconColorClass(userAccount.accountTypeID)" size="xl"/>
                     <div class="mx-auto">
                         <div class="align-self-start">
-                            <span class="mx-auto">{{ (selectedUserGameAccountID == userGameAccount.id ? 'Importing ' : 'Import ') + userGameAccount.gameAccountTypeName + ' games' }}</span>
+                            <span class="mx-auto">{{ (selectedUserAccountID == userAccount.id ? 'Importing ' : 'Import ') + userAccount.accountTypeName + ' games' }}</span>
                         </div>
-                        <div v-if="userGameAccount.relativeImportLastRunDateString" class="align-self-end text-xs">
-                            <span>{{ 'Last imported ' + userGameAccount.relativeImportLastRunDateString }}</span>
+                        <div v-if="userAccount.relativeImportLastRunDateString" class="align-self-end text-xs">
+                            <span>{{ 'Last imported ' + userAccount.relativeImportLastRunDateString }}</span>
                         </div>
                     </div>
-                    <font-awesome-icon v-if="selectedUserGameAccountID == userGameAccount.id" icon="fa-solid fa-spinner" spin size="xl"/>
+                    <font-awesome-icon v-if="selectedUserAccountID == userAccount.id" icon="fa-solid fa-spinner" spin size="xl"/>
                 </button>
             </div>
             <div class="row g-2 justify-content-center">
@@ -57,7 +57,7 @@
         },
         data() {
             return {
-                selectedUserGameAccountID: null,   
+                selectedUserAccountID: null,   
                 isImportAll: 0,           
                 successToast: {},
                 successMessage: '',
@@ -76,8 +76,8 @@
 
             if (that.importgamesvm.authSuccess != null) {
                 if (that.importgamesvm.authSuccess) {
-                    var userGameAccount = that.importgamesvm.userGameAccounts.find(i => i.gameAccountTypeID == that.importgamesvm.authGameAccountTypeID);
-                    that.ImportGames(userGameAccount);
+                    var userAccount = that.importgamesvm.userAccounts.find(i => i.accountTypeID == that.importgamesvm.authAccountTypeID);
+                    that.ImportGames(userAccount);
                 } else {            
                     that.errorMessages = ["Error authorizing account"];
                     if (that.errorMessages.length > 0) {
@@ -91,10 +91,10 @@
             }            
         },        
         methods: {
-            getIconClass: function (gameAccountTypeID) {
+            getIconClass: function (accountTypeID) {
                 var iconClass = '';
 
-                switch (gameAccountTypeID) {
+                switch (accountTypeID) {
                     case 1:
                         iconClass = 'fa-brands fa-steam';
                         break;
@@ -105,10 +105,10 @@
 
                 return iconClass;
             },
-            getIconColorClass: function (gameAccountTypeID) {
+            getIconColorClass: function (accountTypeID) {
                 var iconClass = '';
 
-                switch (gameAccountTypeID) {
+                switch (accountTypeID) {
                     case 1:
                         iconClass = 'text-color-blue';
                         break;
@@ -119,20 +119,20 @@
 
                 return iconClass;
             },            
-            onImportGamesClick(userGameAccount) {
-                this.ImportGames(userGameAccount);
+            onImportGamesClick(userAccount) {
+                this.ImportGames(userAccount);
             },
-            ImportGames(userGameAccount) {
+            ImportGames(userAccount) {
                 var that = this;
-                that.selectedUserGameAccountID = userGameAccount.id;
+                that.selectedUserAccountID = userAccount.id;
 
-                return axios.post('/Home/ImportGames', null,{ params: { userGameAccountID: userGameAccount.id, isImportAll: that.isImportAll == 1 } })
+                return axios.post('/Home/ImportGames', null,{ params: { userAccountID: userAccount.id, isImportAll: that.isImportAll == 1 } })
                     .then((res) => {
                         if (res.data.success) {
-                            that.successMessage = "Successfully imported " + userGameAccount.gameAccountTypeName + " games"
+                            that.successMessage = "Successfully imported " + userAccount.accountTypeName + " games"
                             that.successToast.show();
                         } else {
-                            that.errorMessages = ["Error importing " + userGameAccount.gameAccountTypeName + " games"];
+                            that.errorMessages = ["Error importing " + userAccount.accountTypeName + " games"];
                             if (that.errorMessages.length > 0) {
                                 that.$nextTick(function() {
                                     that.$refs.errortoasts?.forEach(el => {
@@ -141,7 +141,7 @@
                                 }); 
                             }                           
                         }
-                        that.selectedUserGameAccountID = null;
+                        that.selectedUserAccountID = null;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },            

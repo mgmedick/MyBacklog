@@ -39,15 +39,13 @@
                     </div>
                 </div>
                 <div class="row g-2 justify-content-center mb-3 mx-auto">
-                    <button type="submit" class="btn btn-primary d-flex justify-content-center align-items-center" :disabled="loading">Submit</button>
-                </div>  
-                <div v-if="loading">
-                    <div class="d-flex m-3">
-                        <div class="mx-auto">
-                            <font-awesome-icon icon="fa-solid fa-spinner" spin size="2xl" />
-                        </div>
+                    <button type="submit" class="btn btn-primary d-flex justify-content-center align-items-center">Submit</button>
+                </div> 
+                <div ref="loadingmodal" class="modal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered justify-content-center" style="color: #fff;">
+                        <font-awesome-icon icon="fa-solid fa-spinner" spin size="2xl" />
                     </div>
-                </div>                      
+                </div>                                    
             </form>
             <div v-else class="text-center">
                 <div class="m-3">
@@ -101,7 +99,7 @@
                     Password: '',
                     ConfirmPassword: ''
                 },
-                loading: false,
+                loadingModal: {},
                 errorMessages: [],
                 errorToasts: []
             }
@@ -110,6 +108,9 @@
         },
         created: function () {
         },
+        mounted: function () {
+            this.loadingModal = new Modal(this.$refs.loadingmodal);
+        },        
         methods: {
             async submitForm() {
                 const isValid = await this.v$.$validate()
@@ -117,7 +118,7 @@
 
                 var that = this;
                 var formData = getFormData(this.form);
-                this.loading = true;
+                this.loadingModal.show();
 
                 axios.post('/Home/Activate', formData)
                     .then((res) => {
@@ -132,7 +133,7 @@
                             });
                         }
                                                 
-                        that.loading = false;
+                        that.loadingModal.hide();
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             }          

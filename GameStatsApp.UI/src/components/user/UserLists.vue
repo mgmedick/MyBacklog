@@ -20,16 +20,16 @@
         </div>
         <div class="show-lg d-flex flex-column flex-shrink-0 p-3 position-absolute top-0 start-0 bg-light" style="width: 280px; height: 100vh; margin-top: 63px;">
             <ul class="nav nav-pills flex-column mb-auto">
-                <li v-for="(userGameList, userGameListIndex) in indexvm.userGameLists.filter(i => i.defaultGameListID)" key="userGameList.id" class="nav-item">
-                    <a @click="selectedItemID = userGameList.id" href="#" class="nav-link" :class="{ 'active' : selectedItemID == userGameList.id }">
-                        <font-awesome-icon :icon="getIconClass(userGameList.defaultGameListID)" size="lg" class="me-3"/>
-                        <span>{{ userGameList.name }}</span>
+                <li v-for="(userList, userListIndex) in indexvm.userLists.filter(i => i.defaultListID)" key="userList.id" class="nav-item">
+                    <a @click="selectedItemID = userList.id" href="#" class="nav-link" :class="{ 'active' : selectedItemID == userList.id }">
+                        <font-awesome-icon :icon="getIconClass(userList.defaultListID)" size="lg" class="me-3"/>
+                        <span>{{ userList.name }}</span>
                     </a>
                 </li>
-                <li v-if="indexvm.userGameLists.filter(i => !i.defaultGameListID).length > 0" class="border-top my-3"></li>
-                <li v-for="(userGameList, userGameListIndex) in indexvm.userGameLists.filter(i => !i.defaultGameListID)" key="userGameList.id" class="nav-item">
-                    <a @click="selectedItemID = userGameList.id" href="#" class="nav-link" :class="{ 'active' : selectedItemID == userGameList.id }">
-                        <span>{{ userGameList.name }}</span>
+                <li v-if="indexvm.userLists.filter(i => !i.defaultListID).length > 0" class="border-top my-3"></li>
+                <li v-for="(userList, userListIndex) in indexvm.userLists.filter(i => !i.defaultListID)" key="userList.id" class="nav-item">
+                    <a @click="selectedItemID = userList.id" href="#" class="nav-link" :class="{ 'active' : selectedItemID == userList.id }">
+                        <span>{{ userList.name }}</span>
                     </a>
                 </li>                
             </ul>
@@ -37,30 +37,30 @@
         <div class="show-md row g-2 justify-content-center">
             <div class="btn-group">
                 <button class="btn dropdown-toggle btn-primary d-flex align-items-center" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                    <font-awesome-icon v-if="indexvm.userGameLists.find(i => i.id == selectedItemID)?.defaultGameListID" :icon="getIconClass(indexvm.userGameLists.find(i => i.id == selectedItemID)?.defaultGameListID)" size="lg"/>
-                    <span class="mx-auto">{{ indexvm.userGameLists.find(i => i.id == selectedItemID)?.name }}</span>
+                    <font-awesome-icon v-if="indexvm.userLists.find(i => i.id == selectedItemID)?.defaultListID" :icon="getIconClass(indexvm.userLists.find(i => i.id == selectedItemID)?.defaultListID)" size="lg"/>
+                    <span class="mx-auto">{{ indexvm.userLists.find(i => i.id == selectedItemID)?.name }}</span>
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="width: 100%;">
-                    <li v-for="(userGameList, userGameListIndex) in indexvm.userGameLists" :key="userGameList.id">
-                        <a @click="selectedItemID = userGameList.id" class="dropdown-item" :class="{ 'active' : selectedItemID == userGameList.id }" href="#/" data-toggle="pill">{{ userGameList.name }}</a>
+                    <li v-for="(userList, userListIndex) in indexvm.userLists" :key="userList.id">
+                        <a @click="selectedItemID = userList.id" class="dropdown-item" :class="{ 'active' : selectedItemID == userList.id }" href="#/" data-toggle="pill">{{ userList.name }}</a>
                     </li>
                 </ul>
             </div>                
         </div>
-        <user-gamelist-games :userid="indexvm.userID" :usergamelistid="selectedItemID" :usergamelists="indexvm.userGameLists" @success="onSuccess" @error="onError" @delete="onDelete"></user-gamelist-games> 
+        <user-list-games :userid="indexvm.userID" :userlistid="selectedItemID" :userlists="indexvm.userLists" @success="onSuccess" @error="onError" @delete="onDelete"></user-list-games> 
     </div>
 </template>
 <script>
     import { Toast } from 'bootstrap';
 
     export default {
-        name: "UserGameLists",
+        name: "UserLists",
         props: {
             indexvm: Object
         },
         data: function () {
             return {
-                userGameLists: [],
+                userLists: [],
                 selectedItemID: 0,
                 successToast: {},
                 successMessage: '',
@@ -70,7 +70,7 @@
         },       
         watch: {},
         created: function () {
-            this.selectedItemID = this.indexvm.userGameLists[0].id;
+            this.selectedItemID = this.indexvm.userLists[0].id;
         },
         mounted: function() {
             var that = this;

@@ -19,20 +19,20 @@ namespace GameStatsApp.Interfaces.Services
         ChangePasswordViewModel GetChangePassword(string email, long expirationTime, string token);
         void ChangeUserPassword(string email, string pass);
         void ChangeUsername(string email, string username);
-        void AddGameToUserGameList(int userID, int userGameListID, int gameID);
-        void RemoveGameFromUserGameList(int userID, int userGameListID, int gameID);
-        void RemoveGameFromAllUserGameLists(int userID, int gameID);
+        void AddGameToUserList(int userID, int userListID, int gameID);
+        void RemoveGameFromUserList(int userID, int userListID, int gameID);
+        void RemoveGameFromAllUserLists(int userID, int gameID);
         bool EmailExists(string email);
         bool PasswordMatches(string password, string email);
         bool UsernameExists(string username, bool activeFilter);
         bool EmailExists(string email, bool activeFilter);
         Task SendConfirmRegistrationEmail(string email, string username);
         IEnumerable<SearchResult> SearchUsers(string searchText);
-        IEnumerable<UserGameList> GetUserGameLists (int userID);
-        IEnumerable<GameViewModel> GetGamesByUserGameList (int userGameListID);
-        void SaveUserGameAccount(int userID, int gameAccountTypeID, TokenResponse tokenResponse);
-        IEnumerable<UserGameAccountViewModel> GetUserGameAccounts(int userID);   
-        Task<Tuple<UserGameAccountView, string>> GetRefreshedUserGameAccount(int userID, int userGameAccountID);
-        Task ImportGamesFromUserGameAccount(int userID, UserGameAccountView userGameAccount, bool isImportAll);
+        IEnumerable<UserList> GetUserLists (int userID);
+        IEnumerable<GameViewModel> GetGamesByUserList (int userListID);
+        void SaveUserAccount(int userID, int accountTypeID, TokenResponse tokenResponse);
+        IEnumerable<UserAccountViewModel> GetUserAccounts(int userID);   
+        Task<Tuple<UserAccountView, string>> GetRefreshedUserAccount(int userID, int userAccountID);
+        Task ImportGamesFromUserAccount(int userID, UserAccountView userAccount, bool isImportAll);
     }
 }

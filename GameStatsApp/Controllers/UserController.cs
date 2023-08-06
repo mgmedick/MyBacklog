@@ -39,23 +39,23 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetUserGameLists(int userID)
+        public JsonResult GetUserLists(int userID)
         {
-            var userGameLists = _userService.GetUserGameLists(userID);
+            var userLists = _userService.GetUserLists(userID);
 
-            return Json(userGameLists);
+            return Json(userLists);
         }
 
         [HttpGet]
-        public JsonResult GetGamesByUserGameList(int userGameListID)
+        public JsonResult GetGamesByUserList(int userListID)
         {
-            var userGameListGames = _userService.GetGamesByUserGameList(userGameListID);
+            var userListGames = _userService.GetGamesByUserList(userListID);
 
-            return Json(userGameListGames);
+            return Json(userListGames);
         }
         
         [HttpPost]
-        public JsonResult AddGameToUserGameList(int userGameListID, int gameID)
+        public JsonResult AddGameToUserList(int userListID, int gameID)
         {
             var success = false;
             List<string> errorMessages = null;
@@ -63,12 +63,12 @@ namespace GameStatsApp.Controllers
             try
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                _userService.AddGameToUserGameList(userID, userGameListID, gameID);
+                _userService.AddGameToUserList(userID, userListID, gameID);
                 success = true;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "AddGameToUserGameList");
+                _logger.Error(ex, "AddGameToUserList");
                 success = false;
                 errorMessages = new List<string>() { "Error adding game to list" };
             }
@@ -77,7 +77,7 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpPost]
-        public JsonResult RemoveGameFromUserGameList(int userGameListID, int gameID)
+        public JsonResult RemoveGameFromUserList(int userListID, int gameID)
         {
             var success = false;
             List<string> errorMessages = null;
@@ -85,12 +85,12 @@ namespace GameStatsApp.Controllers
             try
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                _userService.RemoveGameFromUserGameList(userID, userGameListID, gameID);
+                _userService.RemoveGameFromUserList(userID, userListID, gameID);
                 success = true;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "RemoveGameFromUserGameList");
+                _logger.Error(ex, "RemoveGameFromUserList");
                 success = false;
                 errorMessages = new List<string>() { "Error removing game from list" };
             }
@@ -99,7 +99,7 @@ namespace GameStatsApp.Controllers
         }   
 
         [HttpPost]
-        public JsonResult RemoveGameFromAllUserGameLists(int gameID)
+        public JsonResult RemoveGameFromAllUserLists(int gameID)
         {
             var success = false;
             List<string> errorMessages = null;
@@ -107,12 +107,12 @@ namespace GameStatsApp.Controllers
             try
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                _userService.RemoveGameFromAllUserGameLists(userID, gameID);
+                _userService.RemoveGameFromAllUserLists(userID, gameID);
                 success = true;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "RemoveGameFromUserGameList");
+                _logger.Error(ex, "RemoveGameFromUserList");
                 success = false;
                 errorMessages = new List<string>() { "Error removing game from list" };
             }

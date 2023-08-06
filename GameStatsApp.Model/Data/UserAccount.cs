@@ -4,11 +4,11 @@ using System.Linq;
 
 namespace GameStatsApp.Model.Data
 {
-    public class UserGameAccount
+    public class UserAccount
     {
         public int ID { get; set; }
         public int UserID { get; set; }
-        public int GameAccountTypeID { get; set; }
+        public int AccountTypeID { get; set; }
         public string AccountUserID { get; set; }
         public string AccountUserHash { get; set; }
         public DateTime? ImportLastRunDate { get; set; }

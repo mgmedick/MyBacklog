@@ -10,7 +10,7 @@ namespace GameStatsApp.Model
         ConfirmRegistration = 3
     }       
 
-    public enum GameAccountType
+    public enum AccountType
     {
         Steam = 1,
         Xbox = 2
@@ -28,7 +28,7 @@ namespace GameStatsApp.Model
         Refresh = 2
     }      
 
-    public enum DefaultGameList
+    public enum DefaultList
     {
         AllGames = 1,
         Backlog = 2,

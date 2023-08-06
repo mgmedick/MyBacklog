@@ -43,7 +43,7 @@ namespace GameStatsApp.Controllers
             if (indexVM.IsAuth)
             {
                 indexVM.UserID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                indexVM.UserGameLists = _userService.GetUserGameLists(indexVM.UserID).ToList();
+                indexVM.UserLists = _userService.GetUserLists(indexVM.UserID).ToList();
             }
 
             return View(indexVM);
@@ -423,13 +423,13 @@ namespace GameStatsApp.Controllers
         {
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
-            var gameAccountTypeIDs = !string.IsNullOrWhiteSpace(userVW.GameAccountTypeIDs) ? userVW.GameAccountTypeIDs.Split(",").Select(i => int.Parse(i)).ToList() : new List<int>();
+            var accountTypeIDs = !string.IsNullOrWhiteSpace(userVW.AccountTypeIDs) ? userVW.AccountTypeIDs.Split(",").Select(i => int.Parse(i)).ToList() : new List<int>();
             var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
             var windowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUri);
 
             var welcomeVM = new WelcomeViewModel() { Username = userVW.Username,                                              
                                                      WindowsLiveAuthUrl = windowsLiveAuthUrl,
-                                                     GameAccountTypeIDs = gameAccountTypeIDs,
+                                                     AccountTypeIDs = accountTypeIDs,
                                                      AuthSuccess = authSuccess };
 
             return View(welcomeVM);
@@ -448,7 +448,7 @@ namespace GameStatsApp.Controllers
                     var tokenResponse = await _authService.Authenticate(code, redirectUri);
 
                     var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                    _userService.SaveUserGameAccount(userID, (int)GameAccountType.Xbox, tokenResponse);
+                    _userService.SaveUserAccount(userID, (int)AccountType.Xbox, tokenResponse);
 
                     success = true;
                 }
@@ -464,20 +464,20 @@ namespace GameStatsApp.Controllers
 
         [HttpGet]
         [Authorize] 
-        public ViewResult ImportGames(bool? authSuccess = null, int? authGameAccountTypeID = null)
+        public ViewResult ImportGames(bool? authSuccess = null, int? authAccountTypeID = null)
         {
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var userGameAccountVMs = _userService.GetUserGameAccounts(userID).ToList();
+            var userAccountVMs = _userService.GetUserAccounts(userID).ToList();
 
-            var importGamesVM = new ImportGamesViewModel() { UserGameAccounts = userGameAccountVMs,
+            var importGamesVM = new ImportGamesViewModel() { UserAccounts = userAccountVMs,
                                                              AuthSuccess = authSuccess,
-                                                             AuthGameAccountTypeID = authGameAccountTypeID };
+                                                             AuthAccountTypeID = authAccountTypeID };
 
             return View(importGamesVM);
         }
 
         [HttpPost]
-        public async Task<ActionResult> ImportGames(int userGameAccountID, bool isImportAll)
+        public async Task<ActionResult> ImportGames(int userAccountID, bool isImportAll)
         {
             var success = false;
             List<string> errorMessages = null;
@@ -485,7 +485,7 @@ namespace GameStatsApp.Controllers
             try
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                var result = await _userService.GetRefreshedUserGameAccount(userID, userGameAccountID);
+                var result = await _userService.GetRefreshedUserAccount(userID, userAccountID);
                 
                 if (!string.IsNullOrWhiteSpace(result.Item2))
                 {
@@ -493,7 +493,7 @@ namespace GameStatsApp.Controllers
                 }
                 else
                 {
-                    await _userService.ImportGamesFromUserGameAccount(userID, result.Item1, isImportAll);
+                    await _userService.ImportGamesFromUserAccount(userID, result.Item1, isImportAll);
                 }
 
                 success = true;
@@ -521,7 +521,7 @@ namespace GameStatsApp.Controllers
                     var tokenResponse = await _authService.Authenticate(code, redirectUri);
 
                     var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                    _userService.SaveUserGameAccount(userID, (int)GameAccountType.Xbox, tokenResponse);
+                    _userService.SaveUserAccount(userID, (int)AccountType.Xbox, tokenResponse);
 
                     success = true;
                 }
@@ -532,7 +532,7 @@ namespace GameStatsApp.Controllers
                 success = false;
             }            
 
-            return RedirectToAction("ImportGames", new { authSuccess = success, authGameAccountTypeID = (int)GameAccountType.Xbox });
+            return RedirectToAction("ImportGames", new { authSuccess = success, authAccountTypeID = (int)AccountType.Xbox });
         }                  
 
         [AllowAnonymous]

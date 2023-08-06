@@ -4,10 +4,10 @@ using System.Linq;
 
 namespace GameStatsApp.Model.Data
 {
-    public class UserGameAccountToken
+    public class UserAccountToken
     {
         public int ID { get; set; }
-        public int UserGameAccountID { get; set; }
+        public int UserAccountID { get; set; }
         public int TokenTypeID { get; set; }
         public string Token { get; set; }
         public DateTime? IssuedDate { get; set; }

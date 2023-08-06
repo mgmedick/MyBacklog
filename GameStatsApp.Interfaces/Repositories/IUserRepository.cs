@@ -13,18 +13,18 @@ namespace GameStatsApp.Interfaces.Repositories
         void SaveUser(User user);
         IEnumerable<UserView> GetUserViews(Expression<Func<UserView, bool>> predicate);
         void SaveUserSetting(UserSetting userSetting);
-        IEnumerable<UserGameAccount> GetUserGameAccounts(Expression<Func<UserGameAccount, bool>>  predicate);
-        IEnumerable<UserGameAccountView> GetUserGameAccountViews(Expression<Func<UserGameAccountView, bool>>  predicate);
-        void SaveUserGameAccount(UserGameAccount userGameAccount);
-        void SaveUserGameAccountTokens(int userGameAccountID, IEnumerable<UserGameAccountToken> userGameAccountTokens);
-        IEnumerable<IDNamePair> GetDefaultGameLists();
-        IEnumerable<UserGameList> GetUserGameLists(Expression<Func<UserGameList, bool>> predicate);
-        IEnumerable<UserGameListView> GetUserGameListViews(Expression<Func<UserGameListView, bool>> predicate);
-        void SaveUserGameLists(IEnumerable<UserGameList> userGameLists);
-        void SaveUserGameListGame(UserGameListGame userGameListGame);
-        void SaveUserGameListGames(IEnumerable<UserGameListGame> userGameListGames);
-        void DeleteUserGameListGame(int userGameListID, int gameID);
-        IEnumerable<GameView> GetGamesByUserGameList(int userGameListID);
+        IEnumerable<UserAccount> GetUserAccounts(Expression<Func<UserAccount, bool>>  predicate);
+        IEnumerable<UserAccountView> GetUserAccountViews(Expression<Func<UserAccountView, bool>>  predicate);
+        void SaveUserAccount(UserAccount userAccount);
+        void SaveUserAccountTokens(int userAccountID, IEnumerable<UserAccountToken> userAccountTokens);
+        IEnumerable<IDNamePair> GetDefaultLists();
+        IEnumerable<UserList> GetUserLists(Expression<Func<UserList, bool>> predicate);
+        IEnumerable<UserListView> GetUserListViews(Expression<Func<UserListView, bool>> predicate);
+        void SaveUserLists(IEnumerable<UserList> userLists);
+        void SaveUserListGame(UserListGame userListGame);
+        void SaveUserListGames(IEnumerable<UserListGame> userListGames);
+        void DeleteUserListGame(int userListID, int gameID);
+        IEnumerable<GameView> GetGamesByUserList(int userListID);
         IEnumerable<SearchResult> SearchUsers(string searchText);
     }
 }

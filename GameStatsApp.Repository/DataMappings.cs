@@ -12,15 +12,18 @@ namespace GameStatsApp.Repository
         {
             For<User>().PrimaryKey("ID").TableName("tbl_User");
             For<UserSetting>().PrimaryKey("UserID", false).TableName("tbl_User_Setting");
-            For<UserGameAccount>().PrimaryKey("ID").TableName("tbl_UserGameAccount");
-            For<UserGameAccountToken>().PrimaryKey("ID").TableName("tbl_UserGameAccount_Token");
-            For<UserGameAccountView>().TableName("vw_UserGameAccount");
-            For<UserGameList>().PrimaryKey("ID").TableName("tbl_UserGameList");
-            For<UserGameListView>().TableName("vw_UserGameList");
-            For<UserGameListGame>().PrimaryKey("ID").TableName("tbl_UserGameList_Game");
+            For<UserAccount>().PrimaryKey("ID").TableName("tbl_UserAccount");
+            For<UserAccountToken>().PrimaryKey("ID").TableName("tbl_UserAccount_Token");
+            For<UserAccountView>().TableName("vw_UserAccount");
+            For<UserList>().PrimaryKey("ID").TableName("tbl_UserList");
+            For<UserListView>().TableName("vw_UserList");
+            For<UserListGame>().PrimaryKey("ID").TableName("tbl_UserList_Game");
             For<UserView>().TableName("vw_User");
             For<Game>().PrimaryKey("ID").TableName("tbl_Game");
-            For<GameView>().TableName("vw_Game");
+            For<GameView>().TableName("vw_Game").Columns(i =>
+            {
+                i.Column(g => g.UserListGameID).Ignore();
+            });
             For<Setting>().PrimaryKey("ID").TableName("tbl_Setting");
         }
     }

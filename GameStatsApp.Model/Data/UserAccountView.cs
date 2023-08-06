@@ -5,12 +5,12 @@ using System.Linq;
 
 namespace GameStatsApp.Model.Data
 {
-    public class UserGameAccountView
+    public class UserAccountView
     {
         public int ID { get; set; }
         public int UserID { get; set; }
-        public int GameAccountTypeID { get; set; }
-        public string GameAccountTypeName { get; set; }
+        public int AccountTypeID { get; set; }
+        public string AccountTypeName { get; set; }
         public string AccountUserID { get; set; }
         public string AccountUserHash { get; set; }
         public string Token { get; set; }
@@ -20,12 +20,12 @@ namespace GameStatsApp.Model.Data
         public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }
         
-        public UserGameAccount ConvertToUserGameAccount()
+        public UserAccount ConvertToUserAccount()
         {
-            return new UserGameAccount {
+            return new UserAccount {
                 ID = ID,
                 UserID = UserID,
-                GameAccountTypeID = GameAccountTypeID,
+                AccountTypeID = AccountTypeID,
                 AccountUserID = AccountUserID,
                 AccountUserHash = AccountUserHash,
                 ImportLastRunDate = ImportLastRunDate,

@@ -57,45 +57,45 @@ namespace GameStatsApp.Repository
             }
         }
 
-        public IEnumerable<UserGameAccount> GetUserGameAccounts(Expression<Func<UserGameAccount, bool>>  predicate)
+        public IEnumerable<UserAccount> GetUserAccounts(Expression<Func<UserAccount, bool>>  predicate)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                return db.Query<UserGameAccount>().Where(predicate).ToList();
+                return db.Query<UserAccount>().Where(predicate).ToList();
             }
         }
         
-        public IEnumerable<UserGameAccountView> GetUserGameAccountViews(Expression<Func<UserGameAccountView, bool>>  predicate)
+        public IEnumerable<UserAccountView> GetUserAccountViews(Expression<Func<UserAccountView, bool>>  predicate)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                return db.Query<UserGameAccountView>().Where(predicate).ToList();
+                return db.Query<UserAccountView>().Where(predicate).ToList();
             }
         }
 
-        public void SaveUserGameAccount(UserGameAccount userGameAccount)
+        public void SaveUserAccount(UserAccount userAccount)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
                 using (var tran = db.GetTransaction())
                 {
-                    db.Save<UserGameAccount>(userGameAccount);
+                    db.Save<UserAccount>(userAccount);
                     tran.Complete();
                 }
             }            
         }
 
-        public void SaveUserGameAccountTokens(int userGameAccountID, IEnumerable<UserGameAccountToken> userGameAccountTokens)
+        public void SaveUserAccountTokens(int userAccountID, IEnumerable<UserAccountToken> userAccountTokens)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
                 using (var tran = db.GetTransaction())
                 {
-                    db.DeleteWhere<UserGameAccountToken>("UserGameAccountID = @0", userGameAccountID);
-                    foreach(var userGameAccountToken in userGameAccountTokens)
+                    db.DeleteWhere<UserAccountToken>("UserAccountID = @0", userAccountID);
+                    foreach(var userAccountToken in userAccountTokens)
                     {
-                        userGameAccountToken.UserGameAccountID = userGameAccountID;
-                        db.Save<UserGameAccountToken>(userGameAccountToken);
+                        userAccountToken.UserAccountID = userAccountID;
+                        db.Save<UserAccountToken>(userAccountToken);
                     }
 
                     tran.Complete();
@@ -103,18 +103,18 @@ namespace GameStatsApp.Repository
             }
         }
 
-        public void SaveUserGameAccount(UserGameAccount userGameAccount, IEnumerable<UserGameAccountToken> userGameAccountTokens)
+        public void SaveUserAccount(UserAccount userAccount, IEnumerable<UserAccountToken> userAccountTokens)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
                 using (var tran = db.GetTransaction())
                 {
-                    db.Save<UserGameAccount>(userGameAccount);
+                    db.Save<UserAccount>(userAccount);
 
-                    foreach(var userGameAccountToken in userGameAccountTokens)
+                    foreach(var userAccountToken in userAccountTokens)
                     {
-                        userGameAccountToken.UserGameAccountID = userGameAccount.ID;
-                        db.Save<UserGameAccountToken>(userGameAccountToken);
+                        userAccountToken.UserAccountID = userAccount.ID;
+                        db.Save<UserAccountToken>(userAccountToken);
                     }
 
                     tran.Complete();
@@ -122,49 +122,49 @@ namespace GameStatsApp.Repository
             }
         }
 
-        public IEnumerable<IDNamePair> GetDefaultGameLists()
+        public IEnumerable<IDNamePair> GetDefaultLists()
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                return db.Query<IDNamePair>("SELECT ID, Name FROM tbl_DefaultGameList;").ToList();
+                return db.Query<IDNamePair>("SELECT ID, Name FROM tbl_DefaultList;").ToList();
             }
         }
 
-        public IEnumerable<UserGameList> GetUserGameLists(Expression<Func<UserGameList, bool>> predicate)
+        public IEnumerable<UserList> GetUserLists(Expression<Func<UserList, bool>> predicate)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                return db.Query<UserGameList>().Where(predicate).ToList();
+                return db.Query<UserList>().Where(predicate).ToList();
             }
         }
 
-        public IEnumerable<UserGameListView> GetUserGameListViews(Expression<Func<UserGameListView, bool>> predicate)
+        public IEnumerable<UserListView> GetUserListViews(Expression<Func<UserListView, bool>> predicate)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                return db.Query<UserGameListView>().Where(predicate).ToList();
+                return db.Query<UserListView>().Where(predicate).ToList();
             }
         }
 
-        public IEnumerable<GameView> GetGamesByUserGameList(int userGameListID)
+        public IEnumerable<GameView> GetGamesByUserList(int userListID)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                var results = db.Query<GameView>("CALL GetGamesByUserGameList (@0);", userGameListID).ToList();
+                var results = db.Query<GameView>("CALL GetGamesByUserList (@0);", userListID).ToList();
 
                 return results;
             }
-        }                
+        }                       
 
-        public void SaveUserGameLists(IEnumerable<UserGameList> userGameLists)
+        public void SaveUserLists(IEnumerable<UserList> userLists)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
                 using (var tran = db.GetTransaction())
                 {
-                    foreach (var userGameList in userGameLists)
+                    foreach (var userList in userLists)
                     {
-                        db.Save<UserGameList>(userGameList);
+                        db.Save<UserList>(userList);
                     }
 
                     tran.Complete();
@@ -172,23 +172,23 @@ namespace GameStatsApp.Repository
             }
         }
 
-        public void SaveUserGameListGame(UserGameListGame userGameListGame)
+        public void SaveUserListGame(UserListGame userListGame)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                db.Save<UserGameListGame>(userGameListGame);
+                db.Save<UserListGame>(userListGame);
             }
         }
 
-        public void SaveUserGameListGames(IEnumerable<UserGameListGame> userGameListGames)
+        public void SaveUserListGames(IEnumerable<UserListGame> userListGames)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
                 using (var tran = db.GetTransaction())
                 {
-                    foreach (var userGameListGame in userGameListGames)
+                    foreach (var userListGame in userListGames)
                     {
-                        db.Save<UserGameListGame>(userGameListGame);
+                        db.Save<UserListGame>(userListGame);
                     }
 
                     tran.Complete();
@@ -196,11 +196,11 @@ namespace GameStatsApp.Repository
             }
         }              
 
-        public void DeleteUserGameListGame(int userGameListID, int gameID)
+        public void DeleteUserListGame(int userListID, int gameID)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                db.DeleteWhere<UserGameListGame>("UserGameListID = @0 AND GameID = @1", userGameListID, gameID);
+                db.DeleteWhere<UserListGame>("UserListID = @0 AND GameID = @1", userListID, gameID);
             }
         }                                       
 

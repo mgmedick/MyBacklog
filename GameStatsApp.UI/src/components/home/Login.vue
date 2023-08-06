@@ -36,13 +36,11 @@
                     <div class="fb-login-button" data-width="100%" data-size="large" data-button-type="continue_with" data-layout="rounded" data-auto-logout-link="false" data-use-continue-as="true" data-scope="public_profile,email" onlogin="checkFBLoginState();"></div>
                     <div ref="googleLoginBtn" class="p-0"></div>
                 </div>
-                <div v-if="loading">
-                    <div class="d-flex m-3">
-                        <div class="mx-auto">
-                            <font-awesome-icon icon="fa-solid fa-spinner" spin size="2xl" />
-                        </div>
+                <div ref="loadingmodal" class="modal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered justify-content-center" style="color: #fff;">
+                        <font-awesome-icon icon="fa-solid fa-spinner" spin size="2xl" />
                     </div>
-                </div>                
+                </div>                               
             </form>
         </div>
     </div>
@@ -52,7 +50,7 @@
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, helpers } from '@vuelidate/validators';
-    import { Toast } from 'bootstrap';
+    import { Modal, Toast } from 'bootstrap';
     const { withAsync } = helpers;
 
     const asyncActiveEmailExists = async (value) => {
@@ -79,7 +77,7 @@
                     Email: '',
                     Password: ''
                 },
-                loading: true,
+                loadingModal: {},
                 errorMessages: [],
                 errorToasts: [],
                 width: document.documentElement.clientWidth
@@ -87,6 +85,9 @@
         },
         mounted: function () {
             var that = this;
+
+            this.loadingModal = new Modal(this.$refs.loadingmodal);
+
             this.createGoogleLoginScript().then(function() {
                 window.google.accounts.id.initialize({
                     client_id: that.loginvm.gClientID,
@@ -133,7 +134,7 @@
             },
             checkFBLoginState() {
                 var that = this;
-                this.loading = true;
+                this.loadingModal.show();
 
                 FB.getLoginStatus(function(response) {
                     that.handleFacebookCredentialResponse(response);
@@ -151,7 +152,7 @@
                             new Toast(el).show();
                         });
                     });   
-                    that.loading = false;                       
+                    that.loadingModal.hide();
                 }
             },            
             async handleGoogleCredentialResponse(response) {
@@ -159,7 +160,7 @@
             },
             async loginOrSignUpWithSocial(accessToken, socialAccountTypeID) {
                 var that = this;
-                this.loading = true;
+                this.loadingModal.show();
 
                 axios.post('/Home/LoginOrSignUpWithSocial', null,{ params: { accessToken: accessToken, socialAccountTypeID: socialAccountTypeID } })
                     .then((res) => {
@@ -177,7 +178,7 @@
                                 });
                             });                            
                         }
-                        that.loading = false;
+                        that.loadingModal.hide();
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },        

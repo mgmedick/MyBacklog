@@ -12,7 +12,7 @@ namespace GameStatsApp.Model.ViewModels
     {
         public bool IsAuth { get; set; }
         public int UserID { get; set; }
-        public List<UserGameList> UserGameLists { get; set; }
+        public List<UserList> UserLists { get; set; }
     }
 }
 

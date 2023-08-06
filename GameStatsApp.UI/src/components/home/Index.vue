@@ -4,7 +4,7 @@
             <span>Not logged in page</span>
         </div>  
         <div v-else>
-            <user-gamelists :indexvm="indexvm"></user-gamelists>
+            <user-lists :indexvm="indexvm"></user-lists>
         </div>
     </div>    
 </template>

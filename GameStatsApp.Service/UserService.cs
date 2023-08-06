@@ -147,9 +147,9 @@ namespace GameStatsApp.Service
 
             _userRepo.SaveUserSetting(userSetting);      
 
-            var userGameLists = _userRepo.GetDefaultGameLists().Select(i => new UserGameList() { UserID = user.ID, Name = i.Name, DefaultGameListID = i.ID }).ToList();
+            var userLists = _userRepo.GetDefaultLists().Select(i => new UserList() { UserID = user.ID, Name = i.Name, DefaultListID = i.ID }).ToList();
             
-            _userRepo.SaveUserGameLists(userGameLists);      
+            _userRepo.SaveUserLists(userLists);      
         }
 
         public void ChangeUserPassword(string email, string pass)
@@ -172,16 +172,16 @@ namespace GameStatsApp.Service
             _userRepo.SaveUser(user);
         }        
 
-        public void SaveUserGameAccount(int userID, int gameAccountTypeID, TokenResponse tokenResponse)
+        public void SaveUserAccount(int userID, int accountTypeID, TokenResponse tokenResponse)
         {
-            var userGameAccount = _userRepo.GetUserGameAccounts(i => i.UserID == userID && i.GameAccountTypeID == gameAccountTypeID).FirstOrDefault();
+            var userAccount = _userRepo.GetUserAccounts(i => i.UserID == userID && i.AccountTypeID == accountTypeID).FirstOrDefault();
 
-            if (userGameAccount == null)
+            if (userAccount == null)
             {
-                userGameAccount = new UserGameAccount()
+                userAccount = new UserAccount()
                 {
                     UserID = userID,
-                    GameAccountTypeID = gameAccountTypeID,
+                    AccountTypeID = accountTypeID,
                     AccountUserID = tokenResponse.AccountUserID,
                     AccountUserHash = tokenResponse.AccountUserHash,                   
                     CreatedDate = DateTime.UtcNow
@@ -189,13 +189,13 @@ namespace GameStatsApp.Service
             }
             else
             {
-                userGameAccount.AccountUserID = tokenResponse.AccountUserID;
-                userGameAccount.AccountUserHash = tokenResponse.AccountUserHash;
-                userGameAccount.ModifiedDate = DateTime.UtcNow;
+                userAccount.AccountUserID = tokenResponse.AccountUserID;
+                userAccount.AccountUserHash = tokenResponse.AccountUserHash;
+                userAccount.ModifiedDate = DateTime.UtcNow;
             }
 
-            var userGameAccountTokens = new List<UserGameAccountToken>() {
-                new UserGameAccountToken() {
+            var userAccountTokens = new List<UserAccountToken>() {
+                new UserAccountToken() {
                         TokenTypeID = (int)TokenType.Access,
                         Token = tokenResponse.Token,
                         IssuedDate = tokenResponse.IssuedDate,
@@ -205,111 +205,111 @@ namespace GameStatsApp.Service
 
             if (!string.IsNullOrWhiteSpace(tokenResponse.RefreshToken))
             {
-                userGameAccountTokens.Add(new UserGameAccountToken() {
+                userAccountTokens.Add(new UserAccountToken() {
                     TokenTypeID = (int)TokenType.Refresh,
                     Token = tokenResponse.RefreshToken
                 });
             }
             
-            _userRepo.SaveUserGameAccount(userGameAccount);
-            _userRepo.SaveUserGameAccountTokens(userGameAccount.ID, userGameAccountTokens);
+            _userRepo.SaveUserAccount(userAccount);
+            _userRepo.SaveUserAccountTokens(userAccount.ID, userAccountTokens);
         }
 
-        public IEnumerable<UserGameList> GetUserGameLists (int userID)
+        public IEnumerable<UserList> GetUserLists (int userID)
         { 
-            var userGameLists = _userRepo.GetUserGameLists(i => i.UserID == userID)
+            var userLists = _userRepo.GetUserLists(i => i.UserID == userID)
                                          .ToList();
 
-            return userGameLists;
+            return userLists;
         }     
 
-        public IEnumerable<GameViewModel> GetGamesByUserGameList (int userGameListID)
+        public IEnumerable<GameViewModel> GetGamesByUserList (int userListID)
         { 
-            var gameVMs = _userRepo.GetGamesByUserGameList(userGameListID).Select(i => new GameViewModel(i)).ToList();
+            var gameVMs = _userRepo.GetGamesByUserList(userListID).Select(i => new GameViewModel(i)).ToList();
 
             return gameVMs;
-        }                
+        }   
 
-        public void AddGameToUserGameList(int userID, int userGameListID, int gameID)
+        public void AddGameToUserList(int userID, int userListID, int gameID)
         {         
-            var userGameListVM = _userRepo.GetUserGameListViews(i => i.ID == userGameListID).Select(i => new UserGameListViewModel(i)).FirstOrDefault();
+            var userListVM = _userRepo.GetUserListViews(i => i.ID == userListID).Select(i => new UserListViewModel(i)).FirstOrDefault();
                         
-            if (!userGameListVM.GameIDs.Contains(gameID))
+            if (!userListVM.GameIDs.Contains(gameID))
             {
-                var userGameListGame = new UserGameListGame() { UserGameListID = userGameListVM.ID, GameID = gameID };
-                _userRepo.SaveUserGameListGame(userGameListGame);
+                var userListGame = new UserListGame() { UserListID = userListVM.ID, GameID = gameID };
+                _userRepo.SaveUserListGame(userListGame);
 
-                if (userGameListVM.DefaultGameListID != (int)DefaultGameList.AllGames)
+                if (userListVM.DefaultListID != (int)DefaultList.AllGames)
                 {
-                    var allUserGameListVM = _userRepo.GetUserGameListViews(i => i.UserID == userID && i.ID == (int)DefaultGameList.AllGames).Select(i => new UserGameListViewModel(i)).FirstOrDefault();   
-                    if (!allUserGameListVM.GameIDs.Contains(gameID))
+                    var allUserListVM = _userRepo.GetUserListViews(i => i.UserID == userID && i.ID == (int)DefaultList.AllGames).Select(i => new UserListViewModel(i)).FirstOrDefault();   
+                    if (!allUserListVM.GameIDs.Contains(gameID))
                     {
-                        var allUserGameListGame = new UserGameListGame() { UserGameListID = allUserGameListVM.ID, GameID = gameID };
-                        _userRepo.SaveUserGameListGame(allUserGameListGame);
+                        var allUserListGame = new UserListGame() { UserListID = allUserListVM.ID, GameID = gameID };
+                        _userRepo.SaveUserListGame(allUserListGame);
                     }
                 }
             }
         }        
 
-        public void RemoveGameFromUserGameList(int userID, int userGameListID, int gameID)
+        public void RemoveGameFromUserList(int userID, int userListID, int gameID)
         {         
-            var userGameListVM = _userRepo.GetUserGameListViews(i => i.ID == userGameListID).Select(i => new UserGameListViewModel(i)).FirstOrDefault();
+            var userListVM = _userRepo.GetUserListViews(i => i.ID == userListID).Select(i => new UserListViewModel(i)).FirstOrDefault();
                         
-            if (userGameListVM.GameIDs.Contains(gameID))
+            if (userListVM.GameIDs.Contains(gameID))
             {
-                _userRepo.DeleteUserGameListGame(gameID, userGameListID);
+                _userRepo.DeleteUserListGame(gameID, userListID);
 
-                if (userGameListVM.DefaultGameListID != (int)DefaultGameList.AllGames)
+                if (userListVM.DefaultListID != (int)DefaultList.AllGames)
                 {
-                    var allUserGameListVM = _userRepo.GetUserGameListViews(i => i.UserID == userID && i.ID == (int)DefaultGameList.AllGames).Select(i => new UserGameListViewModel(i)).FirstOrDefault();   
-                    if (allUserGameListVM.GameIDs.Contains(gameID))
+                    var allUserListVM = _userRepo.GetUserListViews(i => i.UserID == userID && i.ID == (int)DefaultList.AllGames).Select(i => new UserListViewModel(i)).FirstOrDefault();   
+                    if (allUserListVM.GameIDs.Contains(gameID))
                     {
-                        _userRepo.DeleteUserGameListGame(gameID, allUserGameListVM.ID);
+                        _userRepo.DeleteUserListGame(gameID, allUserListVM.ID);
                     }
                 }
             }
         }
 
-        public void RemoveGameFromAllUserGameLists(int userID, int gameID)
+        public void RemoveGameFromAllUserLists(int userID, int gameID)
         {         
-            var userGameListIDs = _userRepo.GetUserGameListViews(i => i.UserID == userID)
-                                          .Select(i => new UserGameListViewModel(i))
+            var userListIDs = _userRepo.GetUserListViews(i => i.UserID == userID)
+                                          .Select(i => new UserListViewModel(i))
                                           .Where(i => i.GameIDs.Contains(gameID))
                                           .Select(i => i.ID)
                                           .ToList();
 
-            foreach(var userGameListID in userGameListIDs)
+            foreach(var userListID in userListIDs)
             {
-                _userRepo.DeleteUserGameListGame(userGameListID, gameID);
+                _userRepo.DeleteUserListGame(userListID, gameID);
             }
         }
 
-        public IEnumerable<UserGameAccountViewModel> GetUserGameAccounts(int userID)
+        public IEnumerable<UserAccountViewModel> GetUserAccounts(int userID)
         {
-            var userGameAccountVMs = _userRepo.GetUserGameAccountViews(i => i.UserID == userID).Select(i => new UserGameAccountViewModel(i)).ToList();
+            var userAccountVMs = _userRepo.GetUserAccountViews(i => i.UserID == userID).Select(i => new UserAccountViewModel(i)).ToList();
 
-            return userGameAccountVMs;
+            return userAccountVMs;
         }
 
-        public async Task<Tuple<UserGameAccountView, string>> GetRefreshedUserGameAccount(int userID, int userGameAccountID)
+        public async Task<Tuple<UserAccountView, string>> GetRefreshedUserAccount(int userID, int userAccountID)
         {
             var authUrl = string.Empty;
             var redirectUrl = string.Empty;
-            var userGameAccountVW = _userRepo.GetUserGameAccountViews(i => i.ID == userGameAccountID).FirstOrDefault();
+            var userAccountVW = _userRepo.GetUserAccountViews(i => i.ID == userAccountID).FirstOrDefault();
             
-            switch (userGameAccountVW.GameAccountTypeID)
+            switch (userAccountVW.AccountTypeID)
             {
-                case (int)GameAccountType.Xbox:
+                case (int)AccountType.Xbox:
                     redirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
                     break;
             }
             
-            if (userGameAccountVW.ExpireDate < DateTime.UtcNow)
+            if (userAccountVW.ExpireDate < DateTime.UtcNow)
             {
-                if (!string.IsNullOrWhiteSpace(userGameAccountVW.RefreshToken))
+                if (!string.IsNullOrWhiteSpace(userAccountVW.RefreshToken))
                 {
-                    var tokenResponse = await _authService.ReAuthenticate(userGameAccountVW.RefreshToken);
-                    SaveUserGameAccount(userID, userGameAccountVW.GameAccountTypeID, tokenResponse);
+                    var tokenResponse = await _authService.ReAuthenticate(userAccountVW.RefreshToken);
+                    SaveUserAccount(userID, userAccountVW.AccountTypeID, tokenResponse);
                 }
                 else
                 {
@@ -317,17 +317,17 @@ namespace GameStatsApp.Service
                 }          
             }
 
-            return new Tuple<UserGameAccountView, string>(userGameAccountVW, authUrl);
+            return new Tuple<UserAccountView, string>(userAccountVW, authUrl);
         }
 
-        public async Task ImportGamesFromUserGameAccount(int userID, UserGameAccountView userGameAccountVW, bool isImportAll)
+        public async Task ImportGamesFromUserAccount(int userID, UserAccountView userAccountVW, bool isImportAll)
         {
             var gameNames = new List<string>();
 
-            if (userGameAccountVW.GameAccountTypeID == (int)GameAccountType.Xbox)
+            if (userAccountVW.AccountTypeID == (int)AccountType.Xbox)
             {
-                var lastImportDate = isImportAll ? null : userGameAccountVW.ImportLastRunDate;
-                gameNames = await _authService.GetUserGameNames(userGameAccountVW.AccountUserHash, userGameAccountVW.Token, Convert.ToUInt64(userGameAccountVW.AccountUserID), lastImportDate);
+                var lastImportDate = isImportAll ? null : userAccountVW.ImportLastRunDate;
+                gameNames = await _authService.GetUserGameNames(userAccountVW.AccountUserHash, userAccountVW.Token, Convert.ToUInt64(userAccountVW.AccountUserID), lastImportDate);
             }
 
             var gameIDs = new List<int>();
@@ -341,21 +341,21 @@ namespace GameStatsApp.Service
                 batchCount += maxBatchCount;
             }
 
-            var allUserGameListID = _userRepo.GetUserGameLists(i => i.UserID == userID && i.DefaultGameListID == (int)DefaultGameList.AllGames)
+            var allUserListID = _userRepo.GetUserLists(i => i.UserID == userID && i.DefaultListID == (int)DefaultList.AllGames)
                                              .Select(i => i.ID)
                                              .FirstOrDefault();
-            var existingGameIDs = _userRepo.GetGamesByUserGameList(allUserGameListID).Select(i => i.ID).ToList();
-            var userGameListGames = gameIDs.Where(i => !existingGameIDs.Contains(i))
-                                           .Select(i => new UserGameListGame() { UserGameListID = allUserGameListID, GameID = i })
+            var existingGameIDs = _userRepo.GetGamesByUserList(allUserListID).Select(i => i.ID).ToList();
+            var userListGames = gameIDs.Where(i => !existingGameIDs.Contains(i))
+                                           .Select(i => new UserListGame() { UserListID = allUserListID, GameID = i })
                                            .ToList();
 
-            if (userGameListGames.Any())
+            if (userListGames.Any())
             {
-                _userRepo.SaveUserGameListGames(userGameListGames);
+                _userRepo.SaveUserListGames(userListGames);
             }
 
-            userGameAccountVW.ImportLastRunDate = DateTime.UtcNow;
-            _userRepo.SaveUserGameAccount(userGameAccountVW.ConvertToUserGameAccount());       
+            userAccountVW.ImportLastRunDate = DateTime.UtcNow;
+            _userRepo.SaveUserAccount(userAccountVW.ConvertToUserAccount());       
         }
         
         //jqvalidate
