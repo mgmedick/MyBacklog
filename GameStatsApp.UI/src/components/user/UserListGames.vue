@@ -140,7 +140,7 @@
                 var that = this;
                 this.loading = true;
 
-                axios.get('/User/GetGamesByUserList', { params: { userListID: this.userlistid } })
+                axios.get('/User/GetUserListGames', { params: { userListID: this.userlistid } })
                     .then(res => {
                         that.games = res.data;
                         that.allgames = res.data.slice();                      

@@ -8,8 +8,9 @@ namespace GameStatsApp.Model.Data
     {
         public int ID { get; set; }
         public string Name { get; set; }
-        public int UserListGameID { get; set; }
+        public int UserListID { get; set; }
         public string CoverImagePath { get; set; }
-        public string UserListIDs { get; set; }        
+        public string UserListIDs { get; set; }
+        public int UserListGameID { get; set; }
     }
 } 

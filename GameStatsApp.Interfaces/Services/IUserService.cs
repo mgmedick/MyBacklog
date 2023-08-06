@@ -29,7 +29,7 @@ namespace GameStatsApp.Interfaces.Services
         Task SendConfirmRegistrationEmail(string email, string username);
         IEnumerable<SearchResult> SearchUsers(string searchText);
         IEnumerable<UserList> GetUserLists (int userID);
-        IEnumerable<GameViewModel> GetGamesByUserList (int userListID);
+        IEnumerable<UserListGameViewModel> GetUserListGames (int userListID);               
         void SaveUserAccount(int userID, int accountTypeID, TokenResponse tokenResponse);
         IEnumerable<UserAccountViewModel> GetUserAccounts(int userID);   
         Task<Tuple<UserAccountView, string>> GetRefreshedUserAccount(int userID, int userAccountID);

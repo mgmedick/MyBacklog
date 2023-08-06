@@ -146,15 +146,13 @@ namespace GameStatsApp.Repository
             }
         }
 
-        public IEnumerable<GameView> GetGamesByUserList(int userListID)
+        public IEnumerable<UserListGameView> GetUserListGameViews(Expression<Func<UserListGameView, bool>> predicate)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                var results = db.Query<GameView>("CALL GetGamesByUserList (@0);", userListID).ToList();
-
-                return results;
+                return db.Query<UserListGameView>().Where(predicate).ToList();
             }
-        }                       
+        }        
 
         public void SaveUserLists(IEnumerable<UserList> userLists)
         {

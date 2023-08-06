@@ -223,12 +223,12 @@ namespace GameStatsApp.Service
             return userLists;
         }     
 
-        public IEnumerable<GameViewModel> GetGamesByUserList (int userListID)
+        public IEnumerable<UserListGameViewModel> GetUserListGames (int userListID)
         { 
-            var gameVMs = _userRepo.GetGamesByUserList(userListID).Select(i => new GameViewModel(i)).ToList();
+            var gameVMs = _userRepo.GetUserListGameViews(i => i.UserListID == userListID).Select(i => new UserListGameViewModel(i)).ToList();
 
             return gameVMs;
-        }   
+        }         
 
         public void AddGameToUserList(int userID, int userListID, int gameID)
         {         

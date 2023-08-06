@@ -24,7 +24,7 @@ namespace GameStatsApp.Interfaces.Repositories
         void SaveUserListGame(UserListGame userListGame);
         void SaveUserListGames(IEnumerable<UserListGame> userListGames);
         void DeleteUserListGame(int userListID, int gameID);
-        IEnumerable<GameView> GetGamesByUserList(int userListID);
+        IEnumerable<UserListGameView> GetUserListGameViews(Expression<Func<UserListGameView, bool>> predicate);
         IEnumerable<SearchResult> SearchUsers(string searchText);
     }
 }
