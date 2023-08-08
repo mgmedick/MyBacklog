@@ -2,24 +2,24 @@
     <div class="mx-auto">
         <h2 class="text-center mb-3">Import Games</h2>
         <div class="mx-auto" style="max-width:400px;">
-            <div class="toast-container position-absolute sticky-top p-3 top-0 end-0" id="toastPlacement" style="margin-top: 70px;"> 
-                <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <span>{{ errorMessage }}</span>
+            <div id="toastPlacement" ref="toastcontainer" class="toast-container position-fixed top-0 end-0" style="margin-top:70px;"> 
+                    <div ref="errortoast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <span class="msg-text"></span>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                </div>           
-                <div ref="successtoast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <span>{{ successMessage }}</span>
+                    </div>              
+                    <div ref="successtoast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <span class="msg-text"></span>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
+                    </div>                         
                 </div>
-            </div>
             <div class="row g-2 justify-content-center mb-3">
                 <div class="p-0">
                     <input type="radio" class="btn-check" name="options-outlined" id="latest-outlined" autocomplete="off" value="0" v-model="isImportAll">
@@ -58,11 +58,7 @@
         data() {
             return {
                 selectedUserAccountID: null,   
-                isImportAll: 0,           
-                successToast: {},
-                successMessage: '',
-                errorMessages: [],
-                errorToast: {}
+                isImportAll: 0
             }
         },
         computed: {
@@ -71,22 +67,13 @@
         },        
         mounted: function () {
             var that = this;
-            that.successToast = new Toast(that.$refs.successtoast);
-            that.errorToast = new Toast(that.$refs.errortoast);
 
             if (that.importgamesvm.authSuccess != null) {
                 if (that.importgamesvm.authSuccess) {
                     var userAccount = that.importgamesvm.userAccounts.find(i => i.accountTypeID == that.importgamesvm.authAccountTypeID);
                     that.ImportGames(userAccount);
                 } else {            
-                    that.errorMessages = ["Error authorizing account"];
-                    if (that.errorMessages.length > 0) {
-                        that.$nextTick(function() {
-                            that.$refs.errortoasts?.forEach(el => {
-                                new Toast(el).show();
-                            });
-                        }); 
-                    } 
+                    that.onError("Error authorizing account");       
                 }
             }            
         },        
@@ -129,22 +116,28 @@
                 return axios.post('/Home/ImportGames', null,{ params: { userAccountID: userAccount.id, isImportAll: that.isImportAll == 1 } })
                     .then((res) => {
                         if (res.data.success) {
-                            that.successMessage = "Successfully imported " + userAccount.accountTypeName + " games"
-                            that.successToast.show();
+                            that.onSuccess("Successfully imported " + userAccount.accountTypeName + " games");
                         } else {
-                            that.errorMessages = ["Error importing " + userAccount.accountTypeName + " games"];
-                            if (that.errorMessages.length > 0) {
-                                that.$nextTick(function() {
-                                    that.$refs.errortoasts?.forEach(el => {
-                                        new Toast(el).show();
-                                    });
-                                }); 
-                            }                           
+                            that.onError("Error importing " + userAccount.accountTypeName + " games");                                               
                         }
                         that.selectedUserAccountID = null;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            },            
+            },    
+            onSuccess(successMsg) {
+                var that = this;
+                var el = that.$refs.successtoast.cloneNode(true);
+                el.querySelector('.msg-text').innerHTML = successMsg;
+                that.$refs.toastcontainer.appendChild(el);
+                new Toast(el).show();    
+            },
+            onError(errorMsg) {
+                var that = this;
+                var el = that.$refs.errortoast.cloneNode(true);
+                el.querySelector('.msg-text').innerHTML = errorMsg;
+                that.$refs.toastcontainer.appendChild(el);
+                new Toast(el).show();  
+            }                              
         }
     };
 </script>

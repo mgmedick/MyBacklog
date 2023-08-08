@@ -73,7 +73,9 @@
                         if (res.data.success) {
                             that.$emit('success', "Successfully updated username");                           
                         } else {
-                            that.$emit('error', res.data.errorMessages);                           
+                            res.data.errorMessages.forEach(errorMsg => {
+                                that.$emit('error', errorMsg);                           
+                            });                                
                         }
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });

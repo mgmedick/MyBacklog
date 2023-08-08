@@ -257,16 +257,16 @@ namespace GameStatsApp.Service
                         
             if (userListVM.GameIDs.Contains(gameID))
             {
-                _userRepo.DeleteUserListGame(gameID, userListID);
+                _userRepo.DeleteUserListGame(userListID, gameID);
 
-                if (userListVM.DefaultListID != (int)DefaultList.AllGames)
-                {
-                    var allUserListVM = _userRepo.GetUserListViews(i => i.UserID == userID && i.ID == (int)DefaultList.AllGames).Select(i => new UserListViewModel(i)).FirstOrDefault();   
-                    if (allUserListVM.GameIDs.Contains(gameID))
-                    {
-                        _userRepo.DeleteUserListGame(gameID, allUserListVM.ID);
-                    }
-                }
+                // if (userListVM.DefaultListID != (int)DefaultList.AllGames)
+                // {
+                //     var allUserListVM = _userRepo.GetUserListViews(i => i.UserID == userID && i.ID == (int)DefaultList.AllGames).Select(i => new UserListViewModel(i)).FirstOrDefault();   
+                //     if (allUserListVM.GameIDs.Contains(gameID))
+                //     {
+                //         _userRepo.DeleteUserListGame(allUserListVM.ID, gameID);
+                //     }
+                // }
             }
         }
 
@@ -344,7 +344,7 @@ namespace GameStatsApp.Service
             var allUserListID = _userRepo.GetUserLists(i => i.UserID == userID && i.DefaultListID == (int)DefaultList.AllGames)
                                              .Select(i => i.ID)
                                              .FirstOrDefault();
-            var existingGameIDs = _userRepo.GetGamesByUserList(allUserListID).Select(i => i.ID).ToList();
+            var existingGameIDs = _userRepo.GetUserListGameViews(i=>i.UserListID == allUserListID).Select(i => i.ID).ToList();
             var userListGames = gameIDs.Where(i => !existingGameIDs.Contains(i))
                                            .Select(i => new UserListGame() { UserListID = allUserListID, GameID = i })
                                            .ToList();

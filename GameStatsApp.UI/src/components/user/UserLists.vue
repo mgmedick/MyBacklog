@@ -1,22 +1,22 @@
 ﻿<template>
     <div>
-        <div class="toast-container position-absolute sticky-top p-3 top-0 end-0" id="toastPlacement" style="margin-top: 70px;"> 
-            <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="toastPlacement" ref="toastcontainer" class="toast-container position-fixed top-0 end-0" style="margin-top:70px;"> 
+            <div ref="errortoast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
                     <div class="toast-body">
-                        <span>{{ errorMessage }}</span>
+                        <span class="msg-text"></span>
                     </div>
                     <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>
-            </div>           
+            </div>              
             <div ref="successtoast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
                     <div class="toast-body">
-                        <span>{{ successMessage }}</span>
+                        <span class="msg-text"></span>
                     </div>
                     <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>
-            </div>
+            </div>                         
         </div>
         <div class="show-lg d-flex flex-column flex-shrink-0 p-3 position-absolute top-0 start-0 bg-light" style="width: 280px; height: 100vh; margin-top: 63px;">
             <ul class="nav nav-pills flex-column mb-auto">
@@ -62,10 +62,8 @@
             return {
                 userLists: [],
                 selectedItemID: 0,
-                successToast: {},
-                successMessage: '',
-                errorMessages: [],
-                errorToast: {}
+                successMessages: [],
+                errorMessages: []
             };
         },       
         watch: {},
@@ -74,8 +72,6 @@
         },
         mounted: function() {
             var that = this;
-            that.successToast = new Toast(that.$refs.successtoast);
-            that.errorToast = new Toast(that.$refs.errortoast);
         },
         methods: {
             getIconClass: function (id) {
@@ -100,20 +96,18 @@
             },
             onSuccess(successMsg) {
                 var that = this;
-
-                that.successMessage = successMsg;
-                that.successToast.show();
+                var el = that.$refs.successtoast.cloneNode(true);
+                el.querySelector('.msg-text').innerHTML = successMsg;
+                that.$refs.toastcontainer.appendChild(el);
+                new Toast(el).show();
             },
-            onError(errorMsgs) {
+            onError(errorMsg) {
                 var that = this;
-
-                that.errorMessages = errorMsgs;
-                that.$nextTick(function() {
-                    that.$refs.errortoasts?.forEach(el => {
-                        new Toast(el).show();
-                    });
-                }); 
-            }                      
+                var el = that.$refs.errortoast.cloneNode(true);
+                el.querySelector('.msg-text').innerHTML = errorMsg;
+                that.$refs.toastcontainer.appendChild(el);
+                new Toast(el).show();  
+            }                                        
         },
     };
 </script>

@@ -3,23 +3,23 @@
         <h2 class="text-center mb-3">Change Password</h2>
         <div class="mx-auto" style="max-width:400px;">
             <form v-if="islinkvalid" @submit.prevent="submitForm">         
-                <div class="toast-container position-absolute sticky-top p-3 top-0 end-0" id="toastPlacement" style="margin-top: 70px;"> 
-                    <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div id="toastPlacement" ref="toastcontainer" class="toast-container position-fixed top-0 end-0" style="margin-top:70px;"> 
+                    <div ref="errortoast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
                         <div class="d-flex">
                             <div class="toast-body">
-                                <span>{{ errorMessage }}</span>
+                                <span class="msg-text"></span>
                             </div>
                             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
-                    </div>            
+                    </div>              
                     <div ref="successtoast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
                         <div class="d-flex">
                             <div class="toast-body">
-                                <span>Successfully reset password</span>
+                                <span class="msg-text"></span>
                             </div>
                             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
-                    </div>
+                    </div>                         
                 </div>
                 <div class="mb-2">
                     <label for="txtPassword" class="form-label">New Password</label>
@@ -88,16 +88,12 @@
                     ConfirmPassword: ''
                 },
                 showResetModal: false,
-                showSuccess: false,
-                errorMessages: [],
-                successToast: {},
-                errorToasts: []
+                showSuccess: false
             }
         },
         computed: {
         },
         mounted: function () {
-            this.successToast = new Toast(this.$refs.successtoast);
         },
         methods: {
             async submitForm() {
@@ -110,19 +106,29 @@
                 axios.post('/Home/ChangePassword', formData)
                     .then((res) => {
                         if (res.data.success) {
-                            that.successToast.show();
-                            //location.href = '/';
+                            that.onSuccess("Password has been reset");
                         } else {
-                            that.errorMessages = res.data.errorMessages;
-                            that.$nextTick(function() {
-                                that.$refs.errortoasts?.forEach(el => {
-                                    new Toast(el).show();
-                                });
-                            });
+                            res.data.errorMessages.forEach(errorMsg => {
+                                that.onError(errorMsg);                           
+                            });     
                         }
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            }
+            },
+            onSuccess(successMsg) {
+                var that = this;
+                var el = that.$refs.successtoast.cloneNode(true);
+                el.querySelector('.msg-text').innerHTML = successMsg;
+                that.$refs.toastcontainer.appendChild(el);
+                new Toast(el).show();    
+            },
+            onError(errorMsg) {
+                var that = this;
+                var el = that.$refs.errortoast.cloneNode(true);
+                el.querySelector('.msg-text').innerHTML = errorMsg;
+                that.$refs.toastcontainer.appendChild(el);
+                new Toast(el).show();  
+            }                                             
         },
         validations() {
             return {

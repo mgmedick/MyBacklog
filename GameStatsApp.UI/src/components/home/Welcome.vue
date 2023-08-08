@@ -2,26 +2,26 @@
     <div class="mx-auto">
         <h2 class="text-center mb-1">Welcome to GameStatsApp</h2>
         <div class="mx-auto" style="max-width:400px;">
-            <div class="toast-container position-absolute sticky-top p-3 top-0 end-0" id="toastPlacement" style="margin-top: 70px;"> 
-                <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div id="toastPlacement" ref="toastcontainer" class="toast-container position-fixed top-0 end-0" style="margin-top:70px;"> 
+                <div ref="errortoast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
                     <div class="d-flex">
                         <div class="toast-body">
-                            <span>{{ errorMessage }}</span>
+                            <span class="msg-text"></span>
                         </div>
                         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
-                </div>           
+                </div>              
                 <div ref="successtoast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
                     <div class="d-flex">
                         <div class="toast-body">
-                            <span>{{ successMessage }}</span>
+                            <span class="msg-text"></span>
                         </div>
                         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
-                </div>
+                </div>                         
             </div>
             <div class="mb-3">
-                <change-username :username="welcomevm.username" @success="onChangeUsernameSuccess" @error="onChangeUsernameError"></change-username>
+                <change-username :username="welcomevm.username" @success="onSuccess" @error="onError"></change-username>
             </div>
             <div class="text-center">
                 <p class="lead text-dark">Link an account to keep your game library up to date automatically</p>
@@ -46,47 +46,37 @@
         },
         data() {
             return {
-                successToast: {},
                 successMessage: '',
                 errorMessages: [],
-                errorToast: {}
             }
         },
         computed: {
         },
         mounted: function () {
             var that = this;
-            that.successToast = new Toast(that.$refs.successtoast);
-            that.errorToast = new Toast(that.$refs.errortoast);
 
             if (that.welcomevm.authSuccess != null) {
                 if (that.welcomevm.authSuccess) {
-                    that.successMessage = "Successfully linked account"
-                    that.successToast.show();
-                } else {            
-                    that.errorMessages = ["Error linking account"];
-                    if (that.errorMessages.length > 0) {
-                        that.$nextTick(function() {
-                            that.$refs.errortoasts?.forEach(el => {
-                                new Toast(el).show();
-                            });
-                        }); 
-                    } 
+                    that.onSuccess("Successfully linked account");             
+                } else {                 
+                    that.onError("Error linking account");             
                 }
             }            
         },
         methods: {
-            onChangeUsernameSuccess(successMsg) {
-                that.successMessage = successMsg;
-                that.successToast.show();
+            onSuccess(successMsg) {
+                var that = this;
+                var el = that.$refs.successtoast.cloneNode(true);
+                el.querySelector('.msg-text').innerHTML = successMsg;
+                that.$refs.toastcontainer.appendChild(el);
+                new Toast(el).show();    
             },
-            onChangeUsernameError(errorMsgs) {
-                that.errorMessages = errorMsgs;
-                that.$nextTick(function() {
-                    that.$refs.errortoasts?.forEach(el => {
-                        new Toast(el).show();
-                    });
-                }); 
+            onError(errorMsg) {
+                var that = this;
+                var el = that.$refs.errortoast.cloneNode(true);
+                el.querySelector('.msg-text').innerHTML = errorMsg;
+                that.$refs.toastcontainer.appendChild(el);
+                new Toast(el).show();  
             },
             onXboxClick() {
                 location.href = this.welcomevm.windowsLiveAuthUrl;

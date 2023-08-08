@@ -1,7 +1,7 @@
 ﻿<template>
     <div class="container games-container p-0">
         <div class="d-flex align-items-center mb-3">
-            <div v-if="userlists.find(i => i.defaultListID == 1)?.id == userlistid" class="me-2">
+            <div v-if="userlists.find(i => i.defaultListID == 1).id == userlistid" class="me-2">
                 <a href="/ImportGames" class="btn btn-secondary p-2" tabindex="-1" role="button">
                     <font-awesome-icon icon="fa-solid fa-cloud-arrow-down" size="2xl"/>
                 </a>
@@ -17,7 +17,6 @@
                         <li><a href="#" @click="onOrderByOptionClick($event, 1)" class="dropdown-item" :class="{ 'active' : orderByID == 1 }">Name</a></li>
                     </ul>
                 </div>                             
-                <input type="text" class="form-control" autocomplete="off" v-model="filterText" aria-describedby="spnUserNameErrors" placeholder="Filter games">         
             </div>
         </div>
         <div v-if="loading" class="center" style="font-size: 25px;">
@@ -38,11 +37,11 @@
                     <span style="color: #fff; width:100%; min-height: 50px;">{{ game.name }}</span>
                 </div>
                 <div class="gamelist-icons px-1 d-none" style="margin-top: -50px; margin-bottom: 10px;">
-                    <div class="btn-group gamelist-container" role="group" style="width: 100%;">
-                        <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID && i.defaultListID != 1)" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }">
+                    <div class="btn-group" role="group" style="width: 100%;">
+                        <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID && i.defaultListID != 1)" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
                             <font-awesome-icon :icon="getIconClass(userList.defaultListID)" size="lg"/>
                         </button>
-                        <div v-if="userlists.filter(i => !i.defaultListID).length > 0" class="btn-group btn-group-sm gamelist-container" role="group">
+                        <div v-if="userlists.filter(i => !i.defaultListID).length > 0" class="btn-group btn-group-sm" role="group">
                             <button type="button" class="btn btn-light dropdown-toggle" :class="{ 'active' : userlists.filter(i => !i.defaultListID && game.userListIDs.indexOf(i.id) > -1).length > 0 }" data-bs-toggle="dropdown" aria-expanded="false">
                                 <font-awesome-icon icon="fa-solid fa-ellipsis" size="lg"/>
                             </button>
@@ -62,11 +61,11 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p>Remove <strong>{{ game?.name }}</strong> from all your lists?</p>
+                        <p>Remove <strong>{{ game.name }}</strong> from all your lists?</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" @click="removeGameFromAllUserLists">Continue</button>
+                        <button type="button" class="btn btn-primary" @click="onRemoveGameClick($event, game)">Continue</button>
                     </div>
                 </div>
             </div>
@@ -185,11 +184,12 @@
             }, 
             onGameImageClick(e) {
                 var container = e.target.closest('.game-image-container');
+                var gamelisticons = e.target.closest('.gamelist-icons');
                 if (!container.classList.contains('active')) {
                     container.querySelector('.gamelist-icons').classList.remove('d-none');
                     container.querySelector('.delete-icon').classList.remove('d-none');
                     container.classList.add('active');
-                } else {
+                } else if (!gamelisticons) {
                     container.querySelector('.gamelist-icons').classList.add('d-none');
                     container.querySelector('.delete-icon').classList.add('d-none');
                     container.classList.remove('active');                    
@@ -204,6 +204,9 @@
                     that.removeModal.show();
                 }
             },
+            onRemoveGameClick(e, game) {
+                this.removeGameFromAllUserLists(game);
+            },            
             onUserListClick(e, userList, game) {
                 var el = e.target;
                 if (!el.closest('.gamelist-icons').classList.contains('d-none')) {
@@ -297,49 +300,69 @@
             },                              
             addGameToUserList(userList, game, el) {
                 var that = this;
+                if (game.userListIDs.indexOf(userList.id) == -1) {
+                    game.userListIDs.push(userList.id);
+                } 
 
                 return axios.post('/User/AddGameToUserList', null,{ params: { userListID: userList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {
-                            el?.closest('.gamelist-item').classList.add('active');
-                            el?.closest('.gamelist-container').querySelector('button').classList.add('active');
                             if (that.games.filter(i => i.id == game.id).length == 0) {
                                 that.games.push(game);
-                            }                            
-                            that.$emit('success', "Successfully added " + game.name + " to " + userList.name);
-                        } else {
-                            that.$emit('error', res.data.errorMessages);                           
+                                that.allgames.push({...game});
+                            }
+
+                            that.$emit('success', "Added " + game.name + " to " + userList.name);
+                        } else {                        
+                            if (game.userListIDs.indexOf(userList.id) > -1) {
+                                game.userListIDs.splice(game.userListIDs.indexOf(userList.id),1);
+                            } 
+
+                            res.data.errorMessages.forEach(errorMsg => {
+                                that.$emit('error', errorMsg);                           
+                            });                              
                         }                        
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },          
             removeGameFromUserList(userList, game, el) {
-                var that = this;
-                
+                var that = this;                
+                game.userListIDs = game.userListIDs.filter(i => i != userList.id);
+
                 return axios.post('/User/RemoveGameFromUserList', null,{ params: { userListID: userList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {
-                            el.closest('.gamelist-item').classList.remove('active'); 
-                            if (el.closest('.gamelist-container').querySelectorAll('.dropdown-item.active').length == 0){
-                                el.closest('.gamelist-container').querySelector('button').classList.remove('active');                                                                                      
-                            }                                                                              
-                            that.$emit('success', "Successfully removed " + game.name + " from " + userList.name);
+                            if (that.userlistid == userList.id) {
+                                that.games = that.games.filter(i => i.id != game.id);            
+                                that.allgames = that.allgames.filter(i => i.id != game.id);  
+                            }
+
+                            that.$emit('success', "Removed " + game.name + " from " + userList.name);
                         } else {
-                            that.$emit('error', res.data.errorMessages);                           
+                            if (game.userListIDs.indexOf(userList.id) == -1) {
+                                game.userListIDs.push(userList.id);
+                            } 
+
+                            res.data.errorMessages.forEach(errorMsg => {
+                                that.$emit('error', errorMsg);                           
+                            });                           
                         }                        
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },
-            removeGameFromAllUserLists() {
+            removeGameFromAllUserLists(game) {
                 var that = this;
 
-                return axios.post('/User/RemoveGameFromAllUserLists', null,{ params: { gameID: that.game.id } })
+                return axios.post('/User/RemoveGameFromAllUserLists', null,{ params: { gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {    
-                            that.$emit('success', "Successfully removed " + that.game.name + " from all lists");
-                            that.games = that.games.filter(i => i.id != that.game.id);            
+                            that.games = that.games.filter(i => i.id != game.id);            
+                            that.allgames = that.allgames.filter(i => i.id != game.id);            
+                            that.$emit('success', "Removed " + game.name + " from all lists");
                         } else {
-                            that.$emit('error', res.data.errorMessages);                           
+                            res.data.errorMessages.forEach(errorMsg => {
+                                that.$emit('error', errorMsg);                           
+                            });                           
                         }   
                         that.removeModal.hide();  
                     })
