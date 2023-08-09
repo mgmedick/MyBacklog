@@ -229,7 +229,11 @@ namespace GameStatsApp.Service
             results = items.Where(obj => ((string)obj["titleType"]) == "Game" && (!importLastRunDate.HasValue || ((DateTime)obj["lastUnlock"]) >= importLastRunDate))
                             .OrderBy(obj => (DateTime)obj["lastUnlock"])
                             .Select(obj => (string)obj["name"]).ToList();
-                            
+
+            results = results.GroupBy(g => new { g })
+                .Select(i => i.First())
+                .ToList();
+                                      
             return results;
         }
         

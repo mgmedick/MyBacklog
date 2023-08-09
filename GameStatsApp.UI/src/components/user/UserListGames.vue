@@ -28,7 +28,7 @@
                     <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px; padding-top: 50%; padding-bottom: 50%;"/>
                 </div>
             </div>
-            <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-6 game-image-container" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
+            <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-6 game-image-container" :key="game.id" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
                 <div class="delete-icon d-none" style="margin-bottom:-35px; margin-top: 8.5px; position: relative;">
                     <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="d-flex ms-auto me-2" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/>
                 </div>                
@@ -38,15 +38,15 @@
                 </div>
                 <div class="gamelist-icons px-1 d-none" style="margin-top: -50px; margin-bottom: 10px;">
                     <div class="btn-group" role="group" style="width: 100%;">
-                        <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID && i.defaultListID != 1)" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
+                        <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID && i.defaultListID != 1)" :key="userList.id" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
                             <font-awesome-icon :icon="getIconClass(userList.defaultListID)" size="lg"/>
                         </button>
-                        <div v-if="userlists.filter(i => !i.defaultListID).length > 0" class="btn-group btn-group-sm" role="group">
+                        <div v-if="userlists.filter(i => !i.defaultListID).length > 0" class="btn-group btn-group-sm gamelist-btn-group" role="group">
                             <button type="button" class="btn btn-light dropdown-toggle" :class="{ 'active' : userlists.filter(i => !i.defaultListID && game.userListIDs.indexOf(i.id) > -1).length > 0 }" data-bs-toggle="dropdown" aria-expanded="false">
                                 <font-awesome-icon icon="fa-solid fa-ellipsis" size="lg"/>
                             </button>
                             <ul class="dropdown-menu">
-                                <li v-for="(userList, userListIndex) in userlists.filter(i => !i.defaultListID)"><a @click="onUserListClick($event, userList, game)" href="#" class="dropdown-item gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }">{{ userList.name }}</a></li>
+                                <li v-for="(userList, userListIndex) in userlists.filter(i => !i.defaultListID)" :key="userList.id"><a @click="onUserListClick($event, userList, game)" href="#" class="dropdown-item gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }">{{ userList.name }}</a></li>
                             </ul>
                         </div>
                     </div>
@@ -300,19 +300,22 @@
             },                              
             addGameToUserList(userList, game, el) {
                 var that = this;
-                if (game.userListIDs.indexOf(userList.id) == -1) {
-                    game.userListIDs.push(userList.id);
-                } 
+                el.closest('.gamelist-item').classList.add('active');
+                el.closest('.gamelist-btn-group button')?.classList.add('active');
 
                 return axios.post('/User/AddGameToUserList', null,{ params: { userListID: userList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {
+                            if (game.userListIDs.indexOf(userList.id) == -1) {
+                                game.userListIDs.push(userList.id);
+                            } 
+
                             if (that.games.filter(i => i.id == game.id).length == 0) {
                                 that.games.push(game);
                                 that.allgames.push({...game});
                             }
 
-                            that.$emit('success', "Added " + game.name + " to " + userList.name);
+                            that.$emit('success', "Added <strong>" + game.name + "</strong> to <strong>" + userList.name + "</strong>");
                         } else {                        
                             if (game.userListIDs.indexOf(userList.id) > -1) {
                                 game.userListIDs.splice(game.userListIDs.indexOf(userList.id),1);
@@ -327,17 +330,20 @@
             },          
             removeGameFromUserList(userList, game, el) {
                 var that = this;                
-                game.userListIDs = game.userListIDs.filter(i => i != userList.id);
+                el.closest('.gamelist-item').classList.remove('active');
+                el.closest('.gamelist-btn-group button')?.classList.add('active');
 
                 return axios.post('/User/RemoveGameFromUserList', null,{ params: { userListID: userList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {
+                            game.userListIDs = game.userListIDs.filter(i => i != userList.id);
+
                             if (that.userlistid == userList.id) {
                                 that.games = that.games.filter(i => i.id != game.id);            
                                 that.allgames = that.allgames.filter(i => i.id != game.id);  
                             }
 
-                            that.$emit('success', "Removed " + game.name + " from " + userList.name);
+                            that.$emit('success', "Removed <strong>" + game.name + "</strong> from <strong>" + userList.name + "</strong>");
                         } else {
                             if (game.userListIDs.indexOf(userList.id) == -1) {
                                 game.userListIDs.push(userList.id);
@@ -358,7 +364,7 @@
                         if (res.data.success) {    
                             that.games = that.games.filter(i => i.id != game.id);            
                             that.allgames = that.allgames.filter(i => i.id != game.id);            
-                            that.$emit('success', "Removed " + game.name + " from all lists");
+                            that.$emit('success', "Removed <strong>" + game.name + "</strong> from <strong>all lists</strong>");
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {
                                 that.$emit('error', errorMsg);                           

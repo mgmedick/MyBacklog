@@ -18,7 +18,7 @@
                 </div>
             </div>                         
         </div>
-        <div class="show-lg d-flex flex-column flex-shrink-0 p-3 position-absolute top-0 start-0 bg-light" style="width: 280px; height: 100vh; margin-top: 63px;">
+        <div class="show-lg d-flex flex-column flex-shrink-0 p-3 position-absolute top-0 start-0" style="width: 280px; height: 100vh; margin-top: 63px;">
             <ul class="nav nav-pills flex-column mb-auto">
                 <li v-for="(userList, userListIndex) in indexvm.userLists.filter(i => i.defaultListID)" key="userList.id" class="nav-item">
                     <a @click="selectedItemID = userList.id" href="#" class="nav-link" :class="{ 'active' : selectedItemID == userList.id }">
