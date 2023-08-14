@@ -3,16 +3,6 @@
         <h2 class="text-center mb-3">Reset Password</h2>
         <div class="mx-auto" style="max-width:400px;">
             <form @submit.prevent="submitForm">
-                <div class="toast-container position-absolute sticky-top p-3 top-0 end-0" id="toastPlacement" style="margin-top: 70px;"> 
-                    <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                <span>{{ errorMessage }}</span>
-                            </div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
-                    </div> 
-                </div>
                 <div class="mb-3">
                     <label for="txtEmail" class="form-label">Email</label>
                     <input id="txtEmail" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Email" @blur="v$.form.Email.$touch" aria-describedby="spnEmailErrors">
@@ -53,11 +43,10 @@
     </div>
 </template>
 <script>
-    import { getFormData } from '../../js/common.js';
+    import { getFormData, successToast, errorToast } from '../../js/common.js';
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, helpers } from '@vuelidate/validators';
-    import { Toast } from 'bootstrap';
     const { withAsync } = helpers;
 
     const asyncActiveEmailExists = async (value) => {
@@ -84,9 +73,7 @@
                     Email: this.email
                 },
                 loading: false,
-                showSuccess: false,
-                errorMessages: [],
-                errorToasts: []
+                showSuccess: false
             }
         },
         computed: {
@@ -107,18 +94,15 @@
                         if (res.data.success){
                             that.showSuccess = true;
                         } else {
-                            that.errorMessages = res.data.errorMessages;
-                            that.$nextTick(function() {
-                                that.$refs.errortoasts?.forEach(el => {
-                                    new Toast(el).show();
-                                });
+                            res.data.errorMessages.forEach(errorMsg => {
+                                errorToast(errorMsg);                           
                             }); 
                         }
 
                         that.loading = false;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            }
+            }                          
         },
         validations() {
             return {

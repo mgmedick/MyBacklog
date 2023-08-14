@@ -2,9 +2,15 @@
     <div class="container games-container p-0">
         <div class="d-flex align-items-center mb-3">
             <div v-if="userlists.find(i => i.defaultListID == 1).id == userlistid" class="me-2">
-                <a href="/ImportGames" class="btn btn-secondary p-2" tabindex="-1" role="button">
-                    <font-awesome-icon icon="fa-solid fa-cloud-arrow-down" size="2xl"/>
+                <a v-if="selectedUserAccountID" href="/ImportGames" class="btn btn-secondary ps-2 pe-3" tabindex="-1" role="button">
+                    <font-awesome-layers class="fa-2xl">
+                        <font-awesome-icon icon="fa-solid fa-spinner m-2" spin transform="shrink-5" style="color: #adb5bd; margin-left: 0.25rem; z-index: 9999;"/>
+                        <font-awesome-icon icon="fa-solid fa-cloud"/>
+                    </font-awesome-layers>
                 </a>
+                <a v-else href="/ImportGames" class="btn btn-secondary p-2" tabindex="-1" role="button">
+                    <font-awesome-icon icon="fa-solid fa-cloud-arrow-down" size="2xl"/>
+                </a>                
             </div>        
             <div class="d-flex ms-auto">   
                 <div class="btn-group me-1" role="group">
@@ -88,6 +94,7 @@
 <script>
     import axios from 'axios';
     import { Modal } from 'bootstrap';
+    import { successToast, errorToast } from '../../js/common.js';
 
     export default {
         name: "UserListGames",
@@ -108,8 +115,8 @@
                 searchResults: [],
                 searchLoading: false,
                 filterText: null,
-                orderByDesc: true,
-                orderByID: 0 
+                orderByDesc: true,             
+                orderByID: 0
             };
         },       
         watch: {
@@ -132,7 +139,7 @@
             that.searchModal = new Modal(that.$refs.searchmodal);
             that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {
                 that.$refs.searchAutocomplete.clear();
-            });
+            });          
         },
         methods: {
             loadData: function () {
@@ -314,15 +321,14 @@
                                 that.games.push(game);
                                 that.allgames.push({...game});
                             }
-
-                            that.$emit('success', "Added <strong>" + game.name + "</strong> to <strong>" + userList.name + "</strong>");
+                            successToast("Added <strong>" + game.name + "</strong> to <strong>" + userList.name + "</strong>");
                         } else {                        
                             if (game.userListIDs.indexOf(userList.id) > -1) {
                                 game.userListIDs.splice(game.userListIDs.indexOf(userList.id),1);
                             } 
 
                             res.data.errorMessages.forEach(errorMsg => {
-                                that.$emit('error', errorMsg);                           
+                                errorToast(errorMsg);                           
                             });                              
                         }                        
                     })
@@ -342,15 +348,14 @@
                                 that.games = that.games.filter(i => i.id != game.id);            
                                 that.allgames = that.allgames.filter(i => i.id != game.id);  
                             }
-
-                            that.$emit('success', "Removed <strong>" + game.name + "</strong> from <strong>" + userList.name + "</strong>");
+                            successToast("Removed <strong>" + game.name + "</strong> from <strong>" + userList.name + "</strong>");
                         } else {
                             if (game.userListIDs.indexOf(userList.id) == -1) {
                                 game.userListIDs.push(userList.id);
                             } 
 
                             res.data.errorMessages.forEach(errorMsg => {
-                                that.$emit('error', errorMsg);                           
+                                errorToast(errorMsg);                           
                             });                           
                         }                        
                     })
@@ -364,16 +369,16 @@
                         if (res.data.success) {    
                             that.games = that.games.filter(i => i.id != game.id);            
                             that.allgames = that.allgames.filter(i => i.id != game.id);            
-                            that.$emit('success', "Removed <strong>" + game.name + "</strong> from <strong>all lists</strong>");
+                            successToast("Removed <strong>" + game.name + "</strong> from <strong>all lists</strong>");
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {
-                                that.$emit('error', errorMsg);                           
+                                errorToast(errorMsg);                           
                             });                           
                         }   
                         that.removeModal.hide();  
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });                
-            }                                        
+            }                                                                                          
         },
     };
 </script>

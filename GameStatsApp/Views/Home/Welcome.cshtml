@@ -6,7 +6,7 @@
 
 @{ ViewBag.Title = "Welcome"; }
 
-<welcome :welcomevm="@JsonSerializer.Serialize(Model, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase})"></welcome>
+<welcome ref="welcome" :welcomevm="@JsonSerializer.Serialize(Model, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase})"></welcome>
 
 
 

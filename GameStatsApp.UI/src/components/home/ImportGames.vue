@@ -31,13 +31,13 @@
                     <font-awesome-icon :icon="getIconClass(userAccount.accountTypeID)" :class="getIconColorClass(userAccount.accountTypeID)" size="xl"/>
                     <div class="mx-auto">
                         <div class="align-self-start">
-                            <span class="mx-auto">{{ (selectedUserAccountID == userAccount.id ? 'Importing ' : 'Import ') + userAccount.accountTypeName + ' games' }}</span>
+                            <span class="mx-auto">{{ (importingUserAccountIDs[userAccount.id] ? 'Importing ' : 'Import ') + userAccount.accountTypeName + ' games' }}</span>
                         </div>
                         <div v-if="userAccount.relativeImportLastRunDateString" class="align-self-end text-xs">
                             <span>{{ 'Last imported ' + userAccount.relativeImportLastRunDateString }}</span>
                         </div>
                     </div>
-                    <font-awesome-icon v-if="selectedUserAccountID == userAccount.id" icon="fa-solid fa-spinner" spin size="xl"/>
+                    <font-awesome-icon v-if="importingUserAccountIDs[userAccount.id]" icon="fa-solid fa-spinner" spin size="xl"/>
                 </button>
             </div>
             <div class="row g-2 justify-content-center">
@@ -47,7 +47,7 @@
     </div>
 </template>
 <script>
-    import { Toast } from 'bootstrap';
+    import { successToast, errorToast } from '../../js/common.js';
     import axios from 'axios';
     
     export default {
@@ -57,12 +57,14 @@
         },
         data() {
             return {
-                selectedUserAccountID: null,   
+                importingUserAccountIDs: JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {}, 
                 isImportAll: 0
             }
         },
         computed: {
-        },
+        },                                    
+        watch: {
+        },          
         created: function () {
         },        
         mounted: function () {
@@ -73,9 +75,9 @@
                     var userAccount = that.importgamesvm.userAccounts.find(i => i.accountTypeID == that.importgamesvm.authAccountTypeID);
                     that.ImportGames(userAccount);
                 } else {            
-                    that.onError("Error authorizing account");       
+                    that.errorToast("Error authorizing account");       
                 }
-            }            
+            }
         },        
         methods: {
             getIconClass: function (accountTypeID) {
@@ -107,37 +109,27 @@
                 return iconClass;
             },            
             onImportGamesClick(userAccount) {
-                this.ImportGames(userAccount);
+                this.ImportGames(userAccount)
             },
             ImportGames(userAccount) {
                 var that = this;
-                that.selectedUserAccountID = userAccount.id;
+                if (!that.importingUserAccountIDs.hasOwnProperty(userAccount.id)) {
+                    that.importingUserAccountIDs[userAccount.id] = userAccount.accountTypeName;
+                    sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(that.importingUserAccountIDs));    
+                }
 
-                return axios.post('/Home/ImportGames', null,{ params: { userAccountID: userAccount.id, isImportAll: that.isImportAll == 1 } })
-                    .then((res) => {
-                        if (res.data.success) {
-                            that.onSuccess("Successfully imported " + userAccount.accountTypeName + " games");
-                        } else {
-                            that.onError("Error importing " + userAccount.accountTypeName + " games");                                               
-                        }
-                        that.selectedUserAccountID = null;
-                    })
-                    .catch(err => { console.error(err); return Promise.reject(err); });
-            },    
-            onSuccess(successMsg) {
-                var that = this;
-                var el = that.$refs.successtoast.cloneNode(true);
-                el.querySelector('.msg-text').innerHTML = successMsg;
-                that.$refs.toastcontainer.appendChild(el);
-                new Toast(el).show();    
-            },
-            onError(errorMsg) {
-                var that = this;
-                var el = that.$refs.errortoast.cloneNode(true);
-                el.querySelector('.msg-text').innerHTML = errorMsg;
-                that.$refs.toastcontainer.appendChild(el);
-                new Toast(el).show();  
-            }                              
+                axios.post('/Home/ImportGames', null,{ params: { userAccountID: userAccount.id, isImportAll: that.isImportAll == 1 } }).then((res) => {
+                    if (res.data.success) {
+                        successToast("Successfully imported " + userAccount.accountTypeName + " games");
+                    } else {
+                        errorToast("Error importing " + userAccount.accountTypeName + " games");                                               
+                    }
+
+                    delete that.importingUserAccountIDs[userAccount.id];
+                    sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(that.importingUserAccountIDs));    
+                })
+                .catch(err => { console.error(err); return Promise.reject(err); });
+            }                                                                                                                    
         }
     };
 </script>

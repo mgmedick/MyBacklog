@@ -12,10 +12,11 @@
     </form>
 </template>
 <script>
-    import { getFormData } from '../../js/common.js';
+    import { getFormData, successToast, errorToast } from '../../js/common.js';
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, helpers, sameAs } from '@vuelidate/validators';
+    
     const { withAsync } = helpers;
 
     const usernameFormat = helpers.regex(/^[._()-\/#&$@+\w\s]{3,30}$/)
@@ -71,15 +72,15 @@
                 return axios.post('/Home/ChangeUsername', formData)
                     .then((res) => {
                         if (res.data.success) {
-                            that.$emit('success', "Successfully updated username");                           
+                            successToast("Successfully updated username");                           
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {
-                                that.$emit('error', errorMsg);                           
+                                errorToast(errorMsg);                           
                             });                                
                         }
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            },         
+            },                  
         },
         validations() {
             return {

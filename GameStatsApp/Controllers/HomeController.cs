@@ -17,6 +17,9 @@ using Microsoft.AspNetCore.Authorization;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Http.Extensions;
 using Newtonsoft.Json;
+using System.Threading;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace GameStatsApp.Controllers
 {
@@ -482,6 +485,13 @@ namespace GameStatsApp.Controllers
             var success = false;
             List<string> errorMessages = null;
 
+            var importingUserAccounts = HttpContext.Session.Get<Dictionary<int,bool?>>("ImportingUserAccounts") ?? new Dictionary<int,bool?>();  
+            if (!importingUserAccounts.ContainsKey(userAccountID))
+            {
+                importingUserAccounts.Add(userAccountID, (bool?)null);
+            }
+            HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);
+
             try
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -505,8 +515,30 @@ namespace GameStatsApp.Controllers
                 errorMessages = new List<string>() { "Error importing games" };
             }
 
+            if (importingUserAccounts.ContainsKey(userAccountID))
+            {
+                importingUserAccounts[userAccountID] = success;
+                HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);
+            }
+
             return Json(new { success = success, errorMessages = errorMessages });
         }      
+
+        [HttpGet]
+        [Authorize] 
+        public ActionResult GetCompletedImportGames()
+        {
+            var importingUserAccounts = HttpContext.Session.Get<Dictionary<int, bool?>>("ImportingUserAccounts");            
+            var results = importingUserAccounts.Where(x => x.Value.HasValue).ToDictionary(x => x.Key, x => x.Value);
+            
+            if (results.Any())
+            {
+                importingUserAccounts = importingUserAccounts.Where(x => !results.ContainsKey(x.Key)).ToDictionary(x => x.Key, x => x.Value);
+                HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);  
+            }          
+
+            return Json(results);
+        }
 
         public async Task<ActionResult> MicrosoftAuthCallbackImportGames()
         {

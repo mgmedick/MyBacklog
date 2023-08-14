@@ -21,7 +21,7 @@
                 </div>                         
             </div>
             <div class="mb-3">
-                <change-username :username="welcomevm.username" @success="onSuccess" @error="onError"></change-username>
+                <change-username :username="welcomevm.username"></change-username>
             </div>
             <div class="text-center">
                 <p class="lead text-dark">Link an account to keep your game library up to date automatically</p>
@@ -37,7 +37,7 @@
     </div>
 </template>
 <script>
-    import { Toast } from 'bootstrap';
+    import { successToast, errorToast } from '../../js/common.js';
     
     export default {
         name: "Welcome",
@@ -57,27 +57,13 @@
 
             if (that.welcomevm.authSuccess != null) {
                 if (that.welcomevm.authSuccess) {
-                    that.onSuccess("Successfully linked account");             
+                    successToast("Successfully linked account");             
                 } else {                 
-                    that.onError("Error linking account");             
+                    errorToast("Error linking account");             
                 }
             }            
         },
-        methods: {
-            onSuccess(successMsg) {
-                var that = this;
-                var el = that.$refs.successtoast.cloneNode(true);
-                el.querySelector('.msg-text').innerHTML = successMsg;
-                that.$refs.toastcontainer.appendChild(el);
-                new Toast(el).show();    
-            },
-            onError(errorMsg) {
-                var that = this;
-                var el = that.$refs.errortoast.cloneNode(true);
-                el.querySelector('.msg-text').innerHTML = errorMsg;
-                that.$refs.toastcontainer.appendChild(el);
-                new Toast(el).show();  
-            },
+        methods: {            
             onXboxClick() {
                 location.href = this.welcomevm.windowsLiveAuthUrl;
             },            

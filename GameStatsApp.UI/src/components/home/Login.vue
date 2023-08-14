@@ -3,16 +3,6 @@
         <h2 class="text-center mb-3">Welcome to GameStatsApp</h2>
         <div class="mx-auto" style="max-width:400px;">
             <form @submit.prevent="submitForm">
-                <div class="toast-container position-absolute sticky-top p-3 top-0 end-0" id="toastPlacement" style="margin-top: 70px;"> 
-                    <div ref="errortoasts" v-for="errorMessage in errorMessages" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                <span>{{ errorMessage }}</span>
-                            </div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
-                    </div>  
-                </div>
                 <div class="mb-2">
                     <label for="txtEmail" class="form-label">Email</label>
                     <input id="txtEmail" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Email" @blur="v$.form.Email.$touch" aria-describedby="spnEmailErrors">
@@ -46,7 +36,7 @@
     </div>
 </template>
 <script>
-    import { getFormData, setCookie } from '../../js/common.js';
+    import { getFormData, successToast, errorToast } from '../../js/common.js';
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, helpers } from '@vuelidate/validators';
@@ -79,7 +69,6 @@
                 },
                 loadingModal: {},
                 errorMessages: [],
-                errorToasts: [],
                 width: document.documentElement.clientWidth
             }
         },
@@ -127,7 +116,9 @@
                         if (res.data.success) {
                             location.href = '/';
                         } else {
-                            that.errorMessages = res.data.errorMessages;
+                            res.data.errorMessages.forEach(errorMsg => {
+                                errorToast(errorMsg);                           
+                            }); 
                         }
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
@@ -146,12 +137,7 @@
                 if (response && response.status == 'connected') { 
                         this.loginOrSignUpWithSocial(response.authResponse.accessToken, 2);
                 } else {
-                    that.errorMessages = ['Failed to connect']
-                    that.$nextTick(function() {
-                        that.$refs.errortoasts?.forEach(el => {
-                            new Toast(el).show();
-                        });
-                    });   
+                    errorToast("Failed to connect");                           
                     that.loadingModal.hide();
                 }
             },            
@@ -171,12 +157,9 @@
                                 location.href = '/';
                             }
                         } else {
-                            that.errorMessages = res.data.errorMessages;
-                            that.$nextTick(function() {
-                                that.$refs.errortoasts?.forEach(el => {
-                                    new Toast(el).show();
-                                });
-                            });                            
+                            res.data.errorMessages.forEach(errorMsg => {
+                                errorToast(errorMsg);                           
+                            });                          
                         }
                         that.loadingModal.hide();
                     })
@@ -229,7 +212,7 @@
                 }
 
                 window.google.accounts.id.renderButton(this.$refs.googleLoginBtn, options);
-            }
+            }                      
         },
         validations() {
             return {

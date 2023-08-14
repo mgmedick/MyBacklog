@@ -1,4 +1,5 @@
-﻿const dayjs = require('dayjs');
+﻿import { Toast } from 'bootstrap';
+const dayjs = require('dayjs');
 
 const getFormData = object => Object.keys(object).reduce((formData, key) => {
     if (Array.isArray(object[key])) {
@@ -137,7 +138,35 @@ const deleteCookie = (key) => {
     }
 }
 
-export { getFormData, getIntOrdinalString, getDateDiffList, formatTime, getDateTimeLocalString, isValidDate, escapeHtml, formatFileName, setCookie, getCookie, deleteCookie }
+const listenCookieChange = (callback, interval = 1000) => {
+    let lastCookie = document.cookie;
+    setInterval(()=> {
+        let cookie = document.cookie;
+        if (cookie !== lastCookie) {
+            try {
+                callback({oldValue: lastCookie, newValue: cookie});
+            } finally {
+                lastCookie = cookie;
+            }
+        }
+    }, interval);
+  }
+
+const successToast = (successMsg) => {
+    var el = document.getElementById('successtoast').cloneNode(true);
+    el.querySelector('.msg-text').innerHTML = successMsg;
+    document.getElementById('toastcontainer').appendChild(el);
+    new Toast(el).show(); 
+}
+
+const errorToast = (errorMsg) => {
+    var el = document.getElementById('errortoast').cloneNode(true);
+    el.querySelector('.msg-text').innerHTML = errorMsg;
+    document.getElementById('toastcontainer').appendChild(el);
+    new Toast(el).show();
+} 
+
+export { getFormData, getIntOrdinalString, getDateDiffList, formatTime, getDateTimeLocalString, isValidDate, escapeHtml, formatFileName, setCookie, getCookie, deleteCookie, listenCookieChange, successToast, errorToast }
 
 
 

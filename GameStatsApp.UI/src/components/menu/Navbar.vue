@@ -50,12 +50,12 @@
                 </div>
             </div>
         </div> 
-    </nav>    
+    </nav>       
 </template>
 <script>
     import axios from 'axios'
-    import { setCookie } from '../../js/common';
-
+    import { successToast, errorToast, getCookie, listenCookieChange } from '../../js/common';
+    
     export default {
         name: "Navbar",
         props: {
@@ -77,29 +77,43 @@
                 isDarkTheme: this.isdarktheme,
                 state: false
             }
-        },
+        },       
         computed: {
         },
-        watch: {
-            isDarkTheme: function (val, oldVal) {
-                var that = this;
-
-                if (this.isauth) {
-                    axios.post('/User/UpdateIsDarkTheme', null,{ params: { isDarkTheme: val } })
-                        .then((res) => {
-                            if (res.data.success) {
-                                that.updateTheme(val);
-                            }                                                                                   
-                        })
-                        .catch(err => { console.error(err); return Promise.reject(err); });        
-                } else {
-                    this.updateTheme(val);
-                    var theme = val ? "theme-dark" : "theme-light";
-                    setCookie("theme", theme);                  
-                }
-            }
-        },
         created: function () {
+        },         
+        mounted() {
+            var importingUserAccountIDs = JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {};
+            
+            if (Object.keys(importingUserAccountIDs).length > 0) {
+                var intervalID = setInterval(function() {
+                    axios.get('/Home/GetCompletedImportGames')
+                        .then(res => {
+                            var results = res.data;
+
+                            if (Object.keys(results).length > 0) {
+                                Object.keys(importingUserAccountIDs).forEach(userAccountID => {
+                                    if (results.hasOwnProperty(userAccountID)) {
+                                        if (results[userAccountID]) {
+                                            successToast("Successfuly Imported " + importingUserAccountIDs[userAccountID] + " games");
+                                        } else {
+                                            errorToast("Error importing " + importingUserAccountIDs[userAccountID] + "games");
+                                        }
+
+                                        delete importingUserAccountIDs[userAccountID];
+                                    }
+                                });
+
+                                sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(importingUserAccountIDs));
+                            }
+                            
+                            if (importingUserAccountIDs.length == 0) {
+                                clearInterval(intervalID);
+                            }
+                        })
+                        .catch(err => { console.error(err); return Promise.reject(err); });
+                }, 30000);
+            }
         },        
         methods: {
             onInput: function(e){
@@ -146,7 +160,7 @@
                 }
                 
                 location.href = encodeURI('/' + controller + "/" + action + "/" + result.value);
-            },
+            },            
             updateTheme: function(val){
                 var el = document.body;
 
