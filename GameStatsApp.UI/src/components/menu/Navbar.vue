@@ -83,6 +83,7 @@
         created: function () {
         },         
         mounted() {
+            var that = this;
             var importingUserAccountIDs = JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {};
             
             if (Object.keys(importingUserAccountIDs).length > 0) {
@@ -107,12 +108,13 @@
                                 sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(importingUserAccountIDs));
                             }
                             
-                            if (importingUserAccountIDs.length == 0) {
+                            if (Object.keys(importingUserAccountIDs).length == 0) {
                                 clearInterval(intervalID);
+                                window.dispatchEvent(new CustomEvent('importGamesComplete'));
                             }
                         })
                         .catch(err => { console.error(err); return Promise.reject(err); });
-                }, 30000);
+                }, 10000);
             }
         },        
         methods: {

@@ -29,7 +29,7 @@
                 </ul>
             </div>                
         </div>
-        <user-list-games :userid="indexvm.userID" :userlistid="selectedItemID" :userlists="indexvm.userLists" @delete="onDelete"></user-list-games> 
+        <user-list-games ref="userlistgames" :userid="indexvm.userID" :userlistid="selectedItemID" :userlists="indexvm.userLists" @delete="onDelete"></user-list-games> 
     </div>
 </template>
 <script>
@@ -48,6 +48,7 @@
         },       
         watch: {},
         created: function () {
+            var that = this;
             this.selectedItemID = this.indexvm.userLists[0].id;
         },
         mounted: function() {

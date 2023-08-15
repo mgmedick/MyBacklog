@@ -2,7 +2,7 @@
     <div class="container games-container p-0">
         <div class="d-flex align-items-center mb-3">
             <div v-if="userlists.find(i => i.defaultListID == 1).id == userlistid" class="me-2">
-                <a v-if="selectedUserAccountID" href="/ImportGames" class="btn btn-secondary ps-2 pe-3" tabindex="-1" role="button">
+                <a v-if="Object.keys(importingUserAccountIDs).length > 0" href="/ImportGames" class="btn btn-secondary ps-2 pe-3" tabindex="-1" role="button">
                     <font-awesome-layers class="fa-2xl">
                         <font-awesome-icon icon="fa-solid fa-spinner m-2" spin transform="shrink-5" style="color: #adb5bd; margin-left: 0.25rem; z-index: 9999;"/>
                         <font-awesome-icon icon="fa-solid fa-cloud"/>
@@ -116,7 +116,8 @@
                 searchLoading: false,
                 filterText: null,
                 orderByDesc: true,             
-                orderByID: 0
+                orderByID: 0,
+                importingUserAccountIDs: JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {}
             };
         },       
         watch: {
@@ -135,6 +136,10 @@
         },
         mounted: function() {
             var that = this;
+            window.addEventListener('importGamesComplete', (event) => {
+                that.importingUserAccountIDs = JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {};
+            });
+
             that.removeModal = new Modal(that.$refs.removemodal);
             that.searchModal = new Modal(that.$refs.searchmodal);
             that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {

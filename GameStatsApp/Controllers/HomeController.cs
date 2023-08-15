@@ -504,6 +504,7 @@ namespace GameStatsApp.Controllers
                 else
                 {
                     await _userService.ImportGamesFromUserAccount(userID, result.Item1, isImportAll);
+                    Thread.Sleep(TimeSpan.FromMilliseconds(30000));
                 }
 
                 success = true;
@@ -528,7 +529,7 @@ namespace GameStatsApp.Controllers
         [Authorize] 
         public ActionResult GetCompletedImportGames()
         {
-            var importingUserAccounts = HttpContext.Session.Get<Dictionary<int, bool?>>("ImportingUserAccounts");            
+            var importingUserAccounts = HttpContext.Session.Get<Dictionary<int, bool?>>("ImportingUserAccounts") ?? new Dictionary<int,bool?>();             
             var results = importingUserAccounts.Where(x => x.Value.HasValue).ToDictionary(x => x.Key, x => x.Value);
             
             if (results.Any())
