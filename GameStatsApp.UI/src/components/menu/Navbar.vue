@@ -104,13 +104,13 @@
                                         delete importingUserAccountIDs[userAccountID];
                                     }
                                 });
-
+                                
                                 sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(importingUserAccountIDs));
+                                window.dispatchEvent(new CustomEvent('importingUserAccountIDsUpdate'));
                             }
                             
                             if (Object.keys(importingUserAccountIDs).length == 0) {
                                 clearInterval(intervalID);
-                                window.dispatchEvent(new CustomEvent('importGamesComplete'));
                             }
                         })
                         .catch(err => { console.error(err); return Promise.reject(err); });

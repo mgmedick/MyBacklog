@@ -69,11 +69,10 @@
         },        
         mounted: function () {
             var that = this;
-
-            window.addEventListener('importGamesComplete', (event) => {
+            window.addEventListener('importingUserAccountIDsUpdate', (event) => {
                 that.importingUserAccountIDs = JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {};
             });
-            
+
             if (that.importgamesvm.authSuccess != null) {
                 if (that.importgamesvm.authSuccess) {
                     var userAccount = that.importgamesvm.userAccounts.find(i => i.accountTypeID == that.importgamesvm.authAccountTypeID);

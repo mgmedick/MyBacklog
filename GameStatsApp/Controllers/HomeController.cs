@@ -504,7 +504,6 @@ namespace GameStatsApp.Controllers
                 else
                 {
                     await _userService.ImportGamesFromUserAccount(userID, result.Item1, isImportAll);
-                    Thread.Sleep(TimeSpan.FromMilliseconds(30000));
                 }
 
                 success = true;
