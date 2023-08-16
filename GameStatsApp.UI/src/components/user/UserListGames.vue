@@ -22,7 +22,8 @@
                         <li><a href="#" @click="onOrderByOptionClick($event, 0)" class="dropdown-item" :class="{ 'active' : orderByID == 0 }">Date Added</a></li>
                         <li><a href="#" @click="onOrderByOptionClick($event, 1)" class="dropdown-item" :class="{ 'active' : orderByID == 1 }">Name</a></li>
                     </ul>
-                </div>                             
+                </div>  
+                <input type="text" class="form-control" autocomplete="off" v-model="filterText" aria-describedby="spnUserNameErrors" placeholder="Filter games">
             </div>
         </div>
         <div v-if="loading" class="center" style="font-size: 25px;">

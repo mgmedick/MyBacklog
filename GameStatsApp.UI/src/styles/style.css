@@ -29,6 +29,10 @@
     left: 50%;
 }
 
+.nav-link.text-dark.active {
+    color: #fff !important;
+}
+
 @media (max-width: 991.98px) {
     .show-lg {
         display: none !important;

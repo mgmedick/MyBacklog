@@ -16,7 +16,7 @@
                 </ul>
                 <div class="d-flex">
                     <!-- <autocomplete v-model="searchText" class="me-2" @change="onChange" @search="onSearch" @selected="onSearchSelected" :options="searchResults" labelby="label" valueby="label" :isasync="true" :loading="searchLoading" :placeholder="'Search users'"/>                 -->
-                    <div v-if="isauth">
+                    <div v-if="isauth" class="ms-auto">
                         <div class="btn-group">
                             <button class="btn dropdown-toggle btn-secondary" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
                                 <font-awesome-icon icon="fa-solid fa-user" />
@@ -96,9 +96,9 @@
                                 Object.keys(importingUserAccountIDs).forEach(userAccountID => {
                                     if (results.hasOwnProperty(userAccountID)) {
                                         if (results[userAccountID]) {
-                                            successToast("Successfuly Imported " + importingUserAccountIDs[userAccountID] + " games");
+                                            successToast("Successfuly Imported " + importingUserAccountIDs[userAccountID].accountTypeName + " games");
                                         } else {
-                                            errorToast("Error importing " + importingUserAccountIDs[userAccountID] + "games");
+                                            errorToast("Error importing " + importingUserAccountIDs[userAccountID].accountTypeName  + "games");
                                         }
 
                                         delete importingUserAccountIDs[userAccountID];

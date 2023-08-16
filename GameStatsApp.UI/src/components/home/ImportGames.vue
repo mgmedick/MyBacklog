@@ -21,24 +21,27 @@
                     </div>                         
                 </div>
             <div class="row g-2 justify-content-center mb-3">
-                <div class="p-0">
-                    <input type="radio" class="btn-check" name="options-outlined" id="latest-outlined" autocomplete="off" value="0" v-model="isImportAll">
-                    <label class="btn btn-outline-primary me-2" for="latest-outlined">Latest</label>
-                    <input type="radio" class="btn-check" name="options-outlined" id="all-outlined" autocomplete="off" value="1" v-model="isImportAll">
-                    <label class="btn btn-outline-primary" for="all-outlined">All</label>
+                <div v-for="(userAccount, userAccountIndex) in importgamesvm.userAccounts" class="btn-group me-1 useraccount-btn-group" role="group">
+                    <button type="button" class="btn btn-outline-dark d-flex justify-content-center align-items-center" @click="onImportGamesClick($event, userAccount)" :disabled="importingUserAccountIDs[userAccount.id]">
+                        <font-awesome-icon :icon="getIconClass(userAccount.accountTypeID)" :class="getIconColorClass(userAccount.accountTypeID)" size="xl"/>
+                        <div class="mx-auto">
+                            <div class="align-self-start">
+                                <span class="mx-auto useraccount-btn-text">{{ (importingUserAccountIDs[userAccount.id] ? 'Importing ' : 'Import ') + ((importingUserAccountIDs[userAccount.id]?.isImportAll == 0 || !userAccount.relativeImportLastRunDateString) ? 'All ' : 'Latest ') + userAccount.accountTypeName + ' games' }}</span>
+                            </div>
+                            <div v-if="userAccount.relativeImportLastRunDateString" class="align-self-end text-xs">
+                                <span>{{ 'Last imported ' + userAccount.relativeImportLastRunDateString }}</span>
+                            </div>
+                        </div>
+                        <font-awesome-icon v-if="importingUserAccountIDs[userAccount.id]" icon="fa-solid fa-spinner" spin size="xl"/>
+                    </button>
+                    <button type="button" class="btn btn-outline-dark dropdown-toggle dropdown-toggle-split p-2" data-bs-toggle="dropdown" aria-expanded="false" style="max-width: 50px;" :disabled="importingUserAccountIDs[userAccount.id]">
+                        <span class="visually-hidden">Toggle Dropdown</span>
+                    </button>                    
+                    <ul class="dropdown-menu">
+                        <li><a href="#" @click="onIsImportAllClick" class="dropdown-item isimportall-dropdown-item" :class="{ active : !userAccount.relativeImportLastRunDateString }" data-value="0">All</a></li>
+                        <li><a href="#" @click="onIsImportAllClick" class="dropdown-item isimportall-dropdown-item" :class="{ active : userAccount.relativeImportLastRunDateString }" data-value="1">Latest</a></li>
+                    </ul>
                 </div>
-                <button v-for="(userAccount, userAccountIndex) in importgamesvm.userAccounts" type="button" class="btn btn-outline-dark d-flex justify-content-center align-items-center" @click="onImportGamesClick(userAccount)" :disabled="selectedUserAccountID">
-                    <font-awesome-icon :icon="getIconClass(userAccount.accountTypeID)" :class="getIconColorClass(userAccount.accountTypeID)" size="xl"/>
-                    <div class="mx-auto">
-                        <div class="align-self-start">
-                            <span class="mx-auto">{{ (importingUserAccountIDs[userAccount.id] ? 'Importing ' : 'Import ') + userAccount.accountTypeName + ' games' }}</span>
-                        </div>
-                        <div v-if="userAccount.relativeImportLastRunDateString" class="align-self-end text-xs">
-                            <span>{{ 'Last imported ' + userAccount.relativeImportLastRunDateString }}</span>
-                        </div>
-                    </div>
-                    <font-awesome-icon v-if="importingUserAccountIDs[userAccount.id]" icon="fa-solid fa-spinner" spin size="xl"/>
-                </button>
             </div>
             <div class="row g-2 justify-content-center">
                 <a href="/" class="btn btn-primary mt-3" tabindex="-1" role="button">Back to my games</a>
@@ -110,18 +113,30 @@
                 }
 
                 return iconClass;
-            },            
-            onImportGamesClick(userAccount) {
-                this.ImportGames(userAccount)
+            },  
+            onIsImportAllClick(e) {
+                var el = e.target;
+                var bntGroupEl = el.closest('.useraccount-btn-group');
+                bntGroupEl.querySelectorAll('.isimportall-dropdown-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                el.classList.add('active');
+                
+                var btnTextEl = bntGroupEl.querySelector('.useraccount-btn-text');
+                btnTextEl.innerHTML = btnTextEl.innerHTML.indexOf("All") > -1 ? btnTextEl.innerHTML.replace("All","Latest") : btnTextEl.innerHTML.replace("Latest","All");
+            },          
+            onImportGamesClick(e, userAccount) {
+                var isImportAll = e.target.closest('.useraccount-btn-group').querySelector('.isimportall-dropdown-item.active').getAttribute('data-value');
+                this.ImportGames(userAccount, isImportAll)
             },
-            ImportGames(userAccount) {
+            ImportGames(userAccount, isImportAll) {
                 var that = this;
                 if (!that.importingUserAccountIDs.hasOwnProperty(userAccount.id)) {
-                    that.importingUserAccountIDs[userAccount.id] = userAccount.accountTypeName;
+                    that.importingUserAccountIDs[userAccount.id] = { accountTypeName: userAccount.accountTypeName, isImportAll: isImportAll };
                     sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(that.importingUserAccountIDs));    
                 }
 
-                axios.post('/Home/ImportGames', null,{ params: { userAccountID: userAccount.id, isImportAll: that.isImportAll == 1 } }).then((res) => {
+                axios.post('/Home/ImportGames', null,{ params: { userAccountID: userAccount.id, isImportAll: isImportAll == 0 } }).then((res) => {
                     if (res.data.success) {
                         successToast("Successfully imported " + userAccount.accountTypeName + " games");
                     } else {
