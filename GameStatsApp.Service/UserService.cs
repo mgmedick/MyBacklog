@@ -396,7 +396,14 @@ namespace GameStatsApp.Service
             var result = _userRepo.GetUsers(i => i.Email == email && (i.Active || i.Active == activeFilter)).Any();
 
             return result;
-        }        
+        }  
+
+        public bool UserListNameExists(string listName)
+        {
+            var result = _userRepo.GetUserLists(i => i.Name == listName).Any();
+
+            return result;
+        }              
 
         public IEnumerable<SearchResult> SearchUsers(string searchText)
         {

@@ -26,6 +26,7 @@ namespace GameStatsApp.Interfaces.Services
         bool PasswordMatches(string password, string email);
         bool UsernameExists(string username, bool activeFilter);
         bool EmailExists(string email, bool activeFilter);
+        bool UserListNameExists(string listName);
         Task SendConfirmRegistrationEmail(string email, string username);
         IEnumerable<SearchResult> SearchUsers(string searchText);
         IEnumerable<UserList> GetUserLists (int userID);

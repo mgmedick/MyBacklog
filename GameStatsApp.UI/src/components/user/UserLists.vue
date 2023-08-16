@@ -48,28 +48,15 @@
                         <h5 class="modal-title">Add List</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form @submit.prevent="submitForm">
-                        <div class="modal-body">
-                                <input type="text" class="form-control" autocomplete="off" v-model="addListName" aria-describedby="spnListNameErrors" placeholder="List name">
-                            
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary" @click="onAddListClick">Add</button>
-                        </div>
-                    </form>                    
+                    <div class="modal-body">
+                        <add-user-list :listname="''"></add-user-list>
+                    </div>                
                 </div>
             </div>
         </div>             
     </div>
 </template>
 <script>
-    import { getFormData, setCookie } from '../../js/common.js';
-    import axios from 'axios';
-    import useVuelidate from '@vuelidate/core';
-    import { required, helpers, sameAs } from '@vuelidate/validators';
-    import { successToast, errorToast } from '../../js/common.js';
-    
     export default {
         name: "UserLists",
         props: {
@@ -81,8 +68,7 @@
                 selectedItemID: 0,
                 successMessages: [],
                 errorMessages: [],
-                addListModal: {},
-                addListName: ''
+                addListModal: {}
             };
         },       
         watch: {},
@@ -120,9 +106,6 @@
             },
             onShowAddListClick() {
                 this.addListModal.show();
-            },
-            onAddListClick() {
-                console.log("addlist")
             },
             async submitForm() {
                 const isValid = await this.v$.$validate()

@@ -24,6 +24,7 @@ import importGames from './home/ImportGames.vue';
 
 import userSettings from './user/UserSettings.vue';
 import userLists from './user/UserLists.vue';
+import addUserList from './user/AddUserList.vue';
 import userListGames from './user/UserListGames.vue';
 
 export default {
@@ -46,6 +47,7 @@ export default {
 
         app.component('user-settings', userSettings); 
         app.component('user-lists', userLists); 
+        app.component("add-user-list", addUserList);
         app.component('user-list-games', userListGames);
 
         app.component("reset-password", resetPassword);
