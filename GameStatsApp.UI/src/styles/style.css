@@ -33,6 +33,11 @@
     color: #fff !important;
 }
 
+.fa-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 @media (max-width: 991.98px) {
     .show-lg {
         display: none !important;

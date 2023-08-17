@@ -14,12 +14,6 @@
                         <span>{{ userList.name }}</span>
                     </a>
                 </li>    
-                <li class="nav-item">
-                    <a @click="onShowAddListClick" href="#" class="nav-link">
-                        <font-awesome-icon icon="fa-solid fa-plus" size="lg" class="me-3"/>
-                        <span>Add list</span>
-                    </a>
-                </li>
             </ul>
         </div>
         <div class="show-md row g-2 justify-content-center">
@@ -31,29 +25,11 @@
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="width: 100%;">
                     <li v-for="(userList, userListIndex) in indexvm.userLists" :key="userList.id">
                         <a @click="selectedItemID = userList.id" class="dropdown-item" :class="{ 'active' : selectedItemID == userList.id }" href="#/" data-toggle="pill">{{ userList.name }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a @click="onAddListModalClick" class="dropdown-item text-primary" href="#/" data-toggle="pill">
-                            <font-awesome-icon icon="fa-solid fa-plus" size="lg" class="me-2"/>Add list
-                        </a>
-                    </li>                    
+                    </li>                 
                 </ul>
             </div>                
         </div>
-        <user-list-games ref="userlistgames" :userid="indexvm.userID" :userlistid="selectedItemID" :userlists="indexvm.userLists" @delete="onDelete"></user-list-games>
-        <div ref="addlistmodal" class="modal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Add List</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <add-user-list :listname="''"></add-user-list>
-                    </div>                
-                </div>
-            </div>
-        </div>             
+        <user-list-games ref="userlistgames" :userid="indexvm.userID" :userlistid="selectedItemID" :userlists="indexvm.userLists" @delete="onDelete"></user-list-games>           
     </div>
 </template>
 <script>
@@ -67,8 +43,7 @@
                 userLists: [],
                 selectedItemID: 0,
                 successMessages: [],
-                errorMessages: [],
-                addListModal: {}
+                errorMessages: []
             };
         },       
         watch: {},
@@ -77,11 +52,7 @@
             this.selectedItemID = this.indexvm.userLists[0].id;
         },
         mounted: function() {
-            var that = this;
-            that.addListModal = new Modal(that.$refs.addlistmodal);
-            that.$refs.addlistmodal.addEventListener('hidden.bs.modal', event => {
-                that.addListName = '';
-            });             
+            var that = this;      
         },
         methods: {
             getIconClass: function (id) {
@@ -103,29 +74,7 @@
                 }
 
                 return iconClass;
-            },
-            onShowAddListClick() {
-                this.addListModal.show();
-            },
-            async submitForm() {
-                const isValid = await this.v$.$validate()
-                if (!isValid) return
-
-                var that = this;
-                var formData = getFormData(this.form);
-
-                axios.post('/Home/AddUserList', formData)
-                    .then((res) => {
-                        if (res.data.success) {
-                            successToast("List added");
-                        } else {
-                            res.data.errorMessages.forEach(errorMsg => {
-                                errorToast(errorMsg);                           
-                            });     
-                        }
-                    })
-                    .catch(err => { console.error(err); return Promise.reject(err); });
-            }                                                            
+            }                                                           
         },
     };
 </script>

@@ -26,10 +26,12 @@ namespace GameStatsApp.Interfaces.Services
         bool PasswordMatches(string password, string email);
         bool UsernameExists(string username, bool activeFilter);
         bool EmailExists(string email, bool activeFilter);
-        bool UserListNameExists(string listName);
+        bool UserListNameExists(int userID, string userListName);
         Task SendConfirmRegistrationEmail(string email, string username);
         IEnumerable<SearchResult> SearchUsers(string searchText);
         IEnumerable<UserList> GetUserLists (int userID);
+        void SaveUserList(int userID, int userListID, string userListName);
+        void DeleteUserList(int userID, int userListID);
         IEnumerable<UserListGameViewModel> GetUserListGames (int userListID);               
         void SaveUserAccount(int userID, int accountTypeID, TokenResponse tokenResponse);
         IEnumerable<UserAccountViewModel> GetUserAccounts(int userID);   

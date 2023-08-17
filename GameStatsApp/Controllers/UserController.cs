@@ -39,8 +39,9 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetUserLists(int userID)
+        public JsonResult GetUserLists()
         {
+            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));          
             var userLists = _userService.GetUserLists(userID);
 
             return Json(userLists);
@@ -118,6 +119,90 @@ namespace GameStatsApp.Controllers
             }
 
             return Json(new { success = success, errorMessages = errorMessages });
-        }                       
+        }
+
+        [HttpGet]
+        [Authorize]
+        public ViewResult UserSettings(bool? authSuccess = null)
+        {
+            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
+            var accountTypeIDs = !string.IsNullOrWhiteSpace(userVW.AccountTypeIDs) ? userVW.AccountTypeIDs.Split(",").Select(i => int.Parse(i)).ToList() : new List<int>();
+            var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
+            var windowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUri);
+
+            var userSettingsVM = new UserSettingsViewModel() { UserID = userID,
+                                                    Username = userVW.Username,                                              
+                                                     WindowsLiveAuthUrl = windowsLiveAuthUrl,
+                                                     AccountTypeIDs = accountTypeIDs,
+                                                     AuthSuccess = authSuccess };
+
+            return View(userSettingsVM);
+        }       
+
+        [HttpPost]
+        public JsonResult SaveUserList(SaveUserListViewModel saveUserListVM)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                if (_userService.UserListNameExists(userID, saveUserListVM.UserListName))
+                {
+                    ModelState.AddModelError("SaveUserList", "List name already exists");
+                }
+
+                if (ModelState.IsValid)
+                {
+                    _userService.SaveUserList(userID, saveUserListVM.UserListID, saveUserListVM.UserListName);
+                    success = true;
+                }
+                else
+                {
+                    success = false;
+                    errorMessages = ModelState.Values.SelectMany(i => i.Errors).Select(i => i.ErrorMessage).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "SaveUserList");
+                success = false;
+                errorMessages = new List<string>() { "Error saving user list" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
+        }
+
+        [HttpPost]
+        public JsonResult DeleteUserList(int userListID)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                _userService.DeleteUserList(userID, userListID);
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "DeleteUserList");
+                success = false;
+                errorMessages = new List<string>() { "Error deleting user list" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
+        }
+
+        public IActionResult UserListNameNotExists(string userListName)
+        {
+            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var result = !_userService.UserListNameExists(userID, userListName);
+
+            return Json(result);
+        }                                                   
     }
 }

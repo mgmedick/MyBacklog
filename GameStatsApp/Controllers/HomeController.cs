@@ -602,13 +602,6 @@ namespace GameStatsApp.Controllers
             var result = !_userService.EmailExists(email, false);
 
             return Json(result);
-        } 
-
-        public IActionResult UserListNameNotExists(string listName)
-        {
-            var result = !_userService.UserListNameExists(listName);
-
-            return Json(result);
-        }            
+        }         
     }
 }

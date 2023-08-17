@@ -141,6 +141,10 @@
                 that.importingUserAccountIDs = JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {};
             });
 
+            window.addEventListener('importGamesComplete', (event) => {
+                location.href = '/';
+            });            
+
             that.removeModal = new Modal(that.$refs.removemodal);
             that.searchModal = new Modal(that.$refs.searchmodal);
             that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {

@@ -36,11 +36,10 @@
     </div>
 </template>
 <script>
-    import { getFormData } from '../../js/common.js';
+    import { getFormData, successToast, errorToast } from '../../js/common.js';
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, sameAs, helpers } from '@vuelidate/validators';
-    import { successToast, errorToast } from '../../js/common.js';
     const { withAsync } = helpers;
 
     const passwordFormat = helpers.regex(/^(?=.*[A-Za-z])(?=.*\d)[._()-\/#&$@+\w\s]{8,30}$/)

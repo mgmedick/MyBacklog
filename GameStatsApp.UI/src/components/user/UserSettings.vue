@@ -1,92 +1,63 @@
 ﻿<template>
-    <div>
-        <div v-if="loading">
-            <div class="d-flex">
-                <div class="mx-auto">
-                    <i class="fas fa-spinner fa-spin fa-lg"></i>
-                </div>
+    <div class="mx-auto">
+        <h2 class="text-center mb-1">User Settings</h2>
+        <div class="mx-auto" style="max-width:400px;">
+            <div class="mb-4">
+                <change-username :username="usersettingsvm.username"></change-username>
             </div>
-        </div>
-        <div v-else>
-            <form @submit.prevent="submitForm">
-                <div>
-                    <ul>
-                        <li class="text-danger small font-weight-semibold" v-for="errorMessage in errorMessages">{{ errorMessage }}</li>
-                    </ul>
-                </div>
-                <div class="form-group row no-gutters">
-                    <label class="col-sm-1 col-form-label">Night Mode</label>
-                    <div class="col-sm-auto">
-                        <div class="custom-control custom-switch pt-2">
-                            <input id="chkNightMode1" type="checkbox" class="custom-control-input" data-toggle="toggle" v-model="item.isDarkTheme">
-                            <label class="custom-control-label pl-1" for="chkNightMode1"><span class="pl-2"></span></label>
-                        </div>                   
-                    </div>
-                </div>
-                <div class="row no-gutters pt-1" style="width:50%;">
-                    <div class="form-group mx-auto">
-                        <button type="submit" class="btn btn-primary">Save</button>
-                    </div>
-                </div>
-            </form>
-        </div>
+            <div class="text-center">
+                <h4>Link Accounts</h4>
+            </div>
+            <div class="row g-2 justify-content-center mb-4">
+                <button type="button" class="btn btn-outline-dark d-flex" :disabled="usersettingsvm.accountTypeIDs.indexOf(1) > -1"><font-awesome-icon icon="fa-brands fa-steam" size="xl" style="color: #0a3169;" /><span class="mx-auto">Link Steam account</span><font-awesome-icon v-if="usersettingsvm.accountTypeIDs.indexOf(1) > -1" icon="fa-solid fa-circle-check" size="xl" style="color: #02b875;"/></button>
+                <button type="button" class="btn btn-outline-dark d-flex" :disabled="usersettingsvm.accountTypeIDs.indexOf(2) > -1" @click="onXboxClick"><font-awesome-icon icon="fa-brands fa-xbox" size="xl" style="color: #107711;" /><span class="mx-auto">Link Xbox account</span><font-awesome-icon v-if="usersettingsvm.accountTypeIDs.indexOf(2) > -1" icon="fa-solid fa-circle-check" size="xl" style="color: #02b875;"/></button>
+            </div>
+            <div class="text-center">
+                <h4>Manage Lists</h4>
+            </div>   
+            <manage-user-lists></manage-user-lists>
+        </div>                             
     </div>
 </template>
 <script>
-    import axios from 'axios';
-    import { getFormData } from '../../js/common.js';
-
+    import { successToast, errorToast } from '../../js/common.js';
+    
     export default {
         name: "UserSettings",
         props: {
-            userid: String
+            usersettingsvm: Object
         },
         data() {
             return {
-                item: {
-                    userID: 0,
-                    username: '',
-                    isDarkTheme: false
-                },
-                loading: false,
-                errorMessages: []
+                successMessage: '',
+                errorMessages: [],
+                addListModal: {},
+                editListModal: {},
+                deleteListModal: {},
+                userList: {}
             }
-        },        
-        created: function () {
-            this.loadData();
         },
-        methods: {
-            loadData: function () {
-                var that = this;
-                this.loading = true;
+        computed: {
+        },
+        mounted: function () {
+            var that = this;
 
-                var prms = axios.get('/User/GetUser', { params: { userID: this.userid } })
-                    .then(res => {
-                        that.item = res.data;
-                        that.loading = false;
-
-                        return res;
-                    })
-                    .catch(err => { console.error(err); return Promise.reject(err); });
-
-                return prms;
-            },
-            submitForm: function () {
-                var that = this;
-                var formData = getFormData(this.item);
-                this.loading = true;
-
-                axios.post('/User/SaveUser', formData)
-                    .then((res) => {
-                        if (res.data.success) {
-                            location.reload();
-                        } else {
-                            that.errorMessages = res.data.errorMessages;
-                        }
-                    })
-                    .catch(err => { console.error(err); return Promise.reject(err); });
-            }
-        }
+            if (that.usersettingsvm.authSuccess != null) {
+                if (that.usersettingsvm.authSuccess) {
+                    successToast("Successfully linked account");             
+                } else {                 
+                    errorToast("Error linking account");             
+                }
+            }           
+        },
+        methods: {            
+            onXboxClick() {
+                location.href = this.usersettingsvm.windowsLiveAuthUrl;
+            },            
+            onContinueClick() {
+                location.href = "/";
+            }           
+        }    
     };
 </script>
 

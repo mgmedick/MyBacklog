@@ -2,24 +2,6 @@
     <div class="mx-auto">
         <h2 class="text-center mb-3">Import Games</h2>
         <div class="mx-auto" style="max-width:400px;">
-            <div id="toastPlacement" ref="toastcontainer" class="toast-container position-fixed top-0 end-0" style="margin-top:70px;"> 
-                    <div ref="errortoast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                <span class="msg-text"></span>
-                            </div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
-                    </div>              
-                    <div ref="successtoast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                <span class="msg-text"></span>
-                            </div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
-                    </div>                         
-                </div>
             <div class="row g-2 justify-content-center mb-3">
                 <div v-for="(userAccount, userAccountIndex) in importgamesvm.userAccounts" class="btn-group me-1 useraccount-btn-group" role="group">
                     <button type="button" class="btn btn-outline-dark d-flex justify-content-center align-items-center" @click="onImportGamesClick($event, userAccount)" :disabled="importingUserAccountIDs[userAccount.id]">

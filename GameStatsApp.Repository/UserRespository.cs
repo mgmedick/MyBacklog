@@ -134,7 +134,7 @@ namespace GameStatsApp.Repository
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                return db.Query<UserList>().Where(predicate).ToList();
+                return db.Query<UserList>().Where(predicate).Where(i => !i.Deleted).ToList();
             }
         }
 
@@ -169,6 +169,14 @@ namespace GameStatsApp.Repository
                 }
             }
         }
+
+        public void SaveUserList(UserList userList)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                db.Save<UserList>(userList);
+            }
+        }        
 
         public void SaveUserListGame(UserListGame userListGame)
         {

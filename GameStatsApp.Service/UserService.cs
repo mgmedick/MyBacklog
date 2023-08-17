@@ -147,7 +147,7 @@ namespace GameStatsApp.Service
 
             _userRepo.SaveUserSetting(userSetting);      
 
-            var userLists = _userRepo.GetDefaultLists().Select(i => new UserList() { UserID = user.ID, Name = i.Name, DefaultListID = i.ID }).ToList();
+            var userLists = _userRepo.GetDefaultLists().Select(i => new UserList() { UserID = user.ID, Name = i.Name, DefaultListID = i.ID, CreatedDate = DateTime.UtcNow }).ToList();
             
             _userRepo.SaveUserLists(userLists);      
         }
@@ -171,7 +171,7 @@ namespace GameStatsApp.Service
 
             _userRepo.SaveUser(user);
         }        
-
+          
         public void SaveUserAccount(int userID, int accountTypeID, TokenResponse tokenResponse)
         {
             var userAccount = _userRepo.GetUserAccounts(i => i.UserID == userID && i.AccountTypeID == accountTypeID).FirstOrDefault();
@@ -222,6 +222,34 @@ namespace GameStatsApp.Service
 
             return userLists;
         }     
+
+        public void SaveUserList(int userID, int userListID, string userListName)
+        {
+            var userList = _userRepo.GetUserLists(i => i.ID == userListID).FirstOrDefault();
+
+            if (userList == null)
+            {
+                userList = new UserList() { UserID = userID, Name = userListName, CreatedDate = DateTime.UtcNow };
+            }
+            else
+            {
+                userList.Name = userListName;
+            }
+
+            _userRepo.SaveUserList(userList);
+        }    
+
+        public void DeleteUserList(int userID, int userListID)
+        {
+            var userList = _userRepo.GetUserLists(i => i.ID == userListID).FirstOrDefault();
+
+            if (userList != null && userID == userList.UserID)
+            {
+                userList.Deleted = true;
+                userList.ModifiedDate = DateTime.UtcNow;
+                _userRepo.SaveUserList(userList);
+            }
+        }         
 
         public IEnumerable<UserListGameViewModel> GetUserListGames (int userListID)
         { 
@@ -398,9 +426,9 @@ namespace GameStatsApp.Service
             return result;
         }  
 
-        public bool UserListNameExists(string listName)
+        public bool UserListNameExists(int userID, string userListName)
         {
-            var result = _userRepo.GetUserLists(i => i.Name == listName).Any();
+            var result = _userRepo.GetUserLists(i => i.UserID == userID && i.Name == userListName).Any();
 
             return result;
         }              

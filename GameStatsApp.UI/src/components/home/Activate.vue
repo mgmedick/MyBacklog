@@ -52,11 +52,10 @@
     </div>
 </template>
 <script>
-    import { getFormData, setCookie } from '../../js/common.js';
+    import { getFormData, errorToast } from '../../js/common.js';
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, helpers, sameAs } from '@vuelidate/validators';
-    import { successToast, errorToast } from '../../js/common.js';
     const { withAsync } = helpers;
 
     const usernameFormat = helpers.regex(/^[._()-\/#&$@+\w\s]{3,30}$/)
