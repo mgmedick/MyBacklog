@@ -21,6 +21,7 @@ using Newtonsoft.Json;
 
 namespace GameStatsApp.Controllers
 {
+    [Authorize]
     public class UserController : Controller
     {
         private readonly IUserService _userService = null;
@@ -39,12 +40,159 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpGet]
+        public ViewResult Welcome(bool? authSuccess = null)
+        {
+            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
+            var accountTypeIDs = !string.IsNullOrWhiteSpace(userVW.AccountTypeIDs) ? userVW.AccountTypeIDs.Split(",").Select(i => int.Parse(i)).ToList() : new List<int>();
+            var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
+            var windowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUri);
+
+            var welcomeVM = new WelcomeViewModel() { Username = userVW.Username,                                              
+                                                     WindowsLiveAuthUrl = windowsLiveAuthUrl,
+                                                     AccountTypeIDs = accountTypeIDs,
+                                                     AuthSuccess = authSuccess };
+
+            return View(welcomeVM);
+        }
+
+        public async Task<ActionResult> MicrosoftAuthCallbackWelcome()
+        {
+            var success = false;
+            
+            try
+            {
+                var code = Request.Query["code"].ToString();
+                if (!string.IsNullOrWhiteSpace(code))
+                {
+                    var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
+                    var tokenResponse = await _authService.Authenticate(code, redirectUri);
+
+                    var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                    _userService.SaveUserAccount(userID, (int)AccountType.Xbox, tokenResponse);
+
+                    success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "MicrosoftAuthCallbackWelcome");
+                success = false;
+            }            
+
+            return RedirectToAction("Welcome", new { authSuccess = success });
+        }
+
+        [HttpGet]
+        public ViewResult UserSettings(bool? authSuccess = null)
+        {
+            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
+            var accountTypeIDs = !string.IsNullOrWhiteSpace(userVW.AccountTypeIDs) ? userVW.AccountTypeIDs.Split(",").Select(i => int.Parse(i)).ToList() : new List<int>();
+            var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
+            var windowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUri);
+
+            var userSettingsVM = new UserSettingsViewModel() { UserID = userID,
+                                                    Username = userVW.Username,                                              
+                                                     WindowsLiveAuthUrl = windowsLiveAuthUrl,
+                                                     AccountTypeIDs = accountTypeIDs,
+                                                     AuthSuccess = authSuccess };
+
+            return View(userSettingsVM);
+        }
+
+        public async Task<ActionResult> MicrosoftAuthCallbackUserSettings()
+        {
+            var success = false;
+            
+            try
+            {
+                var code = Request.Query["code"].ToString();
+                if (!string.IsNullOrWhiteSpace(code))
+                {
+                    var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
+                    var tokenResponse = await _authService.Authenticate(code, redirectUri);
+
+                    var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                    _userService.SaveUserAccount(userID, (int)AccountType.Xbox, tokenResponse);
+
+                    success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "MicrosoftAuthCallbackUserSettings");
+                success = false;
+            }            
+
+            return RedirectToAction("UserSettings", new { authSuccess = success });
+        }
+
+
+        [HttpGet]
         public JsonResult GetUserLists()
         {
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));          
             var userLists = _userService.GetUserLists(userID);
 
             return Json(userLists);
+        }
+
+        [HttpPost]
+        public JsonResult SaveUserList(SaveUserListViewModel saveUserListVM)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                if (_userService.UserListNameExists(userID, saveUserListVM.UserListName))
+                {
+                    ModelState.AddModelError("SaveUserList", "List name already exists");
+                }
+
+                if (ModelState.IsValid)
+                {
+                    _userService.SaveUserList(userID, saveUserListVM.UserListID, saveUserListVM.UserListName);
+                    success = true;
+                }
+                else
+                {
+                    success = false;
+                    errorMessages = ModelState.Values.SelectMany(i => i.Errors).Select(i => i.ErrorMessage).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "SaveUserList");
+                success = false;
+                errorMessages = new List<string>() { "Error saving user list" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
+        }
+
+        [HttpPost]
+        public JsonResult DeleteUserList(int userListID)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                _userService.DeleteUserList(userID, userListID);
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "DeleteUserList");
+                success = false;
+                errorMessages = new List<string>() { "Error deleting user list" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
         }
 
         [HttpGet]
@@ -122,81 +270,106 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpGet]
-        [Authorize]
-        public ViewResult UserSettings(bool? authSuccess = null)
+        public ViewResult ImportGames(bool? authSuccess = null, int? authAccountTypeID = null)
         {
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
-            var accountTypeIDs = !string.IsNullOrWhiteSpace(userVW.AccountTypeIDs) ? userVW.AccountTypeIDs.Split(",").Select(i => int.Parse(i)).ToList() : new List<int>();
-            var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
-            var windowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUri);
+            var userAccountVMs = _userService.GetUserAccounts(userID).ToList();
 
-            var userSettingsVM = new UserSettingsViewModel() { UserID = userID,
-                                                    Username = userVW.Username,                                              
-                                                     WindowsLiveAuthUrl = windowsLiveAuthUrl,
-                                                     AccountTypeIDs = accountTypeIDs,
-                                                     AuthSuccess = authSuccess };
+            var importGamesVM = new ImportGamesViewModel() { UserAccounts = userAccountVMs,
+                                                             AuthSuccess = authSuccess,
+                                                             AuthAccountTypeID = authAccountTypeID };
 
-            return View(userSettingsVM);
-        }       
-
-        [HttpPost]
-        public JsonResult SaveUserList(SaveUserListViewModel saveUserListVM)
-        {
-            var success = false;
-            List<string> errorMessages = null;
-
-            try
-            {
-                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                if (_userService.UserListNameExists(userID, saveUserListVM.UserListName))
-                {
-                    ModelState.AddModelError("SaveUserList", "List name already exists");
-                }
-
-                if (ModelState.IsValid)
-                {
-                    _userService.SaveUserList(userID, saveUserListVM.UserListID, saveUserListVM.UserListName);
-                    success = true;
-                }
-                else
-                {
-                    success = false;
-                    errorMessages = ModelState.Values.SelectMany(i => i.Errors).Select(i => i.ErrorMessage).ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "SaveUserList");
-                success = false;
-                errorMessages = new List<string>() { "Error saving user list" };
-            }
-
-            return Json(new { success = success, errorMessages = errorMessages });
+            return View(importGamesVM);
         }
 
         [HttpPost]
-        public JsonResult DeleteUserList(int userListID)
+        public async Task<ActionResult> ImportGames(int userAccountID, bool isImportAll)
         {
             var success = false;
             List<string> errorMessages = null;
 
+            var importingUserAccounts = HttpContext.Session.Get<Dictionary<int,bool?>>("ImportingUserAccounts") ?? new Dictionary<int,bool?>();  
+            if (!importingUserAccounts.ContainsKey(userAccountID))
+            {
+                importingUserAccounts.Add(userAccountID, (bool?)null);
+            }
+            HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);
+
             try
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                _userService.DeleteUserList(userID, userListID);
+                var result = await _userService.GetRefreshedUserAccount(userID, userAccountID);
+                
+                if (!string.IsNullOrWhiteSpace(result.Item2))
+                {
+                    Redirect(result.Item2);
+                }
+                else
+                {
+                    await _userService.ImportGamesFromUserAccount(userID, result.Item1, isImportAll);
+                }
+
                 success = true;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "DeleteUserList");
+                _logger.Error(ex, "ImportGames");
                 success = false;
-                errorMessages = new List<string>() { "Error deleting user list" };
+                errorMessages = new List<string>() { "Error importing games" };
+            }
+
+            if (importingUserAccounts.ContainsKey(userAccountID))
+            {
+                importingUserAccounts[userAccountID] = success;
+                HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);
             }
 
             return Json(new { success = success, errorMessages = errorMessages });
-        }
+        }      
 
+        public async Task<ActionResult> MicrosoftAuthCallbackImportGames()
+        {
+            var success = false;
+
+            try
+            {
+                var code = Request.Query["code"].ToString();
+                if (!string.IsNullOrWhiteSpace(code))
+                {
+                    var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
+                    var tokenResponse = await _authService.Authenticate(code, redirectUri);
+
+                    var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                    _userService.SaveUserAccount(userID, (int)AccountType.Xbox, tokenResponse);
+
+                    success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "MicrosoftAuthCallbackImportGames");
+                success = false;
+            }            
+
+            return RedirectToAction("ImportGames", new { authSuccess = success, authAccountTypeID = (int)AccountType.Xbox });
+        }    
+
+        [HttpGet]
+        public ActionResult GetCompletedImportGames()
+        {
+            var importingUserAccounts = HttpContext.Session.Get<Dictionary<int, bool?>>("ImportingUserAccounts") ?? new Dictionary<int,bool?>();             
+            var results = importingUserAccounts.Where(x => x.Value.HasValue).ToDictionary(x => x.Key, x => x.Value);
+            
+            if (results.Any())
+            {
+                importingUserAccounts = importingUserAccounts.Where(x => !results.ContainsKey(x.Key)).ToDictionary(x => x.Key, x => x.Value);
+                HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);  
+            }          
+
+            return Json(results);
+        }                          
+
+        [HttpGet]
         public IActionResult UserListNameNotExists(string userListName)
         {
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));

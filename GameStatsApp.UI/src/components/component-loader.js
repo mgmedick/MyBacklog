@@ -6,10 +6,8 @@ import { faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd
 import { faGoogle, faFacebook, faSteam, faXbox } from '@fortawesome/free-brands-svg-icons'
 library.add(faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner, faSquarePen, faAt, faList, faInbox, faPlay, faCheck, faEllipsis, faPlus, faCircleXmark, faCaretUp, faCaretDown, faCloudArrowDown, faCircleExclamation, faArrowDownWideShort, faArrowUpWideShort, faCloud, faGoogle, faFacebook, faSteam, faXbox);
 
-import buttonDropdown from './shared/ButtonDropdown.vue';
 import autocomplete from './shared/Autocomplete.vue';
 import multiselect from './shared/Multiselect.vue';
-import modal from './shared/Modal.vue';
 import navbar from './menu/Navbar.vue';
 
 import index from './home/Index.vue';
@@ -19,9 +17,9 @@ import login from './home/Login.vue';
 import resetPassword from './home/ResetPassword.vue';
 import changePassword from './home/ChangePassword.vue';
 import changeUsername from './home/ChangeUsername.vue';
-import welcome from './home/Welcome.vue';
-import importGames from './home/ImportGames.vue';
 
+import welcome from './user/Welcome.vue';
+import importGames from './user/ImportGames.vue';
 import userSettings from './user/UserSettings.vue';
 import userLists from './user/UserLists.vue';
 import manageUserLists from './user/ManageUserLists.vue';
@@ -38,27 +36,24 @@ export default {
         
         app.component("font-awesome-icon", FontAwesomeIcon);
         app.component("font-awesome-layers", FontAwesomeLayers);
-        app.component("button-dropdown", buttonDropdown);
         app.component("navbar", navbar);
         app.component('autocomplete', autocomplete);
         app.component('multiselect', multiselect);
-        app.component('modal', modal);
 
         app.component('index', index); 
-
-        app.component('user-lists', userLists); 
-        app.component('user-list-games', userListGames);
-        app.component('user-settings', userSettings); 
-        app.component("manage-user-lists", manageUserLists);
-        app.component("save-user-list", saveUserList);
-
         app.component("reset-password", resetPassword);
         app.component("change-password", changePassword);
         app.component("change-username", changeUsername);
         app.component("login", login);
         app.component("signup", signUp);
         app.component("activate", activate);
+
         app.component("welcome", welcome);
+        app.component('user-settings', userSettings); 
+        app.component("manage-user-lists", manageUserLists);
+        app.component("save-user-list", saveUserList);        
+        app.component('user-lists', userLists); 
+        app.component('user-list-games', userListGames);
         app.component("import-games", importGames);
 
         app.mount('#vue-app');

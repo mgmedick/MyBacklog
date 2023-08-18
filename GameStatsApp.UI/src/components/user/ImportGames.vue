@@ -118,7 +118,7 @@
                     sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(that.importingUserAccountIDs));    
                 }
 
-                axios.post('/Home/ImportGames', null,{ params: { userAccountID: userAccount.id, isImportAll: isImportAll == 0 } }).then((res) => {
+                axios.post('/User/ImportGames', null,{ params: { userAccountID: userAccount.id, isImportAll: isImportAll == 0 } }).then((res) => {
                     if (res.data.success) {
                         successToast("Successfully imported " + userAccount.accountTypeName + " games");
                     } else {

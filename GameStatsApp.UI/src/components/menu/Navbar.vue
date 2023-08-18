@@ -31,7 +31,7 @@
                                     </div>
                                 </li>
                                 <li>
-                                    <a href="/User/UserSettings" class="dropdown-item"><font-awesome-icon icon="fa-solid fa-gear" /><span class="ps-2">Settings</span></a>
+                                    <a href="/UserSettings" class="dropdown-item"><font-awesome-icon icon="fa-solid fa-gear" /><span class="ps-2">Settings</span></a>
                                 </li>
                                 <li>
                                     <a href="/Logout" class="dropdown-item"><font-awesome-icon icon="fa-solid fa-right-from-bracket" /><span class="ps-2">Log out</span></a>
@@ -88,7 +88,7 @@
             
             if (Object.keys(importingUserAccountIDs).length > 0) {
                 var intervalID = setInterval(function() {
-                    axios.get('/Home/GetCompletedImportGames')
+                    axios.get('/User/GetCompletedImportGames')
                         .then(res => {
                             var results = res.data;
 

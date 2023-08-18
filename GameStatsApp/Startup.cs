@@ -87,14 +87,16 @@ namespace GameStatsApp
             app.UseEndpoints(endpoints =>
             {
                 // endpoints.MapControllerRoute("actions", "{action}", new { controller = "Home", action = "Index", id = "" });
+                endpoints.MapControllerRoute("Welcome", "Welcome", new { controller = "User", action = "Welcome" });
+                endpoints.MapControllerRoute("UserSettings", "UserSettings", new { controller = "User", action = "UserSettings" });
+                endpoints.MapControllerRoute("ImportGames", "ImportGames", new { controller = "User", action = "ImportGames" });
+             
                 endpoints.MapControllerRoute("Activate", "Activate", new { controller = "Home", action = "Activate" });
                 endpoints.MapControllerRoute("ChangePassword", "ChangePassword", new { controller = "Home", action = "ChangePassword" });
-                endpoints.MapControllerRoute("ImportGames", "ImportGames", new { controller = "Home", action = "ImportGames" });
                 endpoints.MapControllerRoute("Login", "Login", new { controller = "Home", action = "Login" });
                 endpoints.MapControllerRoute("Logout", "Logout", new { controller = "Home", action = "Logout" });
                 endpoints.MapControllerRoute("ResetPassword", "ResetPassword", new { controller = "Home", action = "ResetPassword" });
                 endpoints.MapControllerRoute("SignUp", "SignUp", new { controller = "Home", action = "SignUp" });
-                endpoints.MapControllerRoute("Welcome", "Welcome", new { controller = "Home", action = "Welcome" });
                 endpoints.MapControllerRoute("default", "{controller}/{action}/{id}", new { controller = "Home", action = "Index", id = "" });
             });
         }
