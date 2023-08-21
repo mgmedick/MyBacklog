@@ -256,12 +256,20 @@ namespace GameStatsApp.Service
             var gameVMs = _userRepo.GetUserListGameViews(i => i.UserListID == userListID).Select(i => new UserListGameViewModel(i)).ToList();
 
             return gameVMs;
-        }         
+        }
+
+        public UserListGameViewModel AddNewGameToUserList(int userID, int userListID, int gameID)
+        {         
+            AddGameToUserList(userID, userListID, gameID);
+            var userListGameVM = _userRepo.GetUserListGameViews(i => i.UserListID == userListID && i.ID == gameID).Select(i => new UserListGameViewModel(i)).FirstOrDefault();
+                      
+            return userListGameVM;
+        } 
 
         public void AddGameToUserList(int userID, int userListID, int gameID)
         {         
             var userListVM = _userRepo.GetUserListViews(i => i.ID == userListID).Select(i => new UserListViewModel(i)).FirstOrDefault();
-                        
+
             if (!userListVM.GameIDs.Contains(gameID))
             {
                 var userListGame = new UserListGame() { UserListID = userListVM.ID, GameID = gameID };
@@ -269,7 +277,7 @@ namespace GameStatsApp.Service
 
                 if (userListVM.DefaultListID != (int)DefaultList.AllGames)
                 {
-                    var allUserListVM = _userRepo.GetUserListViews(i => i.UserID == userID && i.ID == (int)DefaultList.AllGames).Select(i => new UserListViewModel(i)).FirstOrDefault();   
+                    var allUserListVM = _userRepo.GetUserListViews(i => i.UserID == userID && i.DefaultListID == (int)DefaultList.AllGames).Select(i => new UserListViewModel(i)).FirstOrDefault();   
                     if (!allUserListVM.GameIDs.Contains(gameID))
                     {
                         var allUserListGame = new UserListGame() { UserListID = allUserListVM.ID, GameID = gameID };
@@ -286,15 +294,6 @@ namespace GameStatsApp.Service
             if (userListVM.GameIDs.Contains(gameID))
             {
                 _userRepo.DeleteUserListGame(userListID, gameID);
-
-                // if (userListVM.DefaultListID != (int)DefaultList.AllGames)
-                // {
-                //     var allUserListVM = _userRepo.GetUserListViews(i => i.UserID == userID && i.ID == (int)DefaultList.AllGames).Select(i => new UserListViewModel(i)).FirstOrDefault();   
-                //     if (allUserListVM.GameIDs.Contains(gameID))
-                //     {
-                //         _userRepo.DeleteUserListGame(allUserListVM.ID, gameID);
-                //     }
-                // }
             }
         }
 

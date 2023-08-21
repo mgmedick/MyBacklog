@@ -23,11 +23,11 @@ namespace GameStatsApp.Repository
             }
         }
 
-        public IEnumerable<Game> SearchGames(string searchText)
+        public IEnumerable<SearchResult> SearchGames(string searchText)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                var results = db.Query<Game>("SELECT ID, Name, ReleaseDate, CoverImagePath FROM vw_Game WHERE Name LIKE CONCAT('%', @0, '%') LIMIT 10;", searchText).ToList();
+                var results = db.Query<SearchResult>("SELECT ID AS Value, Name AS Label, YEAR(ReleaseDate) AS LabelSecondary, CoverImagePath AS ImagePath FROM vw_Game WHERE Name LIKE CONCAT('%', @0, '%') ORDER BY ReleaseDate LIMIT 10;", searchText).ToList();
 
                 return results;
             }

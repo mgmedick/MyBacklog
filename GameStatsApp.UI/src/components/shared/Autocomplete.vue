@@ -5,18 +5,28 @@
         </div>
         <div v-if="isimgresults" class="container">
             <div class="row g-3 mt-3">
-                <div v-for="(result, i) in results" class="col-lg-2 col-md-3 col-4" :class="{ 'highlighted': i === arrowCounter }" @click="onSearchSelected(result)">
-                    <img v-if="result[imageby]" :src="result[imageby]" class="img-fluid rounded" alt="Responsive image">
-                    <div :class="result.labelclass ?? labelclass" v-html="result[labelby]">
+                <div v-if="results.length > 0" v-for="(result, i) in results" class="col-lg-2 col-md-3 col-4" :class="{ 'highlighted': i === arrowCounter }" @click="onSearchSelected(result)">
+                    <img v-if="result.imagePath" :src="result.imagePath" class="img-fluid rounded" alt="Responsive image">
+                    <div class="text-xs">
+                        <span> {{ result.label }}</span>
+                        <div v-if="result.labelSecondary" class="text-muted">
+                            <span>{{ result.labelSecondary }}</span>
+                        </div>
                     </div>
+                </div>
+                <div v-else-if="model && model.length >= minlength && !loading && results.length == 0">
+                    <span>No results found</span>
                 </div>
             </div>
         </div>
         <ul v-else class="dropdown-menu" style="width: 100%;" :style="[ isOpen ? { display:'block' } : { display:'none' } ]">
-            <li v-for="(result, i) in results" :key="i" class="dropdown-item" :class="[result.labelclass, { 'highlighted': i === arrowCounter }]" @click="onSearchSelected(result)" @mouseover="arrowCounter = i">
-                <span>{{ result[labelby] }}</span>
+            <li v-if="results.length > 0" v-for="(result, i) in results" :key="i" class="dropdown-item" :class="{ 'dropdown-header' : result.isGroupHeader, 'highlighted': i === arrowCounter }" @click="onSearchSelected(result)" @mouseover="arrowCounter = i">
+                <span>{{ result.label }}</span>
             </li>
-        </ul>
+            <div v-else-if="model && model.length >= minlength && !loading && results.length == 0">
+                <span>No results found</span>
+            </div>            
+    </ul>
   </div>    
 </template>
 <script>
@@ -28,24 +38,11 @@
             options: {
                 type: Array,
                 default: () => []
-            }, 
-            labelby: {
-                type: String,
-                required: true
-            },            
-            valueby: {
-                type: String,
-                required: true
-            },   
-            imageby: {
-                type: String,
-                required: false
-            },                    
+            },                  
             minlength: {
                 type: Number,
                 default: 0
             }, 
-            labelclass: String,
             isimgresults: Boolean,
             isasync: Boolean,               
             loading: Boolean,
@@ -59,7 +56,7 @@
                 isFocus: false,
                 arrowCounter: -1,
                 throttleTimer: null,
-                throttleDelay: 300                
+                throttleDelay: 300
             }
         },       
         watch: {
@@ -128,7 +125,6 @@
                 } else {
                     this.isOpen = false;
                     this.arrowCounter = -1;                     
-                    //this.model = result[this.labelby];                   
                     this.$emit('selected', result);
                 }
             },          
@@ -136,13 +132,8 @@
                 var that = this;
 
                 this.results = this.options.filter((option) => {
-                    return option[that.labelby].toLowerCase().indexOf(that.model.toLowerCase()) > -1;
-                });
-
-                if (this.results.length == 0) {
-                    var noResult = { value: "", label: "No results found", category: null, disabled: true };
-                    this.results.push(noResult);
-                }                
+                    return option.label.toLowerCase().indexOf(that.model.toLowerCase()) > -1;
+                });           
             },                                    
             handleClickOutside(event) {
                 if (!(this.$el == event.target || this.$el.contains(event.target))) {

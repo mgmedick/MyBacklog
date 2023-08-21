@@ -42,9 +42,9 @@
                 <div class="delete-icon mt-2 me-2 right-0 position-absolute end-0 d-none">
                     <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="d-flex ms-auto me-2" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/> 
                 </div>      
-                <img :src="game.coverImagePath" class="img-fluid rounded" alt="Responsive image">
-                <div class="gamelist-icons px-1 d-none" style="margin-top: -40px;">
-                    <div class="btn-group" role="group" style="width: 100%;">
+                <img :src="game.coverImagePath" class="img-fluid object-fit-md-scale rounded" alt="Responsive image">
+                <div class="gamelist-icons position-absolute start-0 d-none" style="margin-top: -40px; width: 100%; padding: inherit;">
+                    <div class="btn-group position-relative px-2" role="group" style="width: 100%;">
                         <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID && i.defaultListID != 1)" :key="userList.id" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
                             <font-awesome-icon :icon="getIconClass(userList.defaultListID)" size="lg"/>
                         </button>
@@ -85,7 +85,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <autocomplete ref="searchAutocomplete" v-model="searchText" @search="onSearch" @selected="onSearchSelected" :options="searchResults" labelby="label" valueby="value" imageby="imagePath" labelclass="text-xs" :isasync="true" :isimgresults="true" :loading="searchLoading" :placeholder="'Search games'"/>    
+                        <autocomplete ref="searchAutocomplete" v-model="searchText" @search="onSearch" @selected="onSearchSelected" :options="searchResults" :isasync="true" :isimgresults="true" :loading="searchLoading" :placeholder="'Search games'"/>    
                     </div>
                 </div>
             </div>
@@ -244,13 +244,8 @@
                 axios.get('/Game/SearchGames', { params: { term: this.searchText } })
                         .then(res => {
                             that.searchResults = res.data;
-
-                            if(that.searchResults.length == 0) {
-                                var noResult = { value: "", label: "No results found", labelclass: "text-md text-nowrap", disabled: true };
-                                that.searchResults.push(noResult);
-                            }
-
                             that.searchLoading = false;
+
                             return res;
                         })
                         .catch(err => { console.error(err); return Promise.reject(err); });
@@ -258,13 +253,8 @@
             onSearchSelected: function (result) {
                 var that = this;
                 var userlist = this.userlists.find(item => item.id == that.userlistid);
-                var userListIDs = [userlist.id];
-                if (userlist.id != 1) {
-                    userListIDs.unshift(1);
-                }
 
-                var game = { id: result.value, name: result.label, coverImagePath: result.coverImagePath, userListIDs: userListIDs };
-                that.addGameToUserList(userlist, game).then(i => { that.searchModal.hide() });
+                that.addNewGameToUserList(userlist, result.value).then(i => { that.searchModal.hide() });
             },  
             onFilterInput: function(e) {
                 var val = e.target.value;
@@ -285,11 +275,11 @@
                 {
                     case 0:
                         if (this.orderByDesc) {
-                            this.games = this.games.sort((a, b) => { return b.id - a.id });
-                            this.allgames = this.allgames.sort((a, b) => { return b.id - a.id });
+                            this.games = this.games.sort((a, b) => { return b.userListGameID - a.userListGameID });
+                            this.allgames = this.allgames.sort((a, b) => { return b.userListGameID - a.userListGameID });
                         } else {
-                            this.games = this.games.sort((a, b) => { return a.id - b.id });
-                            this.allgames = this.allgames.sort((a, b) => { return a.id - b.id });
+                            this.games = this.games.sort((a, b) => { return a.userListGameID - b.userListGameID });
+                            this.allgames = this.allgames.sort((a, b) => { return a.userListGameID - b.userListGameID });
                         }
                         break;                    
                     case 1:
@@ -313,31 +303,42 @@
                 } else {
                     this.games = this.allgames.slice();
                 }                
+            },
+            addNewGameToUserList(userList, gameID) {
+                var that = this;  
+                return axios.post('/User/AddNewGameToUserList', null,{ params: { userListID: userList.id, gameID: gameID } })
+                    .then((res) => {
+                        if (res.data.success) {
+                            var game = res.data.game;
+
+                            if (that.games.filter(i => i.id == game.id).length == 0) {
+                                that.games.push(game);
+                                that.allgames.push({...game});
+                                that.sortGames();
+                            }
+                            successToast("Added <strong>" + game.name + "</strong> to <strong>" + userList.name + "</strong>");
+                        } else {                        
+                            res.data.errorMessages.forEach(errorMsg => {
+                                errorToast(errorMsg);                           
+                            });                              
+                        }                        
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });                
             },                              
             addGameToUserList(userList, game, el) {
-                var that = this;
-                if (el){
-                    el.closest('.gamelist-item').classList.add('active');
-                    el.closest('.gamelist-btn-group button')?.classList.add('active');
-                }
+                var that = this;       
+                el.closest('.gamelist-item').classList.add('active');
+                el.closest('.gamelist-btn-group button')?.classList.add('active');
 
                 return axios.post('/User/AddGameToUserList', null,{ params: { userListID: userList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {
                             if (game.userListIDs.indexOf(userList.id) == -1) {
                                 game.userListIDs.push(userList.id);
-                            } 
-
-                            if (that.games.filter(i => i.id == game.id).length == 0) {
-                                that.games.push(game);
-                                that.allgames.push({...game});
                             }
-                            successToast("Added <strong>" + game.name + "</strong> to <strong>" + userList.name + "</strong>");
-                        } else {                        
-                            if (game.userListIDs.indexOf(userList.id) > -1) {
-                                game.userListIDs.splice(game.userListIDs.indexOf(userList.id),1);
-                            } 
 
+                            successToast("Added <strong>" + game.name + "</strong> to <strong>" + userList.name + "</strong>");
+                        } else {       
                             res.data.errorMessages.forEach(errorMsg => {
                                 errorToast(errorMsg);                           
                             });                              
@@ -348,7 +349,7 @@
             removeGameFromUserList(userList, game, el) {
                 var that = this;                
                 el.closest('.gamelist-item').classList.remove('active');
-                el.closest('.gamelist-btn-group button')?.classList.add('active');
+                el.closest('.gamelist-btn-group button')?.classList.remove('active');
 
                 return axios.post('/User/RemoveGameFromUserList', null,{ params: { userListID: userList.id, gameID: game.id } })
                     .then((res) => {
@@ -361,10 +362,6 @@
                             }
                             successToast("Removed <strong>" + game.name + "</strong> from <strong>" + userList.name + "</strong>");
                         } else {
-                            if (game.userListIDs.indexOf(userList.id) == -1) {
-                                game.userListIDs.push(userList.id);
-                            } 
-
                             res.data.errorMessages.forEach(errorMsg => {
                                 errorToast(errorMsg);                           
                             });                           
