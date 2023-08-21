@@ -5,16 +5,15 @@
         </div>
         <div v-if="isimgresults" class="container">
             <div class="row g-3 mt-3">
-                <div v-for="(result, i) in results" class="col-lg-2 col-md-3 col-4" @click="onSearchSelected(result)">
-                    <img src="/dist/images/gamecovers/GameCover_yo1ypo1q.jpg" class="img-fluid rounded" alt="Responsive image">
-                    <div class="text-xs">
-                        <span>{{ result[labelby] }}</span>
+                <div v-for="(result, i) in results" class="col-lg-2 col-md-3 col-4" :class="{ 'highlighted': i === arrowCounter }" @click="onSearchSelected(result)">
+                    <img v-if="result[imageby]" :src="result[imageby]" class="img-fluid rounded" alt="Responsive image">
+                    <div :class="result.labelclass ?? labelclass" v-html="result[labelby]">
                     </div>
                 </div>
             </div>
         </div>
         <ul v-else class="dropdown-menu" style="width: 100%;" :style="[ isOpen ? { display:'block' } : { display:'none' } ]">
-            <li v-for="(result, i) in results" :key="i" class="dropdown-item" :class="{ 'dropdown-header' : result.isGroupHeader, 'highlighted': i === arrowCounter }" @click="onSearchSelected(result)" @mouseover="arrowCounter = i">
+            <li v-for="(result, i) in results" :key="i" class="dropdown-item" :class="[result.labelclass, { 'highlighted': i === arrowCounter }]" @click="onSearchSelected(result)" @mouseover="arrowCounter = i">
                 <span>{{ result[labelby] }}</span>
             </li>
         </ul>
@@ -46,6 +45,7 @@
                 type: Number,
                 default: 0
             }, 
+            labelclass: String,
             isimgresults: Boolean,
             isasync: Boolean,               
             loading: Boolean,

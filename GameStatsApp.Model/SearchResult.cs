@@ -6,7 +6,7 @@ namespace GameStatsApp.Model
     {
         public string Label { get; set; }
         public string Value { get; set; }
-        public string CoverImagePath { get; set; }
+        public string ImagePath { get; set; }
         public List<SearchResult> SubItems { get; set; } 
     }
 }

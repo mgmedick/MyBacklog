@@ -10,7 +10,7 @@ namespace GameStatsApp.Interfaces.Repositories
     public interface IGameRepository
     {
         IEnumerable<Game> GetGames(Expression<Func<Game, bool>>  predicate);
-        IEnumerable<SearchResult> SearchGames(string searchText);
+        IEnumerable<Game> SearchGames(string searchText);
     }
 }
 

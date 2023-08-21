@@ -136,7 +136,7 @@
                                     .concat({
                                         label: groupheader.label,
                                         value: groupheader.subItems.map(method => method.value),
-                                        isGroupHeader: true,
+                                        labelclass: 'dropdown-header',
                                         disabled: true
                                     })
                                     .concat(groupheader.subItems.map(method => ({ label: method.label, value: method.value, category: groupheader.label })))

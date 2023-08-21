@@ -26,7 +26,10 @@ namespace GameStatsApp.Service
             {
                 searchText = searchText.Trim();
                 var games = _gameRepo.SearchGames(searchText).ToList();
-                results.AddRange(games);
+                results = games.Select(i => new SearchResult() { 
+                                                    Value = i.ID.ToString(), 
+                                                    Label = "<span>" + i.Name + "</span>" + (i.ReleaseDate.HasValue ? "<br/><span class='text-muted'>" + i.ReleaseDate.Value.Year.ToString() + "</span>" : string.Empty),
+                                                    ImagePath = i.CoverImagePath }).ToList();
             }
 
             return results;

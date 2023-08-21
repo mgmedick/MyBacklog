@@ -35,17 +35,17 @@
                     <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px; padding-top: 50%; padding-bottom: 50%;"/>
                 </div>
             </div>
-            <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-6 game-image-container" :key="game.id" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
-                <div class="delete-icon d-none" style="margin-bottom:-35px; margin-top: 8.5px; position: relative;">
-                    <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="d-flex ms-auto me-2" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/>
+            <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-6 position-relative game-image-container" :key="game.id" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
+                <div v-if="game.coverImagePath?.indexOf('nocover.jpg') > -1" class="position-absolute text-center" style="line-height: 20px; top: 90px; padding: inherit;">
+                    <small class="position-relative">{{ game.name }}</small>
                 </div>                
-                <img v-if="game.coverImagePath" :src="game.coverImagePath" class="img-fluid rounded" alt="Responsive image">
-                <div v-else class="bg-dark d-flex align-items-center" style="height: 100%; text-align: center; padding-top: 50%; padding-bottom: 50%;">
-                    <span style="color: #fff; width:100%; min-height: 50px;">{{ game.name }}</span>
-                </div>
-                <div class="gamelist-icons px-1 d-none" style="margin-top: -50px; margin-bottom: 10px;">
+                <div class="delete-icon mt-2 me-2 right-0 position-absolute end-0 d-none">
+                    <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="d-flex ms-auto me-2" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/> 
+                </div>      
+                <img :src="game.coverImagePath" class="img-fluid rounded" alt="Responsive image">
+                <div class="gamelist-icons px-1 d-none" style="margin-top: -40px;">
                     <div class="btn-group" role="group" style="width: 100%;">
-                        <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID && i.defaultListID != 1)" :key="userList.id" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
+                        <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID && i.defaultListID != 1)" :key="userList.id" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
                             <font-awesome-icon :icon="getIconClass(userList.defaultListID)" size="lg"/>
                         </button>
                         <div v-if="userlists.filter(i => !i.defaultListID).length > 0" class="btn-group btn-group-sm gamelist-btn-group" role="group">
@@ -57,7 +57,7 @@
                             </ul>
                         </div>
                     </div>
-                </div>               
+                </div>
             </div>            
         </div>         
         <div ref="removemodal" class="modal" tabindex="-1">
@@ -85,7 +85,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <autocomplete ref="searchAutocomplete" v-model="searchText" @search="onSearch" @selected="onSearchSelected" :options="searchResults" labelby="label" valueby="value" imageby="coverImagePath" :isasync="true" :isimgresults="true" :loading="searchLoading" :placeholder="'Search games'"/>    
+                        <autocomplete ref="searchAutocomplete" v-model="searchText" @search="onSearch" @selected="onSearchSelected" :options="searchResults" labelby="label" valueby="value" imageby="imagePath" labelclass="text-xs" :isasync="true" :isimgresults="true" :loading="searchLoading" :placeholder="'Search games'"/>    
                     </div>
                 </div>
             </div>
@@ -245,9 +245,8 @@
                         .then(res => {
                             that.searchResults = res.data;
 
-                            if(that.searchResults.length == 0)
-                            {
-                                var noResult = { value: "", label: "No results found", disabled: true };
+                            if(that.searchResults.length == 0) {
+                                var noResult = { value: "", label: "No results found", labelclass: "text-md text-nowrap", disabled: true };
                                 that.searchResults.push(noResult);
                             }
 
@@ -317,8 +316,10 @@
             },                              
             addGameToUserList(userList, game, el) {
                 var that = this;
-                el.closest('.gamelist-item').classList.add('active');
-                el.closest('.gamelist-btn-group button')?.classList.add('active');
+                if (el){
+                    el.closest('.gamelist-item').classList.add('active');
+                    el.closest('.gamelist-btn-group button')?.classList.add('active');
+                }
 
                 return axios.post('/User/AddGameToUserList', null,{ params: { userListID: userList.id, gameID: game.id } })
                     .then((res) => {
