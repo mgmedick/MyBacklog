@@ -260,9 +260,26 @@ namespace GameStatsApp.Service
 
         public UserListGameViewModel AddNewGameToUserList(int userID, int userListID, int gameID)
         {         
-            AddGameToUserList(userID, userListID, gameID);
+            var userListVM = _userRepo.GetUserListViews(i => i.ID == userListID).Select(i => new UserListViewModel(i)).FirstOrDefault();
+
+            if (!userListVM.GameIDs.Contains(gameID))
+            {
+                var userListGame = new UserListGame() { UserListID = userListVM.ID, GameID = gameID };
+                _userRepo.SaveUserListGame(userListGame);
+            }
+
+            if (userListVM.DefaultListID != (int)DefaultList.AllGames)
+            {
+                var allUserListVM = _userRepo.GetUserListViews(i => i.UserID == userID && i.DefaultListID == (int)DefaultList.AllGames).Select(i => new UserListViewModel(i)).FirstOrDefault();   
+                if (!allUserListVM.GameIDs.Contains(gameID))
+                {
+                    var allUserListGame = new UserListGame() { UserListID = allUserListVM.ID, GameID = gameID };
+                    _userRepo.SaveUserListGame(allUserListGame);
+                }
+            }
+
             var userListGameVM = _userRepo.GetUserListGameViews(i => i.UserListID == userListID && i.ID == gameID).Select(i => new UserListGameViewModel(i)).FirstOrDefault();
-                      
+
             return userListGameVM;
         } 
 
@@ -274,16 +291,6 @@ namespace GameStatsApp.Service
             {
                 var userListGame = new UserListGame() { UserListID = userListVM.ID, GameID = gameID };
                 _userRepo.SaveUserListGame(userListGame);
-
-                if (userListVM.DefaultListID != (int)DefaultList.AllGames)
-                {
-                    var allUserListVM = _userRepo.GetUserListViews(i => i.UserID == userID && i.DefaultListID == (int)DefaultList.AllGames).Select(i => new UserListViewModel(i)).FirstOrDefault();   
-                    if (!allUserListVM.GameIDs.Contains(gameID))
-                    {
-                        var allUserListGame = new UserListGame() { UserListID = allUserListVM.ID, GameID = gameID };
-                        _userRepo.SaveUserListGame(allUserListGame);
-                    }
-                }
             }
         }        
 

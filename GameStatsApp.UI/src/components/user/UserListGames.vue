@@ -30,35 +30,42 @@
             <font-awesome-icon icon="fa-solid fa-spinner" spin size="2xl"/>
         </div>
         <div v-else class="row g-3">
-            <div class="col-lg-2 col-md-3 col-6">
-                <div class="bg-light d-flex" style="height: 100%; cursor: pointer;" @click="onSearchGamesClick">
-                    <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px; padding-top: 50%; padding-bottom: 50%;"/>
+            <div class="col-lg-2 col-md-3 col-6 position-relative">
+                <div class="position-relative add-game-container" @click="onSearchGamesClick">
+                    <div class="position-absolute top-0 bottom-0 start-0 end-0">
+                        <div class="d-flex" style="width: 100%; height: 100%;">
+                            <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px;"/>                    
+                        </div>
+                    </div>                  
+                    <img src="/dist/images/gamecovers/emptycover.jpg" class="img-fluid rounded" alt="Responsive image" @click="onSearchGamesClick">
                 </div>
             </div>
-            <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-6 position-relative game-image-container" :key="game.id" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
-                <div v-if="game.coverImagePath?.indexOf('nocover.jpg') > -1" class="position-absolute text-center" style="line-height: 20px; top: 90px; padding: inherit;">
-                    <small class="position-relative">{{ game.name }}</small>
-                </div>                
-                <div class="delete-icon mt-2 me-2 right-0 position-absolute end-0 d-none">
-                    <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="d-flex ms-auto me-2" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/> 
-                </div>      
-                <img :src="game.coverImagePath" class="img-fluid object-fit-md-scale rounded" alt="Responsive image">
-                <div class="gamelist-icons position-absolute start-0 d-none" style="margin-top: -40px; width: 100%; padding: inherit;">
-                    <div class="btn-group position-relative px-2" role="group" style="width: 100%;">
-                        <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID && i.defaultListID != 1)" :key="userList.id" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
-                            <font-awesome-icon :icon="getIconClass(userList.defaultListID)" size="lg"/>
-                        </button>
-                        <div v-if="userlists.filter(i => !i.defaultListID).length > 0" class="btn-group btn-group-sm gamelist-btn-group" role="group">
-                            <button type="button" class="btn btn-light dropdown-toggle" :class="{ 'active' : userlists.filter(i => !i.defaultListID && game.userListIDs.indexOf(i.id) > -1).length > 0 }" data-bs-toggle="dropdown" aria-expanded="false">
-                                <font-awesome-icon icon="fa-solid fa-ellipsis" size="lg"/>
+            <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-6 position-relative" key="game.id">
+                <div class="position-relative game-image-container" style="overflow: hidden;" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
+                    <div v-if="game.coverImagePath?.indexOf('nocover.jpg') > -1" class="position-absolute text-center bottom-0 start-0 end-0" style="line-height: 20px; top: 90px;">
+                        <small class="position-relative">{{ game.name }}</small>
+                    </div>                
+                    <div class="delete-icon mt-2 position-absolute start-0 end-0 d-none">
+                        <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="d-flex ms-auto me-2" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/> 
+                    </div>      
+                    <img :src="game.coverImagePath" class="img-fluid rounded" alt="Responsive image">
+                    <div class="gamelist-icons position-absolute start-0 end-0 d-none" style="bottom: 10px; width: 100%;">
+                        <div class="btn-group position-relative px-2" role="group" style="width: 100%;">
+                            <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID && i.defaultListID != 1)" :key="userList.id" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
+                                <font-awesome-icon :icon="getIconClass(userList.defaultListID)" size="lg"/>
                             </button>
-                            <ul class="dropdown-menu">
-                                <li v-for="(userList, userListIndex) in userlists.filter(i => !i.defaultListID)" :key="userList.id"><a @click="onUserListClick($event, userList, game)" href="#" class="dropdown-item gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }">{{ userList.name }}</a></li>
-                            </ul>
+                            <div v-if="userlists.filter(i => !i.defaultListID).length > 0" class="btn-group btn-group-sm gamelist-btn-group" role="group">
+                                <button type="button" class="btn btn-light dropdown-toggle" :class="{ 'active' : userlists.filter(i => !i.defaultListID && game.userListIDs.indexOf(i.id) > -1).length > 0 }" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <font-awesome-icon icon="fa-solid fa-ellipsis" size="lg"/>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li v-for="(userList, userListIndex) in userlists.filter(i => !i.defaultListID)" :key="userList.id"><a @click="onUserListClick($event, userList, game)" href="#" class="dropdown-item gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }">{{ userList.name }}</a></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>            
+                </div> 
+            </div>          
         </div>         
         <div ref="removemodal" class="modal" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
@@ -149,8 +156,13 @@
             that.searchModal = new Modal(that.$refs.searchmodal);
             that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {
                 that.$refs.searchAutocomplete.clear();
-            });          
+            });  
+
+            //window.addEventListener('resize', this.resizeColumns);
         },
+        // updated: function () {
+        //     this.resizeColumns();
+        // },        
         methods: {
             loadData: function () {
                 var that = this;
@@ -161,8 +173,12 @@
                         that.games = res.data;
                         that.allgames = res.data.slice();                      
                         that.sortGames();
-
                         that.loading = false;
+
+                        that.$nextTick(function() {
+                            that.resizeColumns();
+                        });
+
                         return res;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
@@ -306,6 +322,7 @@
             },
             addNewGameToUserList(userList, gameID) {
                 var that = this;  
+
                 return axios.post('/User/AddNewGameToUserList', null,{ params: { userListID: userList.id, gameID: gameID } })
                     .then((res) => {
                         if (res.data.success) {
@@ -327,6 +344,7 @@
             },                              
             addGameToUserList(userList, game, el) {
                 var that = this;       
+                
                 el.closest('.gamelist-item').classList.add('active');
                 el.closest('.gamelist-btn-group button')?.classList.add('active');
 
@@ -347,7 +365,8 @@
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },          
             removeGameFromUserList(userList, game, el) {
-                var that = this;                
+                var that = this;     
+
                 el.closest('.gamelist-item').classList.remove('active');
                 el.closest('.gamelist-btn-group button')?.classList.remove('active');
 
@@ -386,6 +405,12 @@
                         that.removeModal.hide();  
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });                
+            },
+            resizeColumns() {
+                var height = document.querySelector('.add-game-container').clientHeight;
+                document.querySelectorAll('.game-image-container').forEach(item => {
+                    item.style.height = height + 'px';
+                });
             }                                                                                          
         },
     };
