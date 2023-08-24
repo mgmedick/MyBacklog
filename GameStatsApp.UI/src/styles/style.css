@@ -4,7 +4,7 @@
     background-color: #e9ecef;
 }
 
-.game-image-container.active img {
+.game-image-container.active {
     outline: 5px solid rgba(69,130,236,1) !important;
 }
 

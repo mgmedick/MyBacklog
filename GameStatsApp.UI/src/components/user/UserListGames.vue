@@ -55,15 +55,15 @@
                 </div>
             </div>
             <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-6" key="game.id">
-                <div class="position-relative game-image-container rounded d-flex" style="overflow: hidden;" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
+                <div class="position-relative game-image-container rounded d-flex" style="overflow: hidden; background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
                     <div v-if="game.coverImagePath?.indexOf('nocover.jpg') > -1" class="position-absolute text-center bottom-0 start-0 end-0" style="line-height: 20px; top: 90px;">
                         <small class="position-relative">{{ game.name }}</small>
                     </div>                
-                    <div class="delete-icon mt-2 position-absolute start-0 end-0 d-none">
+                    <div class="delete-icon mt-2 position-absolute start-0 end-0 d-none" style="z-index: 1;">
                         <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="d-flex ms-auto me-2" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/> 
                     </div>      
-                    <img :src="game.coverImagePath" class="img-fluid ratio align-self-center" alt="Responsive image">
-                    <div class="gamelist-icons position-absolute start-0 end-0 d-none" style="bottom: 10px; width: 100%;">
+                    <img :src="game.coverImagePath" class="img-fluid align-self-center" alt="Responsive image">
+                    <div class="gamelist-icons position-absolute start-0 end-0 d-none" style="bottom: 10px; width: 100%; z-index: 1;">
                         <div class="btn-group position-relative px-2" role="group" style="width: 100%;">
                             <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID && i.defaultListID != 1)" :key="userList.id" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
                                 <font-awesome-icon :icon="getIconClass(userList.defaultListID)" size="lg"/>
