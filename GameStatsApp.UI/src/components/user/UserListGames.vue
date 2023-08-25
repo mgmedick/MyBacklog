@@ -2,16 +2,14 @@
     <div class="container games-container p-0">
         <div class="d-flex align-items-center mb-3">
             <div v-if="userlists.find(i => i.defaultListID == 1).id == userlistid" class="me-2">
-                <a v-if="Object.keys(importingUserAccountIDs).length > 0" href="/ImportGames" class="btn btn-secondary ps-2 pe-3" tabindex="-1" role="button">
-                    <font-awesome-layers class="fa-2xl">
+                <div class="btn btn-secondary p-2" tabindex="-1" role="button">
+                    <font-awesome-layers v-if="Object.keys(importingUserAccountIDs).length > 0" class="fa-2xl" @click="onImportClick">
                         <font-awesome-icon icon="fa-solid fa-spinner m-2" spin transform="shrink-5" style="color: #adb5bd; margin-left: 0.25rem; z-index: 9999;"/>
                         <font-awesome-icon icon="fa-solid fa-cloud"/>
                     </font-awesome-layers>
-                </a>
-                <a v-else href="/ImportGames" class="btn btn-secondary p-2" tabindex="-1" role="button">
-                    <font-awesome-icon icon="fa-solid fa-cloud-arrow-down" size="2xl"/>
-                </a>                
-            </div>        
+                    <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" size="2xl" @click="onImportClick"/>   
+                </div>      
+            </div>              
             <div class="d-flex ms-auto">   
                 <div class="btn-group me-1" role="group">
                     <button type="button" class="btn btn-secondary p-2" @click="onOrderByDescClick"><font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-arrow-down-wide-short" size="xl"/><font-awesome-icon v-else icon="fa-solid fa-arrow-up-wide-short" size="xl"/></button>
@@ -81,8 +79,24 @@
                 </div> 
             </div>          
         </div>         
+        <div ref="importmodal" class="modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Import Games</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <import-games ref="importGames" :importgamesvm="importgamesvm" :importinguseraccountids="importingUserAccountIDs" @update:importinguseraccountids="onImportingUserAccountIDsUpdate"></import-games>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>                      
+                </div>
+            </div>
+        </div>         
         <div ref="removemodal" class="modal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Remove Game</h5>
@@ -123,7 +137,8 @@
         props: {
             userid: String,
             userlistid: Number,
-            userlists: Array
+            userlists: Array,
+            importgamesvm: Object
         },
         data: function () {
             return {
@@ -131,6 +146,7 @@
                 allgames: [],
                 game: {},
                 loading: false,
+                importModal: {},
                 removeModal: {},
                 searchModal: {},
                 searchText: null,
@@ -166,21 +182,28 @@
 
             window.addEventListener('importGamesComplete', (event) => {
                 location.href = '/';
-            });            
-
-            that.removeModal = new Modal(that.$refs.removemodal);
-            that.searchModal = new Modal(that.$refs.searchmodal);
+            });
+            
             that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {
                 that.$refs.searchAutocomplete.clear();
             });  
-
+           
             window.addEventListener('resize', that.onResize);
-        },
-        // updated: function () {
-        //     if (!this.loading) {
-        //         this.resizeColumns();
-        //     }
-        // },        
+
+            that.importModal = new Modal(that.$refs.importmodal);
+            that.removeModal = new Modal(that.$refs.removemodal);
+            that.searchModal = new Modal(that.$refs.searchmodal);
+
+            if (that.importgamesvm.authSuccess != null) {
+                if (that.importgamesvm.authSuccess) {
+                    var userAccount = that.importgamesvm.userAccounts.find(i => i.accountTypeID == that.importgamesvm.authAccountTypeID);
+                    that.$refs.importGames.ImportGames(userAccount);
+                    that.importModal.show();
+                } else {            
+                    that.errorToast("Error authorizing account");       
+                }
+            }            
+        },     
         methods: {
             loadData: function () {
                 var that = this;
@@ -246,6 +269,9 @@
                     container.classList.remove('active');                    
                 }
             },  
+            onImportClick(e) {
+                this.importModal.show();
+            },
             onDeleteClick(e, game) {
                 var that = this;
                 var el = e.target;
@@ -314,7 +340,11 @@
                         that.resizeColumns();
                     });
                 }
-            },            
+            },  
+            onImportingUserAccountIDsUpdate: function (result) {
+                this.importingUserAccountIDs = result;
+                sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(this.importingUserAccountIDs));
+            },       
             sortGames() {
                 switch (this.orderByID)
                 {

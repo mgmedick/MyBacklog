@@ -56,33 +56,6 @@ namespace GameStatsApp.Controllers
             return View(welcomeVM);
         }
 
-        public async Task<ActionResult> MicrosoftAuthCallbackWelcome()
-        {
-            var success = false;
-            
-            try
-            {
-                var code = Request.Query["code"].ToString();
-                if (!string.IsNullOrWhiteSpace(code))
-                {
-                    var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
-                    var tokenResponse = await _authService.Authenticate(code, redirectUri);
-
-                    var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                    _userService.SaveUserAccount(userID, (int)AccountType.Xbox, tokenResponse);
-
-                    success = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "MicrosoftAuthCallbackWelcome");
-                success = false;
-            }            
-
-            return RedirectToAction("Welcome", new { authSuccess = success });
-        }
-
         [HttpGet]
         public ViewResult UserSettings(bool? authSuccess = null)
         {
@@ -100,34 +73,6 @@ namespace GameStatsApp.Controllers
 
             return View(userSettingsVM);
         }
-
-        public async Task<ActionResult> MicrosoftAuthCallbackUserSettings()
-        {
-            var success = false;
-            
-            try
-            {
-                var code = Request.Query["code"].ToString();
-                if (!string.IsNullOrWhiteSpace(code))
-                {
-                    var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
-                    var tokenResponse = await _authService.Authenticate(code, redirectUri);
-
-                    var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                    _userService.SaveUserAccount(userID, (int)AccountType.Xbox, tokenResponse);
-
-                    success = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "MicrosoftAuthCallbackUserSettings");
-                success = false;
-            }            
-
-            return RedirectToAction("UserSettings", new { authSuccess = success });
-        }
-
 
         [HttpGet]
         public JsonResult GetUserLists()
@@ -292,19 +237,6 @@ namespace GameStatsApp.Controllers
             return Json(new { success = success, errorMessages = errorMessages });
         }
 
-        [HttpGet]
-        public ViewResult ImportGames(bool? authSuccess = null, int? authAccountTypeID = null)
-        {
-            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var userAccountVMs = _userService.GetUserAccounts(userID).ToList();
-
-            var importGamesVM = new ImportGamesViewModel() { UserAccounts = userAccountVMs,
-                                                             AuthSuccess = authSuccess,
-                                                             AuthAccountTypeID = authAccountTypeID };
-
-            return View(importGamesVM);
-        }
-
         [HttpPost]
         public async Task<ActionResult> ImportGames(int userAccountID, bool isImportAll)
         {
@@ -350,7 +282,31 @@ namespace GameStatsApp.Controllers
             return Json(new { success = success, errorMessages = errorMessages });
         }      
 
-        public async Task<ActionResult> MicrosoftAuthCallbackImportGames()
+        public async Task<ActionResult> MicrosoftAuthCallbackIndex()
+        {
+            var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("IndexRedirectUri").Value;
+            var success = await MicrosoftAuthCallback(redirectUri);
+
+            return RedirectToAction("Index", "Home", new { authSuccess = success, authAccountTypeID = (int)AccountType.Xbox });
+        }
+
+        public async Task<ActionResult> MicrosoftAuthCallbackWelcome()
+        {
+            var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
+            var success = await MicrosoftAuthCallback(redirectUri);
+
+            return RedirectToAction("Welcome", "User", new { authSuccess = success, authAccountTypeID = (int)AccountType.Xbox });
+        }     
+
+        public async Task<ActionResult> MicrosoftAuthCallbackUserSettings()
+        {
+            var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("UserSettingsRedirectUri").Value;
+            var success = await MicrosoftAuthCallback(redirectUri);
+
+            return RedirectToAction("UserSettings", "User", new { authSuccess = success, authAccountTypeID = (int)AccountType.Xbox });
+        }             
+
+        private async Task<bool> MicrosoftAuthCallback(string redirectUri)
         {
             var success = false;
 
@@ -359,7 +315,6 @@ namespace GameStatsApp.Controllers
                 var code = Request.Query["code"].ToString();
                 if (!string.IsNullOrWhiteSpace(code))
                 {
-                    var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
                     var tokenResponse = await _authService.Authenticate(code, redirectUri);
 
                     var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -372,10 +327,10 @@ namespace GameStatsApp.Controllers
             {
                 _logger.Error(ex, "MicrosoftAuthCallbackImportGames");
                 success = false;
-            }            
+            }   
 
-            return RedirectToAction("ImportGames", new { authSuccess = success, authAccountTypeID = (int)AccountType.Xbox });
-        }    
+            return  success;
+        }
 
         [HttpGet]
         public ActionResult GetCompletedImportGames()

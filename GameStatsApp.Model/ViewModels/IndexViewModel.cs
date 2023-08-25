@@ -13,6 +13,7 @@ namespace GameStatsApp.Model.ViewModels
         public bool IsAuth { get; set; }
         public int UserID { get; set; }
         public List<UserList> UserLists { get; set; }
+        public ImportGamesViewModel ImportGamesVM { get; set; }
     }
 }
 

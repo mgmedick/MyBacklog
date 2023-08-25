@@ -17,7 +17,6 @@ using Microsoft.AspNetCore.Authorization;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Http.Extensions;
 using Newtonsoft.Json;
-using System.Threading;
 using Newtonsoft.Json.Linq;
 
 namespace GameStatsApp.Controllers
@@ -37,15 +36,21 @@ namespace GameStatsApp.Controllers
             _logger = logger;
         }
 
-        public ActionResult Index()
+        public ActionResult Index(bool? authSuccess = null, int? authAccountTypeID = null)
         {
             var indexVM = new IndexViewModel();
             indexVM.IsAuth = User.Identity.IsAuthenticated;
 
             if (indexVM.IsAuth)
             {
-                indexVM.UserID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                indexVM.UserID = userID;
                 indexVM.UserLists = _userService.GetUserLists(indexVM.UserID).ToList();
+
+                var userAccountVMs = _userService.GetUserAccounts(userID).ToList();
+                indexVM.ImportGamesVM = new ImportGamesViewModel() { UserAccounts = userAccountVMs,
+                                                             AuthSuccess = authSuccess,
+                                                             AuthAccountTypeID = authAccountTypeID };
             }
 
             return View(indexVM);

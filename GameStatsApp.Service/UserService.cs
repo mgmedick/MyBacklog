@@ -334,7 +334,7 @@ namespace GameStatsApp.Service
             switch (userAccountVW.AccountTypeID)
             {
                 case (int)AccountType.Xbox:
-                    redirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
+                    redirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("IndexRedirectUri").Value;
                     break;
             }
             
