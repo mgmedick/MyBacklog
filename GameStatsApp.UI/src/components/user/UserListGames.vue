@@ -87,7 +87,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <import-games ref="importGames" :importgamesvm="importgamesvm" :importinguseraccountids="importingUserAccountIDs" @update:importinguseraccountids="onImportingUserAccountIDsUpdate"></import-games>
+                        <import-games ref="importGames" :useraccounts="useraccounts" :windowsliveauthurl="windowsliveauthurl" :importinguseraccountids="importingUserAccountIDs" @update:importinguseraccountids="onImportingUserAccountIDsUpdate"></import-games>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -138,7 +138,10 @@
             userid: String,
             userlistid: Number,
             userlists: Array,
-            importgamesvm: Object
+            useraccounts: Array,
+            windowsliveauthurl: String,
+            authsuccess: Boolean,
+            authaccounttypeid: Number
         },
         data: function () {
             return {
@@ -194,9 +197,9 @@
             that.removeModal = new Modal(that.$refs.removemodal);
             that.searchModal = new Modal(that.$refs.searchmodal);
 
-            if (that.importgamesvm.authSuccess != null) {
-                if (that.importgamesvm.authSuccess) {
-                    var userAccount = that.importgamesvm.userAccounts.find(i => i.accountTypeID == that.importgamesvm.authAccountTypeID);
+            if (that.authsuccess != null) {
+                if (that.authsuccess) {
+                    var userAccount = that.useraccounts.find(i => i.accountTypeID == that.authaccounttypeid);
                     that.$refs.importGames.ImportGames(userAccount);
                     that.importModal.show();
                 } else {            

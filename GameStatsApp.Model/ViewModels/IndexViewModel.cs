@@ -13,7 +13,10 @@ namespace GameStatsApp.Model.ViewModels
         public bool IsAuth { get; set; }
         public int UserID { get; set; }
         public List<UserList> UserLists { get; set; }
-        public ImportGamesViewModel ImportGamesVM { get; set; }
+        public List<UserAccountViewModel> UserAccounts { get; set; }      
+        public string WindowsLiveAuthUrl { get; set; }  
+        public bool? AuthSuccess { get; set; }
+        public int? AuthAccountTypeID { get; set; }
     }
 }
 

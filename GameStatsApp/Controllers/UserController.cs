@@ -242,18 +242,15 @@ namespace GameStatsApp.Controllers
         {
             var success = false;
             List<string> errorMessages = null;
-            var authUrl = string.Empty;
+            var isAuthExpired = false;
 
             try
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var userAccountVW = await _userService.GetRefreshedUserAccount(userID, userAccountID);
-                
-                if (userAccountVW.ExpireDate < DateTime.UtcNow)
-                {
-                    authUrl = _userService.GetUserAccountAuthUrl(userAccountVW.AccountTypeID);
-                }
-                else
+                isAuthExpired = userAccountVW.ExpireDate < DateTime.UtcNow;
+
+                if (!isAuthExpired)
                 {
                     var importingUserAccounts = HttpContext.Session.Get<Dictionary<int,bool?>>("ImportingUserAccounts") ?? new Dictionary<int,bool?>();  
                     if (!importingUserAccounts.ContainsKey(userAccountID))
@@ -278,9 +275,8 @@ namespace GameStatsApp.Controllers
                 success = false;
                 errorMessages = new List<string>() { "Error importing games" };
             }
-
-
-            return Json(new { success = success, errorMessages = errorMessages, authUrl = authUrl });
+            
+            return Json(new { success = success, errorMessages = errorMessages, isAuthExpired = isAuthExpired });
         }      
 
         public async Task<ActionResult> MicrosoftAuthCallbackImportGames()

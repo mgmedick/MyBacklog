@@ -4,7 +4,7 @@
             <font-awesome-icon icon="fa-solid fa-circle-info" class="text-secondary" size="xl" data-bs-toggle="tooltip" data-bs-title="You can close this window at any time while importing"/>
         </div>
         <div class="row g-2 justify-content-center mb-3">
-            <div v-for="(userAccount, userAccountIndex) in importgamesvm.userAccounts" class="btn-group me-1 useraccount-btn-group" role="group">
+            <div v-for="(userAccount, userAccountIndex) in useraccounts" class="btn-group me-1 useraccount-btn-group" role="group">
                 <button type="button" class="btn btn-outline-primary d-flex justify-content-center align-items-center" @click="onImportGamesClick($event, userAccount)" :disabled="importingUserAccountIDs[userAccount.id]">
                     <font-awesome-icon :icon="getIconClass(userAccount.accountTypeID)" :class="getIconColorClass(userAccount.accountTypeID)" size="xl"/>
                     <div class="mx-auto">
@@ -36,8 +36,9 @@
     export default {
         name: "ImportGames",
         props: {
-            importgamesvm: Object,
-            importinguseraccountids: Object
+            useraccounts: Array,
+            importinguseraccountids: Object,
+            windowsliveauthurl: String
         },
         data() {
             return {
@@ -118,8 +119,16 @@
                 }
 
                 axios.post('/User/ImportGames', null,{ params: { userAccountID: userAccount.id, isImportAll: isImportAll == 0 } }).then((res) => {
-                    if (res.data.authUrl) {
-                        location.href = res.data.authUrl;
+                    if (res.data.isAuthExpired) {
+                        var redirectUrl = '/';
+                        
+                        switch (userAccount.accountTypeID) {
+                            case 1:
+                                redirectUrl = that.windowsliveauthurl;
+                                break;
+                        }
+
+                        location.href = redirectUrl;
                     } else {
                         if (res.data.success) {
                             successToast("Successfully imported " + userAccount.accountTypeName + " games");

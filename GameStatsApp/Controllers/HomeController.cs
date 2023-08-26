@@ -44,13 +44,14 @@ namespace GameStatsApp.Controllers
             if (indexVM.IsAuth)
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var redirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
+                
                 indexVM.UserID = userID;
-                indexVM.UserLists = _userService.GetUserLists(indexVM.UserID).ToList();
-
-                var userAccountVMs = _userService.GetUserAccounts(userID).ToList();
-                indexVM.ImportGamesVM = new ImportGamesViewModel() { UserAccounts = userAccountVMs,
-                                                             AuthSuccess = authSuccess,
-                                                             AuthAccountTypeID = authAccountTypeID };
+                indexVM.UserLists = _userService.GetUserLists(userID).ToList();
+                indexVM.UserAccounts = _userService.GetUserAccounts(userID).ToList();
+                indexVM.WindowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUrl);
+                indexVM.AuthSuccess = authSuccess;
+                indexVM.AuthAccountTypeID = authAccountTypeID;
             }
 
             return View(indexVM);

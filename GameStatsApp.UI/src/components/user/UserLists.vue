@@ -29,7 +29,7 @@
                 </ul>
             </div>                
         </div>
-        <user-list-games ref="userlistgames" :userid="indexvm.userID" :userlistid="selectedItemID" :userlists="indexvm.userLists" :importgamesvm="indexvm.importGamesVM" @delete="onDelete"></user-list-games>           
+        <user-list-games ref="userlistgames" :userid="indexvm.userID" :userlistid="selectedItemID" :userlists="indexvm.userLists" :useraccounts="indexvm.userAccounts" :windowsliveauthurl="indexvm.windowsLiveAuthUrl" :authsuccess="indexvm.authSuccess" :authaccounttypeid="indexvm.authAccountTypeID" @delete="onDelete"></user-list-games>           
     </div>
 </template>
 <script>
