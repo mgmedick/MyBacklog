@@ -325,34 +325,36 @@ namespace GameStatsApp.Service
             return userAccountVMs;
         }
 
-        public async Task<Tuple<UserAccountView, string>> GetRefreshedUserAccount(int userID, int userAccountID)
+        public async Task<UserAccountView> GetRefreshedUserAccount(int userID, int userAccountID)
         {
             var authUrl = string.Empty;
             var redirectUrl = string.Empty;
             var userAccountVW = _userRepo.GetUserAccountViews(i => i.ID == userAccountID).FirstOrDefault();
             
-            switch (userAccountVW.AccountTypeID)
+            if (userAccountVW.ExpireDate < DateTime.UtcNow && !string.IsNullOrWhiteSpace(userAccountVW.RefreshToken))
             {
-                case (int)AccountType.Xbox:
-                    redirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("IndexRedirectUri").Value;
-                    break;
-            }
-            
-            if (userAccountVW.ExpireDate < DateTime.UtcNow)
-            {
-                if (!string.IsNullOrWhiteSpace(userAccountVW.RefreshToken))
-                {
-                    var tokenResponse = await _authService.ReAuthenticate(userAccountVW.RefreshToken);
-                    SaveUserAccount(userID, userAccountVW.AccountTypeID, tokenResponse);
-                }
-                else
-                {
-                    authUrl = redirectUrl;
-                }          
+                var tokenResponse = await _authService.ReAuthenticate(userAccountVW.RefreshToken);
+                SaveUserAccount(userID, userAccountVW.AccountTypeID, tokenResponse);
+                userAccountVW = _userRepo.GetUserAccountViews(i => i.ID == userAccountID).FirstOrDefault();      
             }
 
-            return new Tuple<UserAccountView, string>(userAccountVW, authUrl);
+            return userAccountVW;
         }
+
+        public string GetUserAccountAuthUrl(int accountTypeID)
+        {
+            var authUrl = string.Empty;
+
+            switch (accountTypeID)
+            {
+                case (int)AccountType.Xbox:
+                    var url = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
+                    authUrl = _authService.GetWindowsLiveAuthUrl(url);
+                    break;
+            }
+
+            return authUrl;
+        }          
 
         public async Task ImportGamesFromUserAccount(int userID, UserAccountView userAccountVW, bool isImportAll)
         {

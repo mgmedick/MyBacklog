@@ -242,29 +242,35 @@ namespace GameStatsApp.Controllers
         {
             var success = false;
             List<string> errorMessages = null;
-
-            var importingUserAccounts = HttpContext.Session.Get<Dictionary<int,bool?>>("ImportingUserAccounts") ?? new Dictionary<int,bool?>();  
-            if (!importingUserAccounts.ContainsKey(userAccountID))
-            {
-                importingUserAccounts.Add(userAccountID, (bool?)null);
-            }
-            HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);
+            var authUrl = string.Empty;
 
             try
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                var result = await _userService.GetRefreshedUserAccount(userID, userAccountID);
+                var userAccountVW = await _userService.GetRefreshedUserAccount(userID, userAccountID);
                 
-                if (!string.IsNullOrWhiteSpace(result.Item2))
+                if (userAccountVW.ExpireDate < DateTime.UtcNow)
                 {
-                    Redirect(result.Item2);
+                    authUrl = _userService.GetUserAccountAuthUrl(userAccountVW.AccountTypeID);
                 }
                 else
                 {
-                    await _userService.ImportGamesFromUserAccount(userID, result.Item1, isImportAll);
-                }
+                    var importingUserAccounts = HttpContext.Session.Get<Dictionary<int,bool?>>("ImportingUserAccounts") ?? new Dictionary<int,bool?>();  
+                    if (!importingUserAccounts.ContainsKey(userAccountID))
+                    {
+                        importingUserAccounts.Add(userAccountID, (bool?)null);
+                    }
+                    HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);
 
-                success = true;
+                    await _userService.ImportGamesFromUserAccount(userID, userAccountVW, isImportAll);
+                    success = true;
+
+                    if (importingUserAccounts.ContainsKey(userAccountID))
+                    {
+                        importingUserAccounts[userAccountID] = success;
+                        HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -273,18 +279,13 @@ namespace GameStatsApp.Controllers
                 errorMessages = new List<string>() { "Error importing games" };
             }
 
-            if (importingUserAccounts.ContainsKey(userAccountID))
-            {
-                importingUserAccounts[userAccountID] = success;
-                HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);
-            }
 
-            return Json(new { success = success, errorMessages = errorMessages });
+            return Json(new { success = success, errorMessages = errorMessages, authUrl = authUrl });
         }      
 
-        public async Task<ActionResult> MicrosoftAuthCallbackIndex()
+        public async Task<ActionResult> MicrosoftAuthCallbackImportGames()
         {
-            var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("IndexRedirectUri").Value;
+            var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
             var success = await MicrosoftAuthCallback(redirectUri);
 
             return RedirectToAction("Index", "Home", new { authSuccess = success, authAccountTypeID = (int)AccountType.Xbox });

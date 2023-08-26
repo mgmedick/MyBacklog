@@ -118,12 +118,15 @@
                 }
 
                 axios.post('/User/ImportGames', null,{ params: { userAccountID: userAccount.id, isImportAll: isImportAll == 0 } }).then((res) => {
-                    if (res.data.success) {
-                        successToast("Successfully imported " + userAccount.accountTypeName + " games");
+                    if (res.data.authUrl) {
+                        location.href = res.data.authUrl;
                     } else {
-                        errorToast("Error importing " + userAccount.accountTypeName + " games");                                               
-                    }
-
+                        if (res.data.success) {
+                            successToast("Successfully imported " + userAccount.accountTypeName + " games");
+                        } else {
+                            errorToast("Error importing " + userAccount.accountTypeName + " games");                                               
+                        }
+                    }                                                                                                                           
                     delete that.importingUserAccountIDs[userAccount.id];
                 })
                 .catch(err => { console.error(err); return Promise.reject(err); });
