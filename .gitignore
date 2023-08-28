@@ -340,9 +340,10 @@ ASALocalRun/
 healthchecksdb
 
 GameStatsApp/logs
-GameStatsApp/wwwroot/dist
+GameStatsApp/wwwroot/dist/*
+!GameStatsApp/wwwroot/dist/images/demo/
 GameStatsApp/appsettings.dev.json
 .DS_Store
 
-!GameStatsApp/wwwroot/dist/images/demo
+
 
