@@ -2,9 +2,9 @@ import { createApp } from "vue";
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon, FontAwesomeLayers } from '@fortawesome/vue-fontawesome'
-import { faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner, faSquarePen, faAt, faList, faInbox, faPlay, faCheck, faEllipsis, faPlus, faCircleXmark, faCaretUp, faCaretDown, faCloudArrowDown, faCircleExclamation, faArrowDownWideShort, faArrowUpWideShort, faCloud, faCircleInfo } from '@fortawesome/free-solid-svg-icons'
+import { faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner, faSquarePen, faAt, faList, faInbox, faPlay, faCheck, faEllipsis, faPlus, faCircleXmark, faCaretUp, faCaretDown, faCloudArrowDown, faCircleExclamation, faArrowDownWideShort, faArrowUpWideShort, faCloud, faCircleInfo, faGamepad } from '@fortawesome/free-solid-svg-icons'
 import { faGoogle, faFacebook, faSteam, faXbox } from '@fortawesome/free-brands-svg-icons'
-library.add(faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner, faSquarePen, faAt, faList, faInbox, faPlay, faCheck, faEllipsis, faPlus, faCircleXmark, faCaretUp, faCaretDown, faCloudArrowDown, faCircleExclamation, faArrowDownWideShort, faArrowUpWideShort, faCloud, faCircleInfo, faGoogle, faFacebook, faSteam, faXbox);
+library.add(faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner, faSquarePen, faAt, faList, faInbox, faPlay, faCheck, faEllipsis, faPlus, faCircleXmark, faCaretUp, faCaretDown, faCloudArrowDown, faCircleExclamation, faArrowDownWideShort, faArrowUpWideShort, faCloud, faCircleInfo, faGamepad, faGoogle, faFacebook, faSteam, faXbox);
 
 import autocomplete from './shared/Autocomplete.vue';
 import multiselect from './shared/Multiselect.vue';

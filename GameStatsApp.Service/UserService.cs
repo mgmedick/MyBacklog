@@ -340,22 +340,7 @@ namespace GameStatsApp.Service
 
             return userAccountVW;
         }
-
-        public string GetUserAccountAuthUrl(int accountTypeID)
-        {
-            var authUrl = string.Empty;
-
-            switch (accountTypeID)
-            {
-                case (int)AccountType.Xbox:
-                    var url = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
-                    authUrl = _authService.GetWindowsLiveAuthUrl(url);
-                    break;
-            }
-
-            return authUrl;
-        }          
-
+        
         public async Task ImportGamesFromUserAccount(int userID, UserAccountView userAccountVW, bool isImportAll)
         {
             var gameNames = new List<string>();

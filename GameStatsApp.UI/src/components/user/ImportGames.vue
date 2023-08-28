@@ -30,34 +30,36 @@
 </template>
 <script>
     import { successToast, errorToast } from '../../js/common.js';
-    import { Tooltip } from 'bootstrap'; 
+    import bootstrap, { Tooltip } from 'bootstrap'; 
     import axios from 'axios';
     
     export default {
         name: "ImportGames",
         props: {
             useraccounts: Array,
-            importinguseraccountids: Object,
-            windowsliveauthurl: String
+            windowsliveauthurl: String,
+            authsuccess: Boolean,
+            authaccounttypeid: Number
         },
         data() {
             return {
-                importingUserAccountIDs: this.importinguseraccountids,
-                isImportAll: 0
+                importingUserAccountIDs: JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {}
             }
         },
         computed: {
         },                                    
         watch: {
             importingUserAccountIDs: {
-                handler(val, oldVal){
-                    this.$emit('update:importinguseraccountids', val);
+                handler(val, oldVal) {
+                    sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(val));
+                    var isImporting = Object.keys(val).length > 0;
+                    this.$emit('update:isimporting', isImporting);
                 },
                 deep: true
             }             
         },          
-        created: function () {
-        },        
+        created: function() {
+        },         
         mounted: function () {
             var that = this;
             document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
@@ -67,8 +69,17 @@
             window.addEventListener('importingUserAccountIDsUpdate', (event) => {
                 that.importingUserAccountIDs = JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {};
             });
+
+            if (that.authsuccess != null) {
+                if (that.authsuccess) {
+                    var userAccount = that.useraccounts.find(i => i.accountTypeID == that.authaccounttypeid);
+                    that.ImportGames(userAccount);
+                } else {            
+                    that.errorToast("Error authorizing account");       
+                }
+            }
         },        
-        methods: {
+        methods: {            
             getIconClass: function (accountTypeID) {
                 var iconClass = '';
 

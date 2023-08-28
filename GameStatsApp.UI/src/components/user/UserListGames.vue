@@ -3,8 +3,8 @@
         <div class="d-flex align-items-center mb-3">
             <div v-if="userlists.find(i => i.defaultListID == 1).id == userlistid" class="me-2">
                 <div class="btn btn-secondary p-2" tabindex="-1" role="button">
-                    <font-awesome-layers v-if="Object.keys(importingUserAccountIDs).length > 0" class="fa-2xl" @click="onImportClick">
-                        <font-awesome-icon icon="fa-solid fa-spinner m-2" spin transform="shrink-5" style="color: #adb5bd; margin-left: 0.25rem; z-index: 9999;"/>
+                    <font-awesome-layers v-if="isImporting" class="fa-2xl" @click="onImportClick" style="width: 35px;">
+                        <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-5" style="color: #adb5bd; z-index: 9999;"/>
                         <font-awesome-icon icon="fa-solid fa-cloud"/>
                     </font-awesome-layers>
                     <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" size="2xl" @click="onImportClick"/>   
@@ -87,7 +87,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <import-games ref="importGames" :useraccounts="useraccounts" :windowsliveauthurl="windowsliveauthurl" :importinguseraccountids="importingUserAccountIDs" @update:importinguseraccountids="onImportingUserAccountIDsUpdate"></import-games>
+                        <import-games :useraccounts="useraccounts" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" :isimporting="isImporting" @update:isimporting="isImporting = $event"></import-games>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -135,11 +135,9 @@
     export default {
         name: "UserListGames",
         props: {
-            userid: String,
             userlistid: Number,
             userlists: Array,
             useraccounts: Array,
-            windowsliveauthurl: String,
             authsuccess: Boolean,
             authaccounttypeid: Number
         },
@@ -149,7 +147,9 @@
                 allgames: [],
                 game: {},
                 loading: false,
+                showImport: false,
                 importModal: {},
+                isImportShown: false,
                 removeModal: {},
                 searchModal: {},
                 searchText: null,
@@ -158,11 +158,13 @@
                 filterText: null,
                 orderByDesc: true,             
                 orderByID: 0,
-                importingUserAccountIDs: JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {},
+                isImporting: Object.keys(JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {}).length > 0,
                 width: document.documentElement.clientWidth,
                 height: document.documentElement.clientHeight
             };
-        },       
+        },  
+        computed: {     
+        },             
         watch: {
             userlistid: function (val, oldVal) {
                 this.loadData();
@@ -172,6 +174,13 @@
                 if (val != oldVal) {
                     that.filterResults(val);
                 }
+            },
+            showImport: function (val, oldVal) {
+                if (val) {
+                    this.importModal.show();
+                } else {
+                    this.importModal.hide();
+                }
             }                        
         },  
         created: function () {
@@ -180,7 +189,7 @@
         mounted: function() {
             var that = this;
             window.addEventListener('importingUserAccountIDsUpdate', (event) => {
-                that.importingUserAccountIDs = JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {};
+                that.isImporting = Object.keys(JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {}).length > 0;
             });
 
             window.addEventListener('importGamesComplete', (event) => {
@@ -190,22 +199,24 @@
             that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {
                 that.$refs.searchAutocomplete.clear();
             });  
+
+            // that.$refs.importmodal.addEventListener('shown.bs.modal', event => {
+            //     that.isImportShown = true;
+            // }); 
+            
+            // that.$refs.importmodal.addEventListener('hidden.bs.modal', event => {
+            //     that.isImportShown = false;
+            // });             
            
             window.addEventListener('resize', that.onResize);
 
             that.importModal = new Modal(that.$refs.importmodal);
             that.removeModal = new Modal(that.$refs.removemodal);
-            that.searchModal = new Modal(that.$refs.searchmodal);
-
-            if (that.authsuccess != null) {
-                if (that.authsuccess) {
-                    var userAccount = that.useraccounts.find(i => i.accountTypeID == that.authaccounttypeid);
-                    that.$refs.importGames.ImportGames(userAccount);
-                    that.importModal.show();
-                } else {            
-                    that.errorToast("Error authorizing account");       
-                }
-            }            
+            that.searchModal = new Modal(that.$refs.searchmodal);         
+            
+            if (that.authSuccess != null){
+                that.importModal.show();
+            }
         },     
         methods: {
             loadData: function () {
@@ -226,7 +237,7 @@
                         return res;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            },
+            },  
             getIconClass: function (id) {
                 var iconClass = '';
 
@@ -344,10 +355,10 @@
                     });
                 }
             },  
-            onImportingUserAccountIDsUpdate: function (result) {
-                this.importingUserAccountIDs = result;
-                sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(this.importingUserAccountIDs));
-            },       
+            // onImportingUserAccountIDsUpdate: function (result) {
+            //     this.importingUserAccountIDs = result;
+            //     sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(this.importingUserAccountIDs));
+            // },       
             sortGames() {
                 switch (this.orderByID)
                 {

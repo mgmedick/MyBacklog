@@ -45,7 +45,7 @@ namespace GameStatsApp.Controllers
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var redirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
-                
+         
                 indexVM.UserID = userID;
                 indexVM.UserLists = _userService.GetUserLists(userID).ToList();
                 indexVM.UserAccounts = _userService.GetUserAccounts(userID).ToList();

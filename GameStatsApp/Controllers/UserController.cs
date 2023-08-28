@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authorization;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Http.Extensions;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace GameStatsApp.Controllers
 {
@@ -236,7 +237,7 @@ namespace GameStatsApp.Controllers
 
             return Json(new { success = success, errorMessages = errorMessages });
         }
-
+        
         [HttpPost]
         public async Task<ActionResult> ImportGames(int userAccountID, bool isImportAll)
         {
@@ -260,6 +261,7 @@ namespace GameStatsApp.Controllers
                     HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);
 
                     await _userService.ImportGamesFromUserAccount(userID, userAccountVW, isImportAll);
+                    Thread.Sleep(TimeSpan.FromMilliseconds(10000));
                     success = true;
 
                     if (importingUserAccounts.ContainsKey(userAccountID))
@@ -275,7 +277,7 @@ namespace GameStatsApp.Controllers
                 success = false;
                 errorMessages = new List<string>() { "Error importing games" };
             }
-            
+
             return Json(new { success = success, errorMessages = errorMessages, isAuthExpired = isAuthExpired });
         }      
 
