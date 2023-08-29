@@ -104,8 +104,7 @@
 
             that.welcomeModal = new Modal(that.$refs.welcomemodal);         
             
-            //if (that.indexvm.showWelcome) {
-            if (true) {
+            if (that.indexvm.showWelcome) {
                 that.welcomeModal.show();
             }            
         },        
