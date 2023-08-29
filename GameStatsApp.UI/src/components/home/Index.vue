@@ -47,18 +47,38 @@
             </div>
         </div>  
         <div v-else>
-            <user-lists :userlists="indexvm.userLists" :useraccounts="indexvm.userAccounts" :authsuccess="indexvm.authSuccess" :authaccounttypeid="indexvm.authAccountTypeID"></user-lists>
-        </div>
+            <user-lists :userlists="indexvm.userLists" :useraccounts="indexvm.userAccounts" :emptycoverimagepath="indexvm.emptyCoverImagePath" :authsuccess="indexvm.authSuccess" :authaccounttypeid="indexvm.authAccountTypeID" :showimport="indexvm.showImport"></user-lists>
+        </div>   
+        <div ref="welcomemodal" class="modal modal-lg" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <!-- <h5 class="modal-title">Welcome</h5> -->
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <welcome :username="indexvm.username" :useraccounts="indexvm.userAccounts" :windowsliveauthurl="indexvm.windowsLiveAuthUrlWelcome" :authsuccess="indexvm.authSuccess" :authaccounttypeid="indexvm.authAccountTypeID"></welcome>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Continue</button>
+                    </div>
+                </div>
+            </div>
+        </div>               
     </div>    
 </template>
 <script>
+    import { Modal } from 'bootstrap';
+
     export default {
         name: "Index",
         props: {
-            indexvm: Object,
+            indexvm: Object
         },
         data: function () {
             return {
+                welcomeModal: {},
                 width: document.documentElement.clientWidth,
                 height: document.documentElement.clientHeight
             };
@@ -76,9 +96,18 @@
         created: function () {
         },
         mounted: function () {
+            var that = this;
+            
             window.addEventListener('resize', this.onResize);
 
             this.setDemoImages();
+
+            that.welcomeModal = new Modal(that.$refs.welcomemodal);         
+            
+            //if (that.indexvm.showWelcome) {
+            if (true) {
+                that.welcomeModal.show();
+            }            
         },        
         methods: {
             onResize: function() {
@@ -94,9 +123,6 @@
             },              
             setDemoImages() {
                 var imageSize = '';
-                var indexImage = "/dist/images/demo/index_demo_{0}.png";;
-                var importImage = "/dist/images/demo/import_demo_{0}.png";
-                var settingsImage = "/dist/images/demo/settings_demo_{0}.png";
 
                 if (this.$el) {
                     var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
@@ -106,15 +132,15 @@
                     } else if (width >= 768) {
                         imageSize = "md";
                     } else if (width >= 576) {
-                        imageSize = "sm";
+                        imageSize = "xs";
                     } else {
                         imageSize = "xs";
                     }
                 }
 
-                this.indexImagePath = indexImage.replace("{0}", imageSize); 
-                this.importImagePath = importImage.replace("{0}", imageSize); 
-                this.settingsImagePath = settingsImage.replace("{0}", imageSize); 
+                this.indexImagePath = this.indexvm.indexDemoImagePath.replace("{0}", imageSize); 
+                this.importImagePath = this.indexvm.importDemoImagePath.replace("{0}", imageSize); 
+                this.settingsImagePath = this.indexvm.settingsDemoImagePath.replace("{0}", imageSize); 
             }
         },
     };

@@ -164,11 +164,7 @@
                 axios.post('/Home/LoginOrSignUpWithSocial', null,{ params: { accessToken: accessToken, socialAccountTypeID: socialAccountTypeID } })
                     .then((res) => {
                         if (res.data.success) {
-                            if (res.data.isnewuser) {
-                                location.href = '/Welcome';
-                            } else {
-                                location.href = '/';
-                            }
+                            location.href = '/';
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {
                                 errorToast(errorMsg);                           

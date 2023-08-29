@@ -36,22 +36,42 @@ namespace GameStatsApp.Controllers
             _logger = logger;
         }
 
-        public ActionResult Index(bool? authSuccess = null, int? authAccountTypeID = null)
+        public ActionResult Index()
         {
             var indexVM = new IndexViewModel();
             indexVM.IsAuth = User.Identity.IsAuthenticated;
-
+            indexVM.IndexDemoImagePath = _config.GetSection("SiteSettings").GetSection("IndexDemoImagePath").Value;
+            indexVM.ImportDemoImagePath = _config.GetSection("SiteSettings").GetSection("ImportDemoImagePath").Value;
+            indexVM.SettingsDemoImagePath = _config.GetSection("SiteSettings").GetSection("SettingsDemoImagePath").Value;
+            
             if (indexVM.IsAuth)
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var redirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
-         
+                var welcomeRedirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
+        
                 indexVM.UserID = userID;
+                indexVM.Username = User.FindFirstValue(ClaimTypes.Name);
                 indexVM.UserLists = _userService.GetUserLists(userID).ToList();
                 indexVM.UserAccounts = _userService.GetUserAccounts(userID).ToList();
                 indexVM.WindowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUrl);
-                indexVM.AuthSuccess = authSuccess;
-                indexVM.AuthAccountTypeID = authAccountTypeID;
+                indexVM.WindowsLiveAuthUrlWelcome = _authService.GetWindowsLiveAuthUrl(welcomeRedirectUrl);
+                indexVM.EmptyCoverImagePath = _config.GetSection("SiteSettings").GetSection("EmptyCoverImagePath").Value;
+
+                if (TempData["AuthSuccess"] != null) {
+                    indexVM.AuthSuccess = (bool)TempData["AuthSuccess"];
+                    indexVM.AuthAccountTypeID = (int)TempData["AuthAccountTypeID"];
+
+                    if ((int)TempData["AuthCallbackSourceID"] == (int)AuthCallbackSource.Welcome) {
+                        indexVM.ShowWelcome = true;
+                    } else {
+                        indexVM.ShowImport = true;
+                    }
+                }
+
+                if (TempData["ShowWelcome"] != null) {
+                    indexVM.ShowWelcome = true;
+                }                            
             }
 
             return View(indexVM);
@@ -214,6 +234,7 @@ namespace GameStatsApp.Controllers
                         _ = _userService.SendConfirmRegistrationEmail(userVW.Email, userVW.Username).ContinueWith(t => _logger.Error(t.Exception, "SendConfirmRegistrationEmail"), TaskContinuationOptions.OnlyOnFaulted);
                         isNewUser = true;
                         success = true;
+                        TempData.Add("ShowWelcome", true);                    
                     }
                 }
                 else
@@ -268,6 +289,7 @@ namespace GameStatsApp.Controllers
                     LoginUser(userVW);
                     _ = _userService.SendConfirmRegistrationEmail(userVW.Email, userVW.Username).ContinueWith(t => _logger.Error(t.Exception, "SendConfirmRegistrationEmail"), TaskContinuationOptions.OnlyOnFaulted);
                     success = true;
+                    TempData.Add("ShowWelcome", true);                    
                 }
                 else
                 {

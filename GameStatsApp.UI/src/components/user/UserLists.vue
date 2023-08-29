@@ -29,7 +29,7 @@
                 </ul>
             </div>                
         </div>
-        <user-list-games ref="userlistgames" :userlists="userlists" :userlistid="selectedItemID" :useraccounts="useraccounts" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" @delete="onDelete"></user-list-games>           
+        <user-list-games ref="userlistgames" :userlists="userlists" :userlistid="selectedItemID" :useraccounts="useraccounts" :emptycoverimagepath="emptycoverimagepath" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" :showimport="showimport" @delete="onDelete"></user-list-games>           
     </div>
 </template>
 <script>
@@ -38,8 +38,10 @@
         props: {
             userlists: Array,
             useraccounts: Array,
+            emptycoverimagepath: String,
             authsuccess: Boolean,
-            authaccounttypeid: Number            
+            authaccounttypeid: Number,
+            showimport: Boolean            
         },
         data: function () {
             return {

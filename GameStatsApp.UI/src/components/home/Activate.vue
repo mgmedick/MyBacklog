@@ -110,7 +110,7 @@
                 axios.post('/Home/Activate', formData)
                     .then((res) => {
                         if (res.data.success) {
-                            location.href = '/Welcome';
+                            location.href = '/';
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {
                                 errorToast(errorMsg);                           

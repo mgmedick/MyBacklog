@@ -72,6 +72,11 @@ namespace GameStatsApp.Controllers
                                                      AccountTypeIDs = accountTypeIDs,
                                                      AuthSuccess = authSuccess };
 
+            if (TempData["AuthSuccess"] != null) {
+                userSettingsVM.AuthSuccess = (bool)TempData["AuthSuccess"];
+                userSettingsVM.AuthAccountTypeID = (int)TempData["AuthAccountTypeID"];
+            }
+
             return View(userSettingsVM);
         }
 
@@ -285,24 +290,33 @@ namespace GameStatsApp.Controllers
         {
             var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
             var success = await MicrosoftAuthCallback(redirectUri);
+            TempData.Add("AuthSuccess", success);
+            TempData.Add("AuthAccountTypeID", (int)AccountType.Xbox);
+            TempData.Add("AuthCallbackSourceID", (int)AuthCallbackSource.ImportGames);
 
-            return RedirectToAction("Index", "Home", new { authSuccess = success, authAccountTypeID = (int)AccountType.Xbox });
+            return RedirectToAction("Index", "Home");
         }
 
         public async Task<ActionResult> MicrosoftAuthCallbackWelcome()
         {
             var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
             var success = await MicrosoftAuthCallback(redirectUri);
+            TempData.Add("AuthSuccess", success);
+            TempData.Add("AuthAccountTypeID", (int)AccountType.Xbox);
+            TempData.Add("AuthCallbackSourceID", (int)AuthCallbackSource.Welcome);
 
-            return RedirectToAction("Welcome", "User", new { authSuccess = success, authAccountTypeID = (int)AccountType.Xbox });
+            return RedirectToAction("Index", "Home");
         }     
 
         public async Task<ActionResult> MicrosoftAuthCallbackUserSettings()
         {
             var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("UserSettingsRedirectUri").Value;
             var success = await MicrosoftAuthCallback(redirectUri);
+            TempData.Add("AuthSuccess", success);
+            TempData.Add("AuthAccountTypeID", (int)AccountType.Xbox);
+            TempData.Add("AuthCallbackSourceID", (int)AuthCallbackSource.UserSettings);
 
-            return RedirectToAction("UserSettings", "User", new { authSuccess = success, authAccountTypeID = (int)AccountType.Xbox });
+            return RedirectToAction("UserSettings", "User");
         }             
 
         private async Task<bool> MicrosoftAuthCallback(string redirectUri)

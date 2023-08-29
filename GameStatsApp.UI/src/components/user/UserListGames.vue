@@ -33,7 +33,7 @@
                                 <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px;"/>                    
                             </div>
                         </div>                  
-                        <img src="/dist/images/gamecovers/emptycover.jpg" class="img-fluid rounded" alt="Responsive image">
+                        <img :src="emptycoverimagepath" class="img-fluid rounded" alt="Responsive image">
                     </div>
                 </div>
             </div>   
@@ -49,7 +49,7 @@
                             <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px;"/>                    
                         </div>
                     </div>                  
-                    <img src="/dist/images/gamecovers/emptycover.jpg" class="img-fluid rounded" alt="Responsive image">
+                    <img :src="emptycoverimagepath" class="img-fluid rounded" alt="Responsive image">
                 </div>
             </div>
             <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-6" key="game.id">
@@ -87,7 +87,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <import-games :useraccounts="useraccounts" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" :isimporting="isImporting" @update:isimporting="isImporting = $event"></import-games>
+                        <import-games :useraccounts="useraccounts" :windowsliveauthurl="windowsliveauthurl" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" :isimporting="isImporting" @update:isimporting="isImporting = $event"></import-games>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -138,8 +138,11 @@
             userlistid: Number,
             userlists: Array,
             useraccounts: Array,
+            windowsliveauthurl: String,
+            emptycoverimagepath: String,
             authsuccess: Boolean,
-            authaccounttypeid: Number
+            authaccounttypeid: Number,
+            showimport: Boolean
         },
         data: function () {
             return {
@@ -147,9 +150,7 @@
                 allgames: [],
                 game: {},
                 loading: false,
-                showImport: false,
                 importModal: {},
-                isImportShown: false,
                 removeModal: {},
                 searchModal: {},
                 searchText: null,
@@ -174,14 +175,7 @@
                 if (val != oldVal) {
                     that.filterResults(val);
                 }
-            },
-            showImport: function (val, oldVal) {
-                if (val) {
-                    this.importModal.show();
-                } else {
-                    this.importModal.hide();
-                }
-            }                        
+            }                      
         },  
         created: function () {
             this.loadData();
@@ -198,23 +192,15 @@
             
             that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {
                 that.$refs.searchAutocomplete.clear();
-            });  
+            });
 
-            // that.$refs.importmodal.addEventListener('shown.bs.modal', event => {
-            //     that.isImportShown = true;
-            // }); 
-            
-            // that.$refs.importmodal.addEventListener('hidden.bs.modal', event => {
-            //     that.isImportShown = false;
-            // });             
-           
             window.addEventListener('resize', that.onResize);
 
             that.importModal = new Modal(that.$refs.importmodal);
             that.removeModal = new Modal(that.$refs.removemodal);
             that.searchModal = new Modal(that.$refs.searchmodal);         
             
-            if (that.authSuccess != null){
+            if (that.showimport) {
                 that.importModal.show();
             }
         },     

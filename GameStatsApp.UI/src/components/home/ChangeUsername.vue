@@ -1,9 +1,9 @@
 ﻿<template>
     <form ref="form" @submit.prevent="submitForm" autocomplete="off">
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center justify-content-center">
             <font-awesome-icon icon="fa-solid fa-at" size="xl" class="me-2"/>
             <input v-if="editUsername" id="txtUserName" type="text" class="form-control fs-5" autocomplete="off" v-model.lazy="form.Username" @blur="onUserNameBlur" aria-describedby="spnUserNameErrors">
-            <label v-else class="form-control fs-5 border-0 ps-0">{{ form.Username }}</label>
+            <label v-else class="form-control fs-5 border-0 ps-0 w-auto">{{ form.Username }}</label>
             <font-awesome-icon icon="fa-solid fa-square-pen" size="lg" @click="editUsername = !editUsername"/>
             <div>
                 <span id="spnUserNameErrors" class="form-text text-danger" v-for="error of v$.form.Username.$errors">{{ error.$message }}</span>

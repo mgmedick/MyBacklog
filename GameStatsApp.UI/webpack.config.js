@@ -34,7 +34,7 @@ module.exports = {
                 include: srcPath,
                 test: /\.js$/,
                 use: [{ loader: 'babel-loader' }]
-            },
+            },                   
             {
                 test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
                 use: [
@@ -48,15 +48,7 @@ module.exports = {
                         }
                     }
                 ]
-            },            
-            {
-                test: /\.css$/,
-                use: [MiniCssExtractPlugin.loader, 'css-loader']
-            },
-            {
-                test: /\.vue$/,
-                loader: 'vue-loader'
-            },
+            }, 
             {
                 test: /\.(png|jpg|jpeg|gif)$/,
                 use: [
@@ -70,6 +62,14 @@ module.exports = {
                         }
                     }
                 ]
+            },                         
+            {
+                test: /\.css$/,
+                use: [MiniCssExtractPlugin.loader, 'css-loader']
+            },
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader'
             }
         ]
     },
