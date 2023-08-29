@@ -8,7 +8,7 @@
                         <span>{{ userList.name }}</span>
                     </a>
                 </li>
-                <li class="border-top my-3"></li>
+                <li v-if="userlists.filter(i => !i.defaultListID).length > 0" class="border-top my-3"></li>
                 <li v-for="(userList, userListIndex) in userlists.filter(i => !i.defaultListID)" key="userList.id" class="nav-item">
                     <a @click="selectedItemID = userList.id" href="#" class="nav-link text-dark" :class="{ 'active' : selectedItemID == userList.id }">
                         <span>{{ userList.name }}</span>
@@ -29,7 +29,7 @@
                 </ul>
             </div>                
         </div>
-        <user-list-games ref="userlistgames" :userlists="userlists" :userlistid="selectedItemID" :useraccounts="useraccounts" :emptycoverimagepath="emptycoverimagepath" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" :showimport="showimport" @delete="onDelete"></user-list-games>           
+        <user-list-games ref="userlistgames" :userlists="userlists" :userlistid="selectedItemID" :emptycoverimagepath="emptycoverimagepath" :useraccounts="useraccounts" :windowsliveauthurl="windowsliveauthurl" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" @delete="onDelete"></user-list-games>           
     </div>
 </template>
 <script>
@@ -37,11 +37,11 @@
         name: "UserLists",
         props: {
             userlists: Array,
-            useraccounts: Array,
             emptycoverimagepath: String,
+            useraccounts: Array,
+            windowsliveauthurl: String,
             authsuccess: Boolean,
-            authaccounttypeid: Number,
-            showimport: Boolean            
+            authaccounttypeid: Number
         },
         data: function () {
             return {

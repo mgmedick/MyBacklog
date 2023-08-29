@@ -15,8 +15,8 @@
                         <td>
                             <div class="d-flex">
                                 <div class="ms-auto">
-                                    <font-awesome-icon icon="fa-solid fa-square-pen" size="lg" class="me-3 fa-disabled" @click="onShowEditListClick($event, userList)"/>
-                                    <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="fa-disabled" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%);" @click="onShowDeleteListClick($event, userList)"/>
+                                    <font-awesome-icon icon="fa-solid fa-square-pen" size="lg" class="me-3 fa-disabled"/>
+                                    <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="fa-disabled" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%);"/>
                                 </div>
                             </div>
                         </td>

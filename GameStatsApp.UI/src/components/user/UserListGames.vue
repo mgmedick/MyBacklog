@@ -87,7 +87,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <import-games :useraccounts="useraccounts" :windowsliveauthurl="windowsliveauthurl" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" :isimporting="isImporting" @update:isimporting="isImporting = $event"></import-games>
+                        <import-games :useraccounts="useraccounts" :windowsliveauthurl="windowsliveauthurl" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" :isimporting="isImporting" @update:isimporting="onIsImportingUpdate"></import-games>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -137,12 +137,11 @@
         props: {
             userlistid: Number,
             userlists: Array,
+            emptycoverimagepath: String,
             useraccounts: Array,
             windowsliveauthurl: String,
-            emptycoverimagepath: String,
             authsuccess: Boolean,
-            authaccounttypeid: Number,
-            showimport: Boolean
+            authaccounttypeid: Number
         },
         data: function () {
             return {
@@ -184,10 +183,10 @@
             var that = this;
             window.addEventListener('importingUserAccountIDsUpdate', (event) => {
                 that.isImporting = Object.keys(JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {}).length > 0;
-            });
-
-            window.addEventListener('importGamesComplete', (event) => {
-                location.href = '/';
+                
+                if (!that.isImporting) {
+                    that.loadData()
+                }
             });
             
             that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {
@@ -200,7 +199,7 @@
             that.removeModal = new Modal(that.$refs.removemodal);
             that.searchModal = new Modal(that.$refs.searchmodal);         
             
-            if (that.showimport) {
+            if (that.authsuccess != null) {
                 that.importModal.show();
             }
         },     
@@ -340,11 +339,13 @@
                         that.resizeColumns();
                     });
                 }
-            },  
-            // onImportingUserAccountIDsUpdate: function (result) {
-            //     this.importingUserAccountIDs = result;
-            //     sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(this.importingUserAccountIDs));
-            // },       
+            }, 
+            onIsImportingUpdate(e) {
+                this.isImporting = e;
+                if (!this.isImporting) {
+                    this.loadData()
+                }
+            },     
             sortGames() {
                 switch (this.orderByID)
                 {

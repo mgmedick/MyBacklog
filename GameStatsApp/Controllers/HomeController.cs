@@ -48,25 +48,17 @@ namespace GameStatsApp.Controllers
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var redirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
-                var welcomeRedirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("WelcomeRedirectUri").Value;
         
                 indexVM.UserID = userID;
                 indexVM.Username = User.FindFirstValue(ClaimTypes.Name);
                 indexVM.UserLists = _userService.GetUserLists(userID).ToList();
                 indexVM.UserAccounts = _userService.GetUserAccounts(userID).ToList();
                 indexVM.WindowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUrl);
-                indexVM.WindowsLiveAuthUrlWelcome = _authService.GetWindowsLiveAuthUrl(welcomeRedirectUrl);
                 indexVM.EmptyCoverImagePath = _config.GetSection("SiteSettings").GetSection("EmptyCoverImagePath").Value;
 
                 if (TempData["AuthSuccess"] != null) {
                     indexVM.AuthSuccess = (bool)TempData["AuthSuccess"];
                     indexVM.AuthAccountTypeID = (int)TempData["AuthAccountTypeID"];
-
-                    if ((int)TempData["AuthCallbackSourceID"] == (int)AuthCallbackSource.Welcome) {
-                        indexVM.ShowWelcome = true;
-                    } else {
-                        indexVM.ShowImport = true;
-                    }
                 }
 
                 if (TempData["ShowWelcome"] != null) {

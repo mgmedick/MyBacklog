@@ -47,7 +47,7 @@
             </div>
         </div>  
         <div v-else>
-            <user-lists :userlists="indexvm.userLists" :useraccounts="indexvm.userAccounts" :emptycoverimagepath="indexvm.emptyCoverImagePath" :authsuccess="indexvm.authSuccess" :authaccounttypeid="indexvm.authAccountTypeID" :showimport="indexvm.showImport"></user-lists>
+            <user-lists :userlists="indexvm.userLists" :emptycoverimagepath="indexvm.emptyCoverImagePath" :useraccounts="indexvm.userAccounts" :windowsliveauthurl="indexvm.windowsLiveAuthUrl" :authsuccess="indexvm.authSuccess" :authaccounttypeid="indexvm.authAccountTypeID"></user-lists>
         </div>   
         <div ref="welcomemodal" class="modal modal-lg" tabindex="-1">
             <div class="modal-dialog">
@@ -57,7 +57,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <welcome :username="indexvm.username" :useraccounts="indexvm.userAccounts" :windowsliveauthurl="indexvm.windowsLiveAuthUrlWelcome" :authsuccess="indexvm.authSuccess" :authaccounttypeid="indexvm.authAccountTypeID"></welcome>
+                        <welcome :username="indexvm.username"></welcome>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

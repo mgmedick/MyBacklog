@@ -13,14 +13,6 @@
     line-height: 1rem;
 }
 
-.text-color-blue {
-    color: #0a3169;
-}
-
-.text-color-green {
-    color: #107711;
-}
-
 .center {
     -webkit-transform: translate(-50%,-50%);
     transform: translate(-50%,-50%);

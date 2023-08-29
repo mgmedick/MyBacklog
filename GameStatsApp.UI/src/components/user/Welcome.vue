@@ -6,13 +6,6 @@
                 <change-username :username="username"></change-username>
             </div>      
             <div class="text-center">
-                <p class="lead text-dark">Link an account to import games</p>
-            </div>
-            <div class="row g-2 justify-content-center mb-3">
-                <button type="button" class="btn btn-outline-primary d-flex" :disabled="useraccounts?.filter(i => i.accountTypeID == 1).length > 0"><font-awesome-icon icon="fa-brands fa-steam" size="xl" style="color: #0a3169;" /><span class="mx-auto">Link Steam account</span><font-awesome-icon v-if="useraccounts?.filter(i => i.accountTypeID == 1).length > 0" icon="fa-solid fa-circle-check" size="xl" style="color: #02b875;"/></button>
-                <button type="button" class="btn btn-outline-primary d-flex" :disabled="useraccounts?.filter(i => i.accountTypeID == 2).length > 0" @click="onXboxClick"><font-awesome-icon icon="fa-brands fa-xbox" size="xl" style="color: #107711;" /><span class="mx-auto">Link Xbox account</span><font-awesome-icon v-if="useraccounts?.filter(i => i.accountTypeID == 2).length > 0" icon="fa-solid fa-circle-check" size="xl" style="color: #02b875;"/></button>
-            </div> 
-            <div class="text-center">
                 <span class="lead text-dark">Info:</span>
             </div>            
             <div class="mb-3">
@@ -26,17 +19,11 @@
         </div>
     </div>
 </template>
-<script>
-    import { successToast, errorToast } from '../../js/common.js';
-    
+<script>    
     export default {
         name: "Welcome",
         props: {
-            username: String,
-            useraccounts: Array,
-            windowsliveauthurl: String,
-            authsuccess: Boolean,
-            authaccounttypeid: Number
+            username: String
         },
         data() {
             return {
@@ -45,25 +32,8 @@
         computed: {
         },
         mounted: function () {
-            var that = this;
-
-            if (that.authsuccess != null) {
-                var userAccount = that.useraccounts.find(i => i.accountTypeID == that.authaccounttypeid);
-
-                if (that.authsuccess) {
-                    successToast("Successfully linked " + userAccount.accountTypeName + " account");                               
-                } else {                 
-                    errorToast("Error linking account");             
-                }
-            }            
         },
-        methods: {            
-            onXboxClick() {
-                location.href = this.windowsliveauthurl;
-            },            
-            onContinueClick() {
-                location.href = "/";
-            }    
+        methods: {                      
         }
     };
 </script>
