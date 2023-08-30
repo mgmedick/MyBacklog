@@ -107,7 +107,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" @click="onRemoveGameClick($event, game)">Continue</button>
+                        <button type="button" class="btn btn-primary" @click="onRemoveGameClick($event, game.id)">Continue</button>
                     </div>
                 </div>
             </div>
@@ -283,8 +283,8 @@
                     that.removeModal.show();
                 }
             },
-            onRemoveGameClick(e, game) {
-                this.removeGameFromAllUserLists(game);
+            onRemoveGameClick(e, gameID) {
+                this.removeGameFromAllUserLists(gameID);
             },            
             onUserListClick(e, userListID, gameID) {
                 var el = e.target;
@@ -439,14 +439,17 @@
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },
-            removeGameFromAllUserLists(game) {
+            removeGameFromAllUserLists(gameID) {
                 var that = this;
 
-                return axios.post('/User/RemoveGameFromAllUserLists', null,{ params: { gameID: game.id } })
+                return axios.post('/User/RemoveGameFromAllUserLists', null,{ params: { gameID: gameID } })
                     .then((res) => {
                         if (res.data.success) {    
-                            that.games = that.games.filter(i => i.id != game.id);            
-                            that.allgames = that.allgames.filter(i => i.id != game.id);            
+                            var game = that.games.find(i => i.id == gameID);
+
+                            that.games = that.games.filter(i => i.id != gameID);            
+                            that.allgames = that.allgames.filter(i => i.id != gameID);
+                                                               
                             successToast("Removed <strong>" + game.name + "</strong> from <strong>all lists</strong>");
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {
