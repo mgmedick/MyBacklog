@@ -126,7 +126,7 @@ namespace GameStatsApp.Repository
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                return db.Query<IDNamePair>("SELECT ID, Name FROM tbl_DefaultList ORDER BY SortOrder;").ToList();
+                return db.Query<IDNamePair>("SELECT ID, Name FROM tbl_DefaultList;").ToList();
             }
         }
 
@@ -186,8 +186,8 @@ namespace GameStatsApp.Repository
             {
                 db.Save<UserList>(userList);
             }
-        }        
-
+        }
+        
         public void SaveUserListGame(UserListGame userListGame)
         {
             using (IDatabase db = DBFactory.GetDatabase())

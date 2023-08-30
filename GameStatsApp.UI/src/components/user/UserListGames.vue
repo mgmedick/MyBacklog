@@ -63,7 +63,7 @@
                     <img :src="game.coverImagePath" class="img-fluid align-self-center" alt="Responsive image">
                     <div class="gamelist-icons position-absolute start-0 end-0 d-none" style="bottom: 10px; width: 100%; z-index: 1;">
                         <div class="btn-group position-relative px-2" role="group" style="width: 100%;">
-                            <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID == 1 || i.defaultListID == 2 ||  i.defaultListID == 3)" :key="userList.id" @click="onUserListClick($event, userList.id, game.id)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
+                            <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID)" :key="userList.id" @click="onUserListClick($event, userList.id, game.id)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
                                 <font-awesome-icon :icon="getIconClass(userList.defaultListID)" size="lg"/>
                             </button>
                             <div v-if="userlists.filter(i => !i.defaultListID).length > 0" class="btn-group btn-group-sm gamelist-btn-group" role="group">
@@ -235,13 +235,7 @@
                         break;
                     case 3:
                         iconClass = 'fa-solid fa-check';
-                        break;
-                    case 4:
-                        iconClass = 'fa-brands fa-steam';
-                        break;        
-                    case 5:
-                        iconClass = 'fa-brands fa-xbox';
-                        break;                                           
+                        break;                                         
                 }
 
                 return iconClass;

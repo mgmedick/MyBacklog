@@ -146,9 +146,13 @@ namespace GameStatsApp.Service
             };
 
             _userRepo.SaveUserSetting(userSetting);      
+ 
+            var userLists = _userRepo.GetDefaultLists().Select(i => new UserList() { UserID = user.ID,
+                                                                   Name = i.Name, 
+                                                                   DefaultListID = i.ID, 
+                                                                   Active = true,
+                                                                   CreatedDate = DateTime.UtcNow }).ToList();
 
-            var userLists = _userRepo.GetDefaultLists().Select(i => new UserList() { UserID = user.ID, Name = i.Name, DefaultListID = i.ID, CreatedDate = DateTime.UtcNow }).ToList();
-            
             _userRepo.SaveUserLists(userLists);      
         }
 
@@ -323,12 +327,10 @@ namespace GameStatsApp.Service
         public async Task ImportGamesFromUserAccount(int userID, UserAccountView userAccountVW, bool isImportAll)
         {
             var gameNames = new List<string>();
-            var defaultListID = 0;
             var lastImportDate = isImportAll ? null : userAccountVW.ImportLastRunDate;
-            
+
             if (userAccountVW.AccountTypeID == (int)AccountType.Xbox)
             {
-                defaultListID = (int)DefaultList.Xbox;
                 gameNames = await _authService.GetUserGameNames(userAccountVW.AccountUserHash, userAccountVW.Token, Convert.ToUInt64(userAccountVW.AccountUserID), lastImportDate);
             }
 
@@ -347,12 +349,17 @@ namespace GameStatsApp.Service
                 batchCount += maxBatchCount;
             }
 
-            var userListID = _userRepo.GetUserLists(i => i.UserID == userID && i.DefaultListID == defaultListID)
-                                             .Select(i => i.ID)
-                                             .FirstOrDefault();
-            var existingGameIDs = _userRepo.GetUserListGameViews(i=>i.UserListID == userListID).Select(i => i.ID).ToList();
+            var userListName = ((AccountType)userAccountVW.AccountTypeID).ToString();
+            var userList = _userRepo.GetUserLists(i => i.UserID == userID && i.Name == userListName).FirstOrDefault();
+                        
+            if (userList == null) {
+                userList =  new UserList() { UserID = userID, Name = userListName, Active = true, CreatedDate = DateTime.UtcNow };
+                _userRepo.SaveUserList(userList);
+            }          
+
+            var existingGameIDs = _userRepo.GetUserListGameViews(i=>i.UserListID == userList.ID).Select(i => i.ID).ToList();
             var userListGames = gameIDs.Where(i => !existingGameIDs.Contains(i))
-                                           .Select(i => new UserListGame() { UserListID = userListID, GameID = i })
+                                           .Select(i => new UserListGame() { UserListID = userList.ID, GameID = i })
                                            .ToList();
 
             if (userListGames.Any())

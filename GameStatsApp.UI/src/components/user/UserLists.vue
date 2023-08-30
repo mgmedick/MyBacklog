@@ -80,17 +80,11 @@
                         break;
                     case 3:
                         iconClass = 'fa-solid fa-check';
-                        break;
-                    case 4:
-                        iconClass = 'fa-brands fa-steam';
-                        break;        
-                    case 5:
-                        iconClass = 'fa-brands fa-xbox';
-                        break;                                           
+                        break;                                         
                 }
 
                 return iconClass;
-            }                                                           
+            },                                                              
         },
     };
 </script>
