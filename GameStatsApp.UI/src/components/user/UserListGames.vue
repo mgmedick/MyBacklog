@@ -52,7 +52,7 @@
                     <img :src="emptycoverimagepath" class="img-fluid rounded" alt="Responsive image">
                 </div>
             </div>
-            <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-6" key="game.id">
+            <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-6" :key="game.id">
                 <div class="position-relative game-image-container rounded d-flex" style="overflow: hidden; background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
                     <div v-if="game.coverImagePath?.indexOf('nocover.jpg') > -1" class="position-absolute text-center bottom-0 start-0 end-0" style="line-height: 20px; top: 90px;">
                         <small class="position-relative">{{ game.name }}</small>
