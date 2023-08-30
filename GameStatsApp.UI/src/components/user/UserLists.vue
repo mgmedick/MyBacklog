@@ -5,7 +5,7 @@
                 <li class="nav-item">
                     <a @click="selectedItemID = 0" href="#" class="nav-link text-dark" :class="{ 'active' : selectedItemID == 0 }">
                         <font-awesome-icon icon="fa-solid fa-list" size="lg" class="me-3"/>
-                        <span>All</span>
+                        <span>All Games</span>
                     </a>
                 </li>                
                 <li v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID)" key="userList.id" class="nav-item">
@@ -30,7 +30,7 @@
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="width: 100%;">
                     <li>
-                        <a @click="selectedItemID = 0" class="dropdown-item" :class="{ 'active' : selectedItemID == 0 }" href="#/" data-toggle="pill">All</a>
+                        <a @click="selectedItemID = 0" class="dropdown-item" :class="{ 'active' : selectedItemID == 0 }" href="#/" data-toggle="pill">All Games</a>
                     </li>   
                     <li v-for="(userList, userListIndex) in userlists" :key="userList.id">
                         <a @click="selectedItemID = userList.id" class="dropdown-item" :class="{ 'active' : selectedItemID == userList.id }" href="#/" data-toggle="pill">{{ userList.name }}</a>

@@ -349,9 +349,9 @@ namespace GameStatsApp.Service
                 batchCount += maxBatchCount;
             }
 
-            var userListName = ((AccountType)userAccountVW.AccountTypeID).ToString();
+            var userListName = string.Format("My {0} Games", ((AccountType)userAccountVW.AccountTypeID).ToString());
             var userList = _userRepo.GetUserLists(i => i.UserID == userID && i.Name == userListName).FirstOrDefault();
-                        
+
             if (userList == null) {
                 userList =  new UserList() { UserID = userID, Name = userListName, Active = true, CreatedDate = DateTime.UtcNow };
                 _userRepo.SaveUserList(userList);
