@@ -1,7 +1,7 @@
 ﻿<template>
     <div class="container games-container p-0">
         <div class="d-flex align-items-center mb-3">
-            <div v-if="userlists.find(i => i.defaultListID == 1).id == userlistid" class="me-2">
+            <div class="me-2">
                 <div class="btn btn-secondary p-2" tabindex="-1" role="button">
                     <font-awesome-layers v-if="isImporting" class="fa-2xl" @click="onImportClick" style="width: 35px;">
                         <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-5" style="color: #adb5bd; z-index: 9999;"/>
@@ -41,12 +41,12 @@
                 <font-awesome-icon icon="fa-solid fa-spinner" spin size="2xl"/>
             </div>
         </div>
-        <div v-else class="row g-3">
+        <div v-else class="row g-3">          
             <div class="col-lg-2 col-md-3 col-6">
-                <div class="position-relative add-game-container" @click="onSearchGamesClick">
+                <div class="position-relative add-game-container" :class="{ 'disabled' : userlistid == 0 }" @click="onSearchGamesClick">
                     <div class="position-absolute top-0 bottom-0 start-0 end-0">
                         <div class="d-flex" style="width: 100%; height: 100%;">
-                            <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px;"/>                    
+                            <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" :class="{ 'fa-disabled' : userlistid == 0 }" style="font-size: 50px;"/>                    
                         </div>
                     </div>                  
                     <img :src="emptycoverimagepath" class="img-fluid rounded" alt="Responsive image">
@@ -63,7 +63,7 @@
                     <img :src="game.coverImagePath" class="img-fluid align-self-center" alt="Responsive image">
                     <div class="gamelist-icons position-absolute start-0 end-0 d-none" style="bottom: 10px; width: 100%; z-index: 1;">
                         <div class="btn-group position-relative px-2" role="group" style="width: 100%;">
-                            <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID && i.defaultListID != 1)" :key="userList.id" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
+                            <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID == 1 || i.defaultListID == 2 ||  i.defaultListID == 3)" :key="userList.id" @click="onUserListClick($event, userList.id, game.id)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
                                 <font-awesome-icon :icon="getIconClass(userList.defaultListID)" size="lg"/>
                             </button>
                             <div v-if="userlists.filter(i => !i.defaultListID).length > 0" class="btn-group btn-group-sm gamelist-btn-group" role="group">
@@ -71,7 +71,7 @@
                                     <font-awesome-icon icon="fa-solid fa-ellipsis" size="lg"/>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li v-for="(userList, userListIndex) in userlists.filter(i => !i.defaultListID)" :key="userList.id"><a @click="onUserListClick($event, userList, game)" href="#" class="dropdown-item gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }">{{ userList.name }}</a></li>
+                                    <li v-for="(userList, userListIndex) in userlists.filter(i => !i.defaultListID)" :key="userList.id"><a @click="onUserListClick($event, userList.id, game.id)" href="#" class="dropdown-item gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }">{{ userList.name }}</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -188,7 +188,7 @@
                     that.loadData()
                 }
             });
-            
+
             that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {
                 that.$refs.searchAutocomplete.clear();
             });
@@ -228,21 +228,24 @@
 
                 switch (id) {
                     case 1:
-                        iconClass = 'fa-solid fa-list';
-                        break;
-                    case 2:
                         iconClass = 'fa-solid fa-inbox';
                         break;
-                    case 3:
+                    case 2:
                         iconClass = 'fa-solid fa-play';
                         break;
-                    case 4:
+                    case 3:
                         iconClass = 'fa-solid fa-check';
                         break;
+                    case 4:
+                        iconClass = 'fa-brands fa-steam';
+                        break;        
+                    case 5:
+                        iconClass = 'fa-brands fa-xbox';
+                        break;                                           
                 }
 
                 return iconClass;
-            },      
+            },    
             onGameImageMouseOver(e) {
                 var container = e.target.closest('.game-image-container');              
                 container.querySelector('.gamelist-icons').classList.remove('d-none');
@@ -283,13 +286,13 @@
             onRemoveGameClick(e, game) {
                 this.removeGameFromAllUserLists(game);
             },            
-            onUserListClick(e, userList, game) {
+            onUserListClick(e, userListID, gameID) {
                 var el = e.target;
                 if (!el.closest('.gamelist-icons').classList.contains('d-none')) {
                     if (!el.closest('.gamelist-item').classList.contains('active')) {
-                        this.addGameToUserList(userList, game, el);
+                        this.addGameToUserList(userListID, gameID, el);
                     } else {
-                        this.removeGameFromUserList(userList, game, el);
+                        this.removeGameFromUserList(userListID, gameID, el);
                     }
                 }
             },
@@ -311,9 +314,8 @@
             },              
             onSearchSelected: function (result) {
                 var that = this;
-                var userlist = this.userlists.find(item => item.id == that.userlistid);
 
-                that.addNewGameToUserList(userlist, result.value).then(i => { that.searchModal.hide() });
+                that.addGameToUserList(that.userlistid, result.value).then(i => { that.searchModal.hide() });
             },  
             onFilterInput: function(e) {
                 var val = e.target.value;
@@ -379,42 +381,29 @@
                 } else {
                     this.games = this.allgames.slice();
                 }                
-            },
-            addNewGameToUserList(userList, gameID) {
-                var that = this;  
+            },                          
+            addGameToUserList(userListID, gameID, el) {
+                var that = this;
 
-                return axios.post('/User/AddNewGameToUserList', null,{ params: { userListID: userList.id, gameID: gameID } })
+                if (el) {
+                    el.closest('.gamelist-item').classList.add('active');
+                    el.closest('.gamelist-btn-group button')?.classList.add('active');
+                }
+
+                return axios.post('/User/AddGameToUserList', null,{ params: { userListID: userListID, gameID: gameID } })
                     .then((res) => {
                         if (res.data.success) {
-                            var game = res.data.game;
+                            var game = res.data.result;
 
-                            if (that.games.filter(i => i.id == game.id).length == 0) {
-                                that.games.push(game);
-                                that.allgames.push({...game});
-                                that.sortGames();
-                            }
-                            successToast("Added <strong>" + game.name + "</strong> to <strong>" + userList.name + "</strong>");
-                        } else {                        
-                            res.data.errorMessages.forEach(errorMsg => {
-                                errorToast(errorMsg);                           
-                            });                              
-                        }                        
-                    })
-                    .catch(err => { console.error(err); return Promise.reject(err); });                
-            },                              
-            addGameToUserList(userList, game, el) {
-                var that = this;       
-                
-                el.closest('.gamelist-item').classList.add('active');
-                el.closest('.gamelist-btn-group button')?.classList.add('active');
-
-                return axios.post('/User/AddGameToUserList', null,{ params: { userListID: userList.id, gameID: game.id } })
-                    .then((res) => {
-                        if (res.data.success) {
-                            if (game.userListIDs.indexOf(userList.id) == -1) {
-                                game.userListIDs.push(userList.id);
+                            if (that.userlistid == userListID) {
+                                if (that.games.filter(i => i.id == game.id).length == 0) {
+                                    that.games.push(game);
+                                    that.allgames.push({...game});
+                                    that.sortGames();
+                                }
                             }
 
+                            var userList = that.userlists.find(i => i.id == userListID);
                             successToast("Added <strong>" + game.name + "</strong> to <strong>" + userList.name + "</strong>");
                         } else {       
                             res.data.errorMessages.forEach(errorMsg => {
@@ -424,21 +413,23 @@
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },          
-            removeGameFromUserList(userList, game, el) {
+            removeGameFromUserList(userListID, gameID, el) {
                 var that = this;     
 
                 el.closest('.gamelist-item').classList.remove('active');
                 el.closest('.gamelist-btn-group button')?.classList.remove('active');
 
-                return axios.post('/User/RemoveGameFromUserList', null,{ params: { userListID: userList.id, gameID: game.id } })
+                return axios.post('/User/RemoveGameFromUserList', null,{ params: { userListID: userListID, gameID: gameID } })
                     .then((res) => {
                         if (res.data.success) {
-                            game.userListIDs = game.userListIDs.filter(i => i != userList.id);
+                            var game = that.games.find(i => i.id == gameID);
 
-                            if (that.userlistid == userList.id) {
-                                that.games = that.games.filter(i => i.id != game.id);            
-                                that.allgames = that.allgames.filter(i => i.id != game.id);  
+                            if (that.userlistid == userListID) {
+                                that.games = that.games.filter(i => i.id != gameID);            
+                                that.allgames = that.allgames.filter(i => i.id != gameID);  
                             }
+
+                            var userList = that.userlists.find(i => i.id == userListID);                            
                             successToast("Removed <strong>" + game.name + "</strong> from <strong>" + userList.name + "</strong>");
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {

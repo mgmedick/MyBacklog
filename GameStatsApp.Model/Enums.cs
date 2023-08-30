@@ -30,10 +30,11 @@ namespace GameStatsApp.Model
 
     public enum DefaultList
     {
-        AllGames = 1,
-        Backlog = 2,
-        Playing = 3,
-        Completed = 4
+        Backlog = 1,
+        Playing = 2,
+        Completed = 3,
+        Steam = 4,
+        Xbox = 5        
     }
 
     public enum AuthCallbackSource

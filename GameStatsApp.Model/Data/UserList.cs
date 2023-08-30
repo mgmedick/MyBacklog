@@ -10,6 +10,7 @@ namespace GameStatsApp.Model.Data
         public int UserID { get; set; }
         public string Name { get; set; }
         public int? DefaultListID { get; set; }
+        public int? SortOrder { get; set; }
         public bool Deleted { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? ModifiedDate { get; set; }        

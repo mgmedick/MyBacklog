@@ -126,7 +126,7 @@ namespace GameStatsApp.Repository
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                return db.Query<IDNamePair>("SELECT ID, Name FROM tbl_DefaultList;").ToList();
+                return db.Query<IDNamePair>("SELECT ID, Name FROM tbl_DefaultList ORDER BY SortOrder;").ToList();
             }
         }
 
@@ -152,7 +152,17 @@ namespace GameStatsApp.Repository
             {
                 return db.Query<UserListGameView>().Where(predicate).ToList();
             }
-        }        
+        }       
+
+        public IEnumerable<UserListGameView> GetUserListGames(int userListID)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                var results = db.Query<UserListGameView>("CALL GetUserListGames (@0);", userListID).ToList();
+
+                return results;
+            }
+        }          
 
         public void SaveUserLists(IEnumerable<UserList> userLists)
         {

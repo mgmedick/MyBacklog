@@ -13,21 +13,17 @@ namespace GameStatsApp.Model.ViewModels
         public UserListViewModel()
         {
         }
-
-        public UserListViewModel(UserListView userListView)
+        
+        public UserListViewModel(UserList userList)
         {
-            ID = userListView.ID;
-            UserID = userListView.UserID;
-            Name = userListView.Name;
-            DefaultListID = userListView.DefaultListID;
-            GameIDs = !string.IsNullOrWhiteSpace(userListView.GameIDs) ? userListView.GameIDs.Split(',').Select(i => Convert.ToInt32(i)).ToList() : new List<int>();
+            ID = userList.ID;
+            Name = userList.Name;
+            DefaultListID = userList.DefaultListID;
         }
 
         public int ID { get; set; }
-        public int UserID { get; set; }
         public string Name { get; set; }
         public int? DefaultListID { get; set; }
-        public List<int> GameIDs { get; set; }
     }
 }
 

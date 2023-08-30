@@ -49,7 +49,7 @@ namespace GameStatsApp.Controllers
             var userSettingsVM = new UserSettingsViewModel() { UserID = userID,
                                                     Username = userVW.Username,   
                                                     Email = userVW.Email };
-                                                    
+
             return View(userSettingsVM);
         }
 
@@ -57,7 +57,7 @@ namespace GameStatsApp.Controllers
         public JsonResult GetUserLists()
         {
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));          
-            var userLists = _userService.GetUserLists(userID);
+            var userLists = _userService.GetUserLists(userID).ToList();
 
             return Json(userLists);
         }
@@ -128,38 +128,16 @@ namespace GameStatsApp.Controllers
         }        
         
         [HttpPost]
-        public JsonResult AddNewGameToUserList(int userListID, int gameID)
-        {
-            var success = false;
-            List<string> errorMessages = null;
-            UserListGameViewModel userListGameVM = null;
-
-            try
-            {
-                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                userListGameVM = _userService.AddNewGameToUserList(userID, userListID, gameID);
-                success = true;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "AddNewGameToUserList");
-                success = false;
-                errorMessages = new List<string>() { "Error adding game to list" };
-            }
-
-            return Json(new { success = success, game = userListGameVM, errorMessages = errorMessages });
-        }
-
-        [HttpPost]
         public JsonResult AddGameToUserList(int userListID, int gameID)
         {
             var success = false;
             List<string> errorMessages = null;
+            UserListGameViewModel result = null;
 
             try
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                _userService.AddGameToUserList(userID, userListID, gameID);
+                result = _userService.AddGameToUserList(userID, userListID, gameID);
                 success = true;
             }
             catch (Exception ex)
@@ -169,7 +147,7 @@ namespace GameStatsApp.Controllers
                 errorMessages = new List<string>() { "Error adding game to list" };
             }
 
-            return Json(new { success = success, errorMessages = errorMessages });
+            return Json(new { success = success, errorMessages = errorMessages, result = result });
         }
 
         [HttpPost]
@@ -177,6 +155,7 @@ namespace GameStatsApp.Controllers
         {
             var success = false;
             List<string> errorMessages = null;
+            UserListGameViewModel result = null;
 
             try
             {
@@ -191,7 +170,7 @@ namespace GameStatsApp.Controllers
                 errorMessages = new List<string>() { "Error removing game from list" };
             }
 
-            return Json(new { success = success, errorMessages = errorMessages });
+            return Json(new { success = success, errorMessages = errorMessages, result = result });
         }   
 
         [HttpPost]

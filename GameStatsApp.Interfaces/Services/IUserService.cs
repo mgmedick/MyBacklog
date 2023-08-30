@@ -19,8 +19,7 @@ namespace GameStatsApp.Interfaces.Services
         ChangePasswordViewModel GetChangePassword(string email, long expirationTime, string token);
         void ChangeUserPassword(string email, string pass);
         void ChangeUsername(string email, string username);
-        UserListGameViewModel AddNewGameToUserList(int userID, int userListID, int gameID);
-        void AddGameToUserList(int userID, int userListID, int gameID);
+        UserListGameViewModel AddGameToUserList(int userID, int userListID, int gameID);
         void RemoveGameFromUserList(int userID, int userListID, int gameID);
         void RemoveGameFromAllUserLists(int userID, int gameID);
         bool EmailExists(string email);
@@ -30,7 +29,7 @@ namespace GameStatsApp.Interfaces.Services
         bool UserListNameExists(int userID, string userListName);
         Task SendConfirmRegistrationEmail(string email, string username);
         IEnumerable<SearchResult> SearchUsers(string searchText);
-        IEnumerable<UserList> GetUserLists (int userID);
+        IEnumerable<UserListViewModel> GetUserLists (int userID);
         void SaveUserList(int userID, int userListID, string userListName);
         void DeleteUserList(int userID, int userListID);
         IEnumerable<UserListGameViewModel> GetUserListGames (int userListID);               
