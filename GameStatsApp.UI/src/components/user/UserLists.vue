@@ -1,27 +1,29 @@
 ﻿<template>
     <div>
-        <div class="show-lg d-flex flex-column flex-shrink-0 p-3 position-absolute top-0 start-0" style="width: 280px; height: 100vh; margin-top: 63px;">
-            <ul class="nav nav-pills flex-column mb-auto">
-                <li class="nav-item">
-                    <a @click="selectedItemID = 0" href="#" class="nav-link text-dark" :class="{ 'active' : selectedItemID == 0 }">
-                        <font-awesome-icon icon="fa-solid fa-list" size="lg" class="me-3"/>
-                        <span>All Games</span>
-                    </a>
-                </li>                
-                <li v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID)" key="userList.id" class="nav-item">
-                    <a @click="selectedItemID = userList.id" href="#" class="nav-link text-dark" :class="{ 'active' : selectedItemID == userList.id }">
-                        <font-awesome-icon :icon="getDefaultIconClass(userList.defaultListID)" size="lg" class="me-3"/>
-                        <span>{{ userList.name }}</span>
-                    </a>
-                </li>
-                <li v-if="userlists.filter(i => !i.defaultListID).length > 0" class="border-top my-3"></li>
-                <li v-for="(userList, userListIndex) in userlists.filter(i => !i.defaultListID)" key="userList.id" class="nav-item">
-                    <a @click="selectedItemID = userList.id" href="#" class="nav-link text-dark" :class="{ 'active' : selectedItemID == userList.id }">
-                        <font-awesome-icon v-if="userList.accountTypeID" :icon="getAccountIconClass(userList.accountTypeID)" size="lg" class="me-3"/>
-                        <span>{{ userList.name }}</span>
-                    </a>
-                </li>    
-            </ul>
+        <div class="show-lg position-relative">
+            <div class="position-absolute top-0 bottom-0 start-0 end-0 pe-3" style="width: 280px; height: 100vh;">
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a @click="selectedItemID = 0" href="#" class="nav-link text-dark" :class="{ 'active' : selectedItemID == 0 }">
+                            <font-awesome-icon icon="fa-solid fa-list" size="lg" class="me-3"/>
+                            <span>All Games</span>
+                        </a>
+                    </li>                
+                    <li v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID)" key="userList.id" class="nav-item">
+                        <a @click="selectedItemID = userList.id" href="#" class="nav-link text-dark" :class="{ 'active' : selectedItemID == userList.id }">
+                            <font-awesome-icon :icon="getDefaultIconClass(userList.defaultListID)" size="lg" class="me-3"/>
+                            <span>{{ userList.name }}</span>
+                        </a>
+                    </li>
+                    <li v-if="userlists.filter(i => !i.defaultListID).length > 0" class="border-top my-3"></li>
+                    <li v-for="(userList, userListIndex) in userlists.filter(i => !i.defaultListID)" key="userList.id" class="nav-item">
+                        <a @click="selectedItemID = userList.id" href="#" class="nav-link text-dark" :class="{ 'active' : selectedItemID == userList.id }">
+                            <font-awesome-icon v-if="userList.accountTypeID" :icon="getAccountIconClass(userList.accountTypeID)" size="lg" class="me-3"/>
+                            <span>{{ userList.name }}</span>
+                        </a>
+                    </li>    
+                </ul>
+            </div>
         </div>
         <div class="show-md row g-2 justify-content-center">
             <div class="btn-group">
@@ -65,7 +67,7 @@
         watch: {},
         created: function () {
             var that = this;
-            this.selectedItemID = this.userlists[0].id;
+            //this.selectedItemID = this.userlists[0].id;
         },
         mounted: function() {
             var that = this;      

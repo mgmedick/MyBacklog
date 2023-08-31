@@ -1,5 +1,5 @@
 ﻿<template>
-    <div class="container games-container p-0">
+    <div class="games-container">
         <div class="d-flex align-items-center mb-3">
             <div class="me-2">
                 <div class="btn btn-secondary p-2" tabindex="-1" role="button">
@@ -24,62 +24,64 @@
                 <input type="text" class="form-control" autocomplete="off" v-model="filterText" aria-describedby="spnUserNameErrors" placeholder="Filter games">
             </div>
         </div>
-        <div v-if="loading">
-            <div class="row g-3">
+        <div class="container m-0 p-0">
+            <div v-if="loading">
+                <div class="row g-3">
+                    <div class="col-lg-2 col-md-3 col-6">
+                        <div class="position-relative add-game-container">
+                            <div class="position-absolute top-0 bottom-0 start-0 end-0">
+                                <div class="d-flex" style="width: 100%; height: 100%;">
+                                    <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px;"/>                    
+                                </div>
+                            </div>                  
+                            <img :src="emptycoverimagepath" class="img-fluid rounded" alt="Responsive image">
+                        </div>
+                    </div>
+                </div>   
+                <div class="center" style="font-size: 25px;">       
+                    <font-awesome-icon icon="fa-solid fa-spinner" spin size="2xl"/>
+                </div>
+            </div>
+            <div v-else class="row g-3">          
                 <div class="col-lg-2 col-md-3 col-6">
-                    <div class="position-relative add-game-container">
+                    <div class="position-relative add-game-container" :class="{ 'disabled' : userlistid == 0 }" @click="onSearchGamesClick">
                         <div class="position-absolute top-0 bottom-0 start-0 end-0">
                             <div class="d-flex" style="width: 100%; height: 100%;">
-                                <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px;"/>                    
+                                <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" :class="{ 'fa-disabled' : userlistid == 0 }" style="font-size: 50px;"/>                    
                             </div>
                         </div>                  
                         <img :src="emptycoverimagepath" class="img-fluid rounded" alt="Responsive image">
                     </div>
                 </div>
-            </div>   
-            <div class="center" style="font-size: 25px;">       
-                <font-awesome-icon icon="fa-solid fa-spinner" spin size="2xl"/>
-            </div>
-        </div>
-        <div v-else class="row g-3">          
-            <div class="col-lg-2 col-md-3 col-6">
-                <div class="position-relative add-game-container" :class="{ 'disabled' : userlistid == 0 }" @click="onSearchGamesClick">
-                    <div class="position-absolute top-0 bottom-0 start-0 end-0">
-                        <div class="d-flex" style="width: 100%; height: 100%;">
-                            <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" :class="{ 'fa-disabled' : userlistid == 0 }" style="font-size: 50px;"/>                    
-                        </div>
-                    </div>                  
-                    <img :src="emptycoverimagepath" class="img-fluid rounded" alt="Responsive image">
-                </div>
-            </div>
-            <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-6" :key="game.id">
-                <div class="position-relative game-image-container rounded d-flex" style="overflow: hidden; background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
-                    <div v-if="game.coverImagePath?.indexOf('nocover.jpg') > -1" class="position-absolute text-center bottom-0 start-0 end-0" style="line-height: 20px; top: 90px;">
-                        <small class="position-relative">{{ game.name }}</small>
-                    </div>                
-                    <div class="delete-icon mt-2 position-absolute start-0 end-0 d-none" style="z-index: 1;">
-                        <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="d-flex ms-auto me-2" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/> 
-                    </div>      
-                    <img :src="game.coverImagePath" class="img-fluid align-self-center" alt="Responsive image">
-                    <div class="gamelist-icons position-absolute start-0 end-0 d-none" style="bottom: 10px; width: 100%; z-index: 1;">
-                        <div class="btn-group btn-group-sm position-relative px-2" role="group" style="width: 100%;">
-                            <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID)" :key="userList.id" @click="onUserListClick($event, userList.id, game.id)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
-                                <font-awesome-icon :icon="getIconClass(userList.defaultListID)" size="lg"/>
-                            </button>
-                            <template v-if="userlists.filter(i => !i.defaultListID).length > 0">
-                                <button type="button" class="btn btn-light dropdown-toggle" :class="{ 'active' : userlists.filter(i => !i.defaultListID && game.userListIDs.indexOf(i.id) > -1).length > 0 }" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <font-awesome-icon v-if="userlists.filter(i => !i.defaultListID && game.userListIDs.indexOf(i.id) > -1).length == 0" icon="fa-solid fa-ellipsis" size="lg"/>
-                                    <span v-else>{{ '(+' + userlists.filter(i => !i.defaultListID && game.userListIDs.indexOf(i.id) > -1).length + ')' }}</span>
+                <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-6" :key="game.id">
+                    <div class="position-relative game-image-container rounded d-flex" style="overflow: hidden; background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
+                        <div v-if="game.coverImagePath?.indexOf('nocover.jpg') > -1" class="position-absolute text-center bottom-0 start-0 end-0" style="line-height: 20px; top: 90px;">
+                            <small class="position-relative">{{ game.name }}</small>
+                        </div>                
+                        <div class="delete-icon mt-2 position-absolute start-0 end-0 d-none" style="z-index: 1;">
+                            <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="d-flex ms-auto me-2" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/> 
+                        </div>      
+                        <img :src="game.coverImagePath" class="img-fluid align-self-center" alt="Responsive image">
+                        <div class="gamelist-icons position-absolute start-0 end-0 d-none" style="bottom: 10px; width: 100%; z-index: 1;">
+                            <div class="btn-group btn-group-sm position-relative px-2" role="group" style="width: 100%;">
+                                <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID)" :key="userList.id" @click="onUserListClick($event, userList.id, game.id)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
+                                    <font-awesome-icon :icon="getIconClass(userList.defaultListID)" size="lg"/>
                                 </button>
-                                <ul class="dropdown-menu">
-                                    <li v-for="(userList, userListIndex) in userlists.filter(i => !i.defaultListID)" :key="userList.id"><a @click="onUserListClick($event, userList.id, game.id)" href="#" class="dropdown-item gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }">{{ userList.name }}</a></li>
-                                </ul>
-                            </template>
+                                <template v-if="userlists.filter(i => !i.defaultListID).length > 0">
+                                    <button type="button" class="btn btn-light dropdown-toggle" :class="{ 'active' : userlists.filter(i => !i.defaultListID && game.userListIDs.indexOf(i.id) > -1).length > 0 }" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <font-awesome-icon v-if="userlists.filter(i => !i.defaultListID && game.userListIDs.indexOf(i.id) > -1).length == 0" icon="fa-solid fa-ellipsis" size="lg"/>
+                                        <span v-else class="fw-bold">{{ '(+' + userlists.filter(i => !i.defaultListID && game.userListIDs.indexOf(i.id) > -1).length + ')' }}</span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li v-for="(userList, userListIndex) in userlists.filter(i => !i.defaultListID)" :key="userList.id"><a @click="onUserListClick($event, userList.id, game.id)" href="#" class="dropdown-item gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }">{{ userList.name }}</a></li>
+                                    </ul>
+                                </template>
+                            </div>
                         </div>
-                    </div>
-                </div> 
-            </div>          
-        </div>         
+                    </div> 
+                </div>          
+            </div>  
+        </div>       
         <div ref="importmodal" class="modal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -461,6 +463,12 @@
                     document.querySelectorAll('.game-image-container').forEach(item => {
                         item.style.height = defaultheight + 'px';
                     });
+
+                    if(this.userlistid == 0) {
+                        document.querySelector('.add-game-container').parentElement.classList.add('d-none');
+                    } else {
+                        document.querySelector('.add-game-container').parentElement.classList.remove('d-none');              
+                    }
                 }
             }                                                                                          
         },
