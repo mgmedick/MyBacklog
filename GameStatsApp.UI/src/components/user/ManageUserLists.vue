@@ -9,9 +9,23 @@
         </div>   
         <div v-else class="table-responsive">
             <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Active</th>
+                        <th scope="col">Name</th>
+                        <th scope="col" class="d-flex"><span class="ms-auto">Actions</span></th>
+                    </tr>
+                </thead>        
                 <tbody>
                     <tr v-for="(userList, userListIndex) in userLists.filter(i => i.defaultListID)">
-                        <td><span>{{ userList.name }}</span></td>
+                        <td class="col-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" v-model="userList.active" @change="onUpdateActive($event, userList)">
+                            </div>
+                        </td>
+                        <td>
+                            <span>{{ userList.name }}</span>
+                        </td>
                         <td>
                             <div class="d-flex">
                                 <div class="ms-auto">
@@ -22,7 +36,14 @@
                         </td>
                     </tr>
                     <tr v-for="(userList, userListIndex) in userLists.filter(i => !i.defaultListID)">
-                        <td><span>{{ userList.name }}</span></td>
+                        <td class="col-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" v-model="userList.active" @change="onUpdateActive($event, userList)">
+                            </div>
+                        </td>
+                        <td>
+                            <span>{{ userList.name }}</span>
+                        </td>
                         <td>
                             <div class="d-flex">
                                 <div class="ms-auto">
@@ -31,18 +52,15 @@
                                 </div>
                             </div>
                         </td>
-                    </tr>
-                    <tr>                       
-                        <td>
-                            <a @click="onShowAddListClick" href="#/" class="text-primary nav-link">
-                                <font-awesome-icon icon="fa-solid fa-plus" size="lg" class="me-3"/>
-                                <span>Add list</span>              
-                            </a>
-                        </td>
-                        <td></td>                  
-                    </tr>                                         
+                    </tr>                                      
                 </tbody>
-            </table> 
+            </table>
+            <div>                     
+                <a @click="onShowAddListClick" href="#/" class="text-primary nav-link">
+                    <font-awesome-icon icon="fa-solid fa-plus" size="lg" class="me-3"/>
+                    <span>Add list</span>              
+                </a>
+            </div>            
         </div>           
         <div ref="addlistmodal" class="modal" tabindex="-1">
             <div class="modal-dialog">
@@ -52,7 +70,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <save-user-list ref="addlist" :userlist="userList" @complete="onAddListComplete"></save-user-list>
+                        <edit-user-list ref="addlist" :userlist="userList" @complete="onAddListComplete"></edit-user-list>
                     </div>    
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -69,7 +87,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <save-user-list ref="editlist" :userlist="userList" @complete="onEditListComplete"></save-user-list>
+                        <edit-user-list ref="editlist" :userlist="userList" @complete="onEditListComplete"></edit-user-list>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -180,6 +198,21 @@
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },
+            onUpdateActive(e, userList) {
+                var that = this;
+                return axios.post('/User/UpdateUserListActive', null,{ params: { userListID: userList.id, active: userList.active } })
+                    .then((res) => {
+                        if (res.data.success) {
+
+                            successToast("Successfully " + (userList.active ? "activated" : "inactivated") + " <strong>" + userList.name + "</strong> list");                           
+                        } else {
+                            res.data.errorMessages.forEach(errorMsg => {
+                                errorToast(errorMsg);                           
+                            });                                
+                        }                                                                                                     
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
+            },              
             onAddListComplete: function (res) {
                 this.addListModal.hide();
 
@@ -203,7 +236,7 @@
                     });                                
                 }
                 this.loadData();
-            }                      
+            },                                       
         }    
     };
 </script>

@@ -19,11 +19,15 @@ namespace GameStatsApp.Model.ViewModels
             ID = userList.ID;
             Name = userList.Name;
             DefaultListID = userList.DefaultListID;
+            AccountTypeID = userList.AccountTypeID;
+            Active = userList.Active;
         }
 
         public int ID { get; set; }
         public string Name { get; set; }
         public int? DefaultListID { get; set; }
+        public int? AccountTypeID { get; set; }
+        public bool Active { get; set; }
     }
 }
 

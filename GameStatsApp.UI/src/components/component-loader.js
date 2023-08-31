@@ -23,7 +23,7 @@ import importGames from './user/ImportGames.vue';
 import userSettings from './user/UserSettings.vue';
 import userLists from './user/UserLists.vue';
 import manageUserLists from './user/ManageUserLists.vue';
-import saveUserList from './user/SaveUserList.vue';
+import editUserList from './user/EditUserList.vue';
 import userListGames from './user/UserListGames.vue';
 
 export default {
@@ -51,7 +51,7 @@ export default {
         app.component("welcome", welcome);
         app.component('user-settings', userSettings); 
         app.component("manage-user-lists", manageUserLists);
-        app.component("save-user-list", saveUserList);        
+        app.component("edit-user-list", editUserList);        
         app.component('user-lists', userLists); 
         app.component('user-list-games', userListGames);
         app.component("import-games", importGames);

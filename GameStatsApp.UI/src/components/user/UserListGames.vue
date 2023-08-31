@@ -62,18 +62,19 @@
                     </div>      
                     <img :src="game.coverImagePath" class="img-fluid align-self-center" alt="Responsive image">
                     <div class="gamelist-icons position-absolute start-0 end-0 d-none" style="bottom: 10px; width: 100%; z-index: 1;">
-                        <div class="btn-group position-relative px-2" role="group" style="width: 100%;">
+                        <div class="btn-group btn-group-sm position-relative px-2" role="group" style="width: 100%;">
                             <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID)" :key="userList.id" @click="onUserListClick($event, userList.id, game.id)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
                                 <font-awesome-icon :icon="getIconClass(userList.defaultListID)" size="lg"/>
                             </button>
-                            <div v-if="userlists.filter(i => !i.defaultListID).length > 0" class="btn-group btn-group-sm gamelist-btn-group" role="group">
+                            <template v-if="userlists.filter(i => !i.defaultListID).length > 0">
                                 <button type="button" class="btn btn-light dropdown-toggle" :class="{ 'active' : userlists.filter(i => !i.defaultListID && game.userListIDs.indexOf(i.id) > -1).length > 0 }" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <font-awesome-icon icon="fa-solid fa-ellipsis" size="lg"/>
+                                    <font-awesome-icon v-if="userlists.filter(i => !i.defaultListID && game.userListIDs.indexOf(i.id) > -1).length == 0" icon="fa-solid fa-ellipsis" size="lg"/>
+                                    <span v-else>{{ '(+' + userlists.filter(i => !i.defaultListID && game.userListIDs.indexOf(i.id) > -1).length + ')' }}</span>
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li v-for="(userList, userListIndex) in userlists.filter(i => !i.defaultListID)" :key="userList.id"><a @click="onUserListClick($event, userList.id, game.id)" href="#" class="dropdown-item gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }">{{ userList.name }}</a></li>
                                 </ul>
-                            </div>
+                            </template>
                         </div>
                     </div>
                 </div> 

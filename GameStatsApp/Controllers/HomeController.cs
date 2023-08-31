@@ -51,7 +51,7 @@ namespace GameStatsApp.Controllers
         
                 indexVM.UserID = userID;
                 indexVM.Username = User.FindFirstValue(ClaimTypes.Name);
-                indexVM.UserLists = _userService.GetUserLists(userID).ToList();
+                indexVM.UserLists = _userService.GetUserLists(userID).Where(i => i.Active).ToList();
                 indexVM.UserAccounts = _userService.GetUserAccounts(userID).ToList();
                 indexVM.WindowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUrl);
                 indexVM.EmptyCoverImagePath = _config.GetSection("SiteSettings").GetSection("EmptyCoverImagePath").Value;

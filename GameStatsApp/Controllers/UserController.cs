@@ -119,6 +119,28 @@ namespace GameStatsApp.Controllers
             return Json(new { success = success, errorMessages = errorMessages });
         }
 
+        [HttpPost]
+        public JsonResult UpdateUserListActive(int userListID, bool active)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                _userService.UpdateUserListActive(userID, userListID, active);
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "UpdateUserListActive");
+                success = false;
+                errorMessages = new List<string>() { "Error updating user list" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
+        }
+
         [HttpGet]
         public JsonResult GetUserListGames(int userListID)
         {

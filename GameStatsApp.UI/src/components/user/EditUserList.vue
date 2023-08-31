@@ -29,7 +29,7 @@
     }
 
     export default {
-        name: "SaveUserList",
+        name: "EditUserList",
         emits: ["complete"],
         props: {
             userlist: Object

@@ -149,7 +149,7 @@ namespace GameStatsApp.Service
  
             var userLists = _userRepo.GetDefaultLists().Select(i => new UserList() { UserID = user.ID,
                                                                    Name = i.Name, 
-                                                                   DefaultListID = i.ID, 
+                                                                   DefaultListID = i.ID,
                                                                    Active = true,
                                                                    CreatedDate = DateTime.UtcNow }).ToList();
 
@@ -254,7 +254,19 @@ namespace GameStatsApp.Service
                 userList.ModifiedDate = DateTime.UtcNow;
                 _userRepo.SaveUserList(userList);
             }
-        }         
+        }      
+
+        public void UpdateUserListActive(int userID, int userListID, bool active)
+        {
+            var userList = _userRepo.GetUserLists(i => i.ID == userListID).FirstOrDefault();
+
+            if (userList != null && userID == userList.UserID)
+            {
+                userList.Active = active;
+                userList.ModifiedDate = DateTime.UtcNow;
+                _userRepo.SaveUserList(userList);
+            }
+        }              
 
         public IEnumerable<UserListGameViewModel> GetUserListGames (int userListID)
         { 
@@ -349,13 +361,13 @@ namespace GameStatsApp.Service
                 batchCount += maxBatchCount;
             }
 
-            var userListName = string.Format("My {0} Games", ((AccountType)userAccountVW.AccountTypeID).ToString());
-            var userList = _userRepo.GetUserLists(i => i.UserID == userID && i.Name == userListName).FirstOrDefault();
-
+            var accountTypeID = (int)userAccountVW.AccountTypeID;
+            var userList = _userRepo.GetUserLists(i => i.UserID == userID && i.AccountTypeID == accountTypeID).FirstOrDefault();
             if (userList == null) {
-                userList =  new UserList() { UserID = userID, Name = userListName, Active = true, CreatedDate = DateTime.UtcNow };
+                var userListName = string.Format("My {0} Games", ((AccountType)userAccountVW.AccountTypeID).ToString());
+                userList =  new UserList() { UserID = userID, Name = userListName, AccountTypeID = accountTypeID, Active = true, CreatedDate = DateTime.UtcNow };
                 _userRepo.SaveUserList(userList);
-            }          
+            }
 
             var existingGameIDs = _userRepo.GetUserListGameViews(i=>i.UserListID == userList.ID).Select(i => i.ID).ToList();
             var userListGames = gameIDs.Where(i => !existingGameIDs.Contains(i))
