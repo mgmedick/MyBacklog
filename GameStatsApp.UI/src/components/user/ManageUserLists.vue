@@ -145,7 +145,7 @@
                     .then((res) => {
                         if (res.data.success) {
                             that.editListModal.hide();
-                            successToast("Successfully saved list");                           
+                            successToast("Saved <strong>" + result.name + "</strong> list");                           
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {
                                 errorToast(errorMsg);                           
@@ -177,7 +177,7 @@
                         that.deleteListModal.hide();
 
                         if (res.data.success) {
-                            successToast("Successfully deleted <strong>" + userList.name + "</strong> list");                           
+                            successToast("Deleted <strong>" + userList.name + "</strong> list");                           
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {
                                 errorToast(errorMsg);                           
@@ -194,7 +194,7 @@
                     .then((res) => {
                         if (res.data.success) {
 
-                            successToast("Successfully " + (userList.active ? "activated" : "inactivated") + " <strong>" + userList.name + "</strong> list");                           
+                            successToast((userList.active ? "Activated" : "Inactivated") + " <strong>" + userList.name + "</strong> list");                           
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {
                                 errorToast(errorMsg);                           
@@ -235,7 +235,7 @@
                 return axios.post('/User/UpdateUserListSortOrders', formData)
                     .then((res) => {
                         if (res.data.success) {
-                            successToast("Successfully updated user lists");                           
+                            successToast("Updated user lists");                           
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {
                                 errorToast(errorMsg);                           

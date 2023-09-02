@@ -72,7 +72,7 @@
                 return axios.post('/Home/ChangeUsername', formData)
                     .then((res) => {
                         if (res.data.success) {
-                            successToast("Successfully updated username");                           
+                            successToast("Updated username");                           
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {
                                 errorToast(errorMsg);                           

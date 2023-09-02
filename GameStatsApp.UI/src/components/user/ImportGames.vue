@@ -129,7 +129,7 @@
                         } else {
                             if (res.data.success) {
                                 location.href = '/';
-                                successToast("Successfully imported " + userAccount.accountTypeName + " games");
+                                successToast("Imported " + userAccount.accountTypeName + " games");
                             } else {
                                 errorToast("Error importing " + userAccount.accountTypeName + " games");                                               
                             }
