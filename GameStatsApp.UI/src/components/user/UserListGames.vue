@@ -123,7 +123,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <autocomplete v-if="showSearchModal" ref="searchAutocomplete" v-model="searchText" @search="onSearch" @selected="onSearchSelected" :options="searchResults" :isasync="true" :isimgresults="true" :loading="searchLoading" :placeholder="'Search games'"/>    
+                        <autocomplete ref="searchAutocomplete" v-model="searchText" @search="onSearch" @selected="onSearchSelected" :options="searchResults" :isasync="true" :isimgresults="true" :loading="searchLoading" :placeholder="'Search games'"/>    
                     </div>
                 </div>
             </div>
@@ -155,7 +155,6 @@
                 importModal: {},
                 removeModal: {},
                 searchModal: {},
-                showSearchModal: false,
                 searchText: null,
                 searchResults: [],
                 searchLoading: false,
@@ -195,11 +194,6 @@
 
             that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {
                 that.$refs.searchAutocomplete.clear();
-                that.showSearchModal = false;
-            }); 
-
-            that.$refs.searchmodal.addEventListener('show.bs.modal', event => {
-                that.showSearchModal = true;
             }); 
 
             window.addEventListener('resize', that.onResize);
