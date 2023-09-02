@@ -17,8 +17,8 @@
                         <span class="visually-hidden">Toggle Dropdown</span>
                     </button>                    
                     <ul class="dropdown-menu">
-                        <li><a href="#" @click="onOrderByOptionClick($event, 0)" class="dropdown-item" :class="{ 'active' : orderByID == 0 }">Date Added</a></li>
-                        <li><a href="#" @click="onOrderByOptionClick($event, 1)" class="dropdown-item" :class="{ 'active' : orderByID == 1 }">Name</a></li>
+                        <li><a href="#/" @click="onOrderByOptionClick($event, 0)" class="dropdown-item" :class="{ 'active' : orderByID == 0 }">Date Added</a></li>
+                        <li><a href="#/" @click="onOrderByOptionClick($event, 1)" class="dropdown-item" :class="{ 'active' : orderByID == 1 }">Name</a></li>
                     </ul>
                 </div>  
                 <input type="text" class="form-control" autocomplete="off" v-model="filterText" aria-describedby="spnUserNameErrors" placeholder="Filter games">
@@ -64,7 +64,7 @@
                         <img :src="game.coverImagePath" class="img-fluid align-self-center" alt="Responsive image">
                         <div class="gamelist-icons position-absolute start-0 end-0 d-none" style="bottom: 10px; width: 100%; z-index: 1;">
                             <div class="btn-group btn-group-sm position-relative px-2" role="group" style="width: 100%;">
-                                <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID)" :key="userList.id" @click="onUserListClick($event, userList.id, game.id)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
+                                <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID)" :key="userList.id" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
                                     <font-awesome-icon :icon="getIconClass(userList.defaultListID)" size="lg"/>
                                 </button>
                                 <template v-if="userlists.filter(i => !i.defaultListID).length > 0">
@@ -73,7 +73,7 @@
                                         <span v-else class="fw-bold">{{ '(+' + userlists.filter(i => !i.defaultListID && game.userListIDs.indexOf(i.id) > -1).length + ')' }}</span>
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li v-for="(userList, userListIndex) in userlists.filter(i => !i.defaultListID)" :key="userList.id"><a @click="onUserListClick($event, userList.id, game.id)" href="#" class="dropdown-item gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }">{{ userList.name }}</a></li>
+                                        <li v-for="(userList, userListIndex) in userlists.filter(i => !i.defaultListID)" :key="userList.id"><a @click="onUserListClick($event, userList, game)" href="#/" class="dropdown-item gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }">{{ userList.name }}</a></li>
                                     </ul>
                                 </template>
                             </div>
@@ -123,7 +123,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <autocomplete ref="searchAutocomplete" v-model="searchText" @search="onSearch" @selected="onSearchSelected" :options="searchResults" :isasync="true" :isimgresults="true" :loading="searchLoading" :placeholder="'Search games'"/>    
+                        <autocomplete v-if="showSearchModal" ref="searchAutocomplete" v-model="searchText" @search="onSearch" @selected="onSearchSelected" :options="searchResults" :isasync="true" :isimgresults="true" :loading="searchLoading" :placeholder="'Search games'"/>    
                     </div>
                 </div>
             </div>
@@ -155,6 +155,7 @@
                 importModal: {},
                 removeModal: {},
                 searchModal: {},
+                showSearchModal: false,
                 searchText: null,
                 searchResults: [],
                 searchLoading: false,
@@ -194,7 +195,12 @@
 
             that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {
                 that.$refs.searchAutocomplete.clear();
-            });
+                that.showSearchModal = false;
+            }); 
+
+            that.$refs.searchmodal.addEventListener('show.bs.modal', event => {
+                that.showSearchModal = true;
+            }); 
 
             window.addEventListener('resize', that.onResize);
 
@@ -283,13 +289,13 @@
             onRemoveGameClick(e, gameID) {
                 this.removeGameFromAllUserLists(gameID);
             },            
-            onUserListClick(e, userListID, gameID) {
+            onUserListClick(e, userList, game) {
                 var el = e.target;
                 if (!el.closest('.gamelist-icons').classList.contains('d-none')) {
                     if (!el.closest('.gamelist-item').classList.contains('active')) {
-                        this.addGameToUserList(userListID, gameID, el);
+                        this.addGameToUserList(userList, game, el);
                     } else {
-                        this.removeGameFromUserList(userListID, gameID, el);
+                        this.removeGameFromUserList(userList, game, el);
                     }
                 }
             },
@@ -311,8 +317,7 @@
             },              
             onSearchSelected: function (result) {
                 var that = this;
-
-                that.addGameToUserList(that.userlistid, result.value).then(i => { that.searchModal.hide() });
+                that.addNewGameToUserList(that.userlistid, result.value);
             },  
             onFilterInput: function(e) {
                 var val = e.target.value;
@@ -378,29 +383,22 @@
                 } else {
                     this.games = this.allgames.slice();
                 }                
-            },                          
-            addGameToUserList(userListID, gameID, el) {
+            }, 
+            addNewGameToUserList(userListID, gameID) {
                 var that = this;
 
-                if (el) {
-                    el.closest('.gamelist-item').classList.add('active');
-                    el.closest('.gamelist-btn-group button')?.classList.add('active');
-                }
-
-                return axios.post('/User/AddGameToUserList', null,{ params: { userListID: userListID, gameID: gameID } })
+                return axios.post('/User/addNewGameToUserList', null,{ params: { userListID: userListID, gameID: gameID } })
                     .then((res) => {
-                        if (res.data.success) {
-                            var game = res.data.result;
+                        if (res.data.success) {                            
+                            var result = res.data.result;
 
-                            if (that.userlistid == userListID) {
-                                if (that.games.filter(i => i.id == game.id).length == 0) {
-                                    that.games.push(game);
-                                    that.allgames.push({...game});
-                                    that.sortGames();
-                                }
+                            if (that.games.filter(i => i.id == result.id).length == 0) {
+                                that.games.push(result);
+                                that.allgames.push({...result});
+                                that.sortGames();
                             }
 
-                            var userList = that.userlists.find(i => i.id == userListID);
+                            that.searchModal.hide()
                             successToast("Added <strong>" + game.name + "</strong> to <strong>" + userList.name + "</strong>");
                         } else {       
                             res.data.errorMessages.forEach(errorMsg => {
@@ -409,24 +407,45 @@
                         }                        
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            },          
-            removeGameFromUserList(userListID, gameID, el) {
+            },                       
+            addGameToUserList(userList, game, el) {
+                var that = this;
+
+                el.closest('.gamelist-item').classList.add('active');
+                el.closest('.dropdown-menu')?.previousSibling.classList.add('active');
+
+                return axios.post('/User/AddGameToUserList', null,{ params: { userListID: userList.id, gameID: game.id } })
+                    .then((res) => {
+                        if (res.data.success) {                            
+                            if (game.userListIDs.indexOf(userList.id) == -1) {
+                                game.userListIDs.push(userList.id);
+                            }
+
+                            successToast("Added <strong>" + game.name + "</strong> to <strong>" + userList.name + "</strong>");
+                        } else {       
+                            res.data.errorMessages.forEach(errorMsg => {
+                                errorToast(errorMsg);                           
+                            });                              
+                        }                        
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
+            },                                                                  
+            removeGameFromUserList(userList, game, el) {
                 var that = this;     
 
                 el.closest('.gamelist-item').classList.remove('active');
-                el.closest('.gamelist-btn-group button')?.classList.remove('active');
+                el.closest('.dropdown-menu')?.previousSibling.classList.remove('active');
 
-                return axios.post('/User/RemoveGameFromUserList', null,{ params: { userListID: userListID, gameID: gameID } })
+                return axios.post('/User/RemoveGameFromUserList', null,{ params: { userListID: userList.id, gameID: game.id } })
                     .then((res) => {
-                        if (res.data.success) {
-                            var game = that.games.find(i => i.id == gameID);
+                        if (res.data.success) {                            
+                            game.userListIDs = game.userListIDs.filter(i => i != userList.id);
 
-                            if (that.userlistid == userListID) {
+                            if (that.userlistid == userList.id) {
                                 that.games = that.games.filter(i => i.id != gameID);            
                                 that.allgames = that.allgames.filter(i => i.id != gameID);  
                             }
 
-                            var userList = that.userlists.find(i => i.id == userListID);                            
                             successToast("Removed <strong>" + game.name + "</strong> from <strong>" + userList.name + "</strong>");
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {
@@ -458,17 +477,19 @@
                     .catch(err => { console.error(err); return Promise.reject(err); });                
             },
             resizeColumns() {
+                var that = this;
+
                 var defaultheight = document.querySelector('.add-game-container').clientHeight;
                 if (defaultheight > 0) {
                     document.querySelectorAll('.game-image-container').forEach(item => {
                         item.style.height = defaultheight + 'px';
                     });
 
-                    if(this.userlistid == 0) {
-                        document.querySelector('.add-game-container').parentElement.classList.add('d-none');
-                    } else {
-                        document.querySelector('.add-game-container').parentElement.classList.remove('d-none');              
-                    }
+                    that.$nextTick(function() {
+                        if(this.userlistid == 0) {
+                            document.querySelector('.add-game-container').parentElement.classList.add('d-none');
+                        }
+                    });
                 }
             }                                                                                          
         },

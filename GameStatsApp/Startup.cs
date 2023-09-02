@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 //using GameStatsApp.Interfaces.Helpers;
 using GameStatsApp.Repository.Configuration;
 using System;
+using System.Text.Json;
 
 namespace GameStatsApp
 {
@@ -57,6 +58,11 @@ namespace GameStatsApp
                 scanner.WithDefaultConventions();
                 scanner.SingleImplementationsOfInterface();                
             });
+
+            // services.Configure<JsonOptions>(options =>
+            // {
+            //     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            // });
 
             var connString = _config.GetSection("ConnectionStrings").GetSection("DBConnectionString").Value;
             NPocoBootstrapper.Configure(connString);

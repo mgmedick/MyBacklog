@@ -11,7 +11,7 @@
             <div class="mb-3">
                 <ul class="p-0">
                     <li>Add new games using <font-awesome-icon icon="fa-solid fa-plus"/></li>
-                    <li>Add/Remove games from lists using <font-awesome-icon icon="fa-solid fa-list"/>&nbsp;<font-awesome-icon icon="fa-solid fa-inbox"/>&nbsp;<font-awesome-icon icon="fa-solid fa-play"/>&nbsp;<font-awesome-icon icon="fa-solid fa-check"/>&nbsp;<font-awesome-icon icon="fa-solid fa-ellipsis"/></li>
+                    <li>Add/Remove games from lists using <font-awesome-icon icon="fa-solid fa-inbox"/>&nbsp;<font-awesome-icon icon="fa-solid fa-play"/>&nbsp;<font-awesome-icon icon="fa-solid fa-check"/>&nbsp;<font-awesome-icon icon="fa-solid fa-ellipsis"/></li>
                     <li>Import games using <font-awesome-icon icon="fa-solid fa-cloud-arrow-down"/></li>
                     <li>Manage lists and link accounts from Settings <font-awesome-icon icon="fa-solid fa-gear"/></li>
                 </ul>

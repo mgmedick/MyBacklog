@@ -16,8 +16,8 @@
                         <th scope="col" class="d-flex"><span class="ms-auto">Actions</span></th>
                     </tr>
                 </thead>        
-                <tbody>
-                    <tr v-for="(userList, userListIndex) in userLists.filter(i => i.defaultListID)">
+                <tbody>                                   
+                    <tr v-for="(userList, userListIndex) in userLists" :class="{ 'highlighted' : selectedRow == userListIndex }" style="vertical-align: middle;">
                         <td class="col-1">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" v-model="userList.active" @change="onUpdateActive($event, userList)">
@@ -25,60 +25,27 @@
                         </td>
                         <td>
                             <span>{{ userList.name }}</span>
-                        </td>
+                        </td>                     
                         <td>
-                            <div class="d-flex">
-                                <div class="ms-auto">
-                                    <font-awesome-icon icon="fa-solid fa-square-pen" size="lg" class="me-3 fa-disabled"/>
-                                    <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="fa-disabled" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%);"/>
+                            <div class="d-flex align-items-center">
+                                <div class="ms-auto d-flex flex-column me-2">
+                                    <font-awesome-icon v-if="userListIndex > 0" icon="fa-solid fa-angle-up" @click="onMoveUpClick(userListIndex)"/>                                
+                                    <font-awesome-icon v-if="userListIndex < userLists.length - 1" icon="fa-solid fa-angle-down" @click="onMoveDownClick(userListIndex)"/>                                
                                 </div>
+                                <font-awesome-icon icon="fa-solid fa-square-pen" size="lg" class="me-2" :class="{ 'fa-disabled' : userList.defaultListID }" @click="onEditListClick($event, userList)"/>
+                                <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" :class="{ 'fa-disabled' : userList.defaultListID }" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onShowDeleteListClick($event, userList)"/>                                
                             </div>
-                        </td>
-                    </tr>
-                    <tr v-for="(userList, userListIndex) in userLists.filter(i => !i.defaultListID)">
-                        <td class="col-1">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" v-model="userList.active" @change="onUpdateActive($event, userList)">
-                            </div>
-                        </td>
-                        <td>
-                            <span>{{ userList.name }}</span>
-                        </td>
-                        <td>
-                            <div class="d-flex">
-                                <div class="ms-auto">
-                                    <font-awesome-icon icon="fa-solid fa-square-pen" size="lg" class="me-3" @click="onShowEditListClick($event, userList)"/>
-                                    <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onShowDeleteListClick($event, userList)"/>
-                                </div>
-                            </div>
-                        </td>
+                        </td>                        
                     </tr>                                      
                 </tbody>
             </table>
             <div>                     
-                <a @click="onShowAddListClick" href="#/" class="text-primary nav-link">
+                <a @click="onAddListClick" href="#/" class="text-primary nav-link">
                     <font-awesome-icon icon="fa-solid fa-plus" size="lg" class="me-3"/>
                     <span>Add list</span>              
                 </a>
             </div>            
         </div>           
-        <div ref="addlistmodal" class="modal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Add List</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <edit-user-list ref="addlist" :userlist="userList" @complete="onAddListComplete"></edit-user-list>
-                    </div>    
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary" @click="$refs.addlist.submitForm()">Submit</button>
-                    </div>                                  
-                </div>
-            </div>
-        </div> 
         <div ref="editlistmodal" class="modal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -87,7 +54,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <edit-user-list ref="editlist" :userlist="userList" @complete="onEditListComplete"></edit-user-list>
+                        <edit-user-list v-if="showEditModal" ref="editlist" :userlist="userList" @valid="onEditListValid"></edit-user-list>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -116,7 +83,7 @@
     </div>
 </template>
 <script>
-    import { successToast, errorToast } from '../../js/common.js';
+    import { getFormData, successToast, errorToast } from '../../js/common.js';
     import axios from 'axios';
     import { Modal } from 'bootstrap';
    
@@ -126,9 +93,12 @@
             return {
                 userLists: [],
                 userList: {},
-                addListModal: {},
                 editListModal: {},
-                deleteListModal: {},
+                showEditModal: false,
+                deleteListModal: {},   
+                selectedRow: -1,
+                throttleTimer: null,
+                throttleDelay: 300,                
                 loading: false
             }
         },
@@ -140,26 +110,25 @@
         mounted: function () {
             var that = this;
 
-            that.addListModal = new Modal(that.$refs.addlistmodal, { backdrop: 'static' });
-            that.editListModal = new Modal(that.$refs.editlistmodal, { backdrop: 'static' });
-            that.deleteListModal = new Modal(that.$refs.deletelistmodal, { backdrop: 'static' });   
-
-            that.$refs.addlistmodal.addEventListener('hidden.bs.modal', event => {
-                that.userList = { userListID: 0, userListName: '' };
-                that.$refs.addlist.v$.$reset();
-            });      
-            
             that.$refs.editlistmodal.addEventListener('hidden.bs.modal', event => {
-                that.userList = { userListID: 0, userListName: '' };
-                that.$refs.editlist.v$.$reset();
-            });               
+                that.showEditModal = false;
+            }); 
+
+            that.$refs.editlistmodal.addEventListener('show.bs.modal', event => {
+                that.showEditModal = true;
+            }); 
+            
+            document.addEventListener('click', that.handleClickOutside)
+            
+            that.editListModal = new Modal(that.$refs.editlistmodal, { backdrop: 'static' });
+            that.deleteListModal = new Modal(that.$refs.deletelistmodal, { backdrop: 'static' });              
         },
         methods: {   
             loadData: function () {
                 var that = this;
                 this.loading = true;
 
-                axios.get('/User/GetUserLists')
+                axios.get('/User/ManageUserLists')
                     .then(res => {
                         that.userLists = res.data;
 
@@ -167,15 +136,36 @@
                         return res;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            },                     
-            onShowAddListClick() {
-                this.userList = { id: 0, name: '' };
-                this.addListModal.show();
+            },  
+            saveData: function (result) {
+                var that = this;
+                var formData = getFormData(result);
+
+                return axios.post('/User/ManageUserLists', formData)
+                    .then((res) => {
+                        if (res.data.success) {
+                            that.editListModal.hide();
+                            successToast("Successfully saved list");                           
+                        } else {
+                            res.data.errorMessages.forEach(errorMsg => {
+                                errorToast(errorMsg);                           
+                            });                                
+                        }
+                        that.loadData();
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
+            },                                  
+            onAddListClick() {
+                this.userList = { id: 0, name: '', active: true, sortOrder: this.userLists.length + 1 };
+                this.editListModal.show();
             },                      
-            onShowEditListClick(e, userList) {
-                this.userList = userList;
-                this.editListModal.show();    
+            onEditListClick(e, userList) {
+                this.userList = {...userList};
+                this.editListModal.show();
             },
+            onEditListValid: function (result) {
+                this.saveData(result);
+            },                
             onShowDeleteListClick(e, userList) {
                 this.userList = userList;
                 this.deleteListModal.show();  
@@ -212,31 +202,55 @@
                         }                                                                                                     
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            },              
-            onAddListComplete: function (res) {
-                this.addListModal.hide();
+            },                                               
+            onMoveUpClick: function (rowIndex) {
+                var item = this.userLists[rowIndex];
+                var toIndex = rowIndex - 1;
+                this.userLists.splice(rowIndex, 1);
+                this.userLists.splice(toIndex, 0, item);
+                this.selectedRow = toIndex;
+                this.updateUserListSortOrderDelay();
+            },
+            onMoveDownClick: function (rowIndex) {
+                var item = this.userLists[rowIndex];
+                var toIndex = rowIndex + 1;
+                this.userLists.splice(rowIndex, 1);
+                this.userLists.splice(toIndex, 0, item);
+                this.selectedRow = toIndex;
+                this.updateUserListSortOrderDelay();           
+            },
+            updateUserListSortOrderDelay() {
+                var that = this;
 
-                if (res.data.success) {
-                    successToast("Successfully added list");                           
-                } else {
-                    res.data.errorMessages.forEach(errorMsg => {
-                        errorToast(errorMsg);                           
-                    });                                
+                clearTimeout(that.throttleTimer);
+                    that.throttleTimer = setTimeout(function () {
+                            that.updateUserListSortOrders();
+                }, that.throttleDelay);     
+            },
+            updateUserListSortOrders() {
+                var that = this;
+                var userListIDs = that.userLists.map(i => { return i.id });
+                var formData = getFormData({ userListIDs: userListIDs });
+
+                return axios.post('/User/UpdateUserListSortOrders', formData)
+                    .then((res) => {
+                        if (res.data.success) {
+                            successToast("Successfully updated user lists");                           
+                        } else {
+                            res.data.errorMessages.forEach(errorMsg => {
+                                errorToast(errorMsg);                           
+                            });                                
+                        }
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
+            },
+            handleClickOutside(event) {
+                if (!(this.$el == event.target || this.$el.contains(event.target))) {
+                    this.isOpen = false;
+                    this.isFocus = false;
+                    this.selectedRow = -1;
                 }
-                this.loadData();
-            },                           
-            onEditListComplete: function (res) {    
-                this.editListModal.hide();
-            
-                if (res.data.success) {
-                    successToast("Successfully saved list");                           
-                } else {
-                    res.data.errorMessages.forEach(errorMsg => {
-                        errorToast(errorMsg);                           
-                    });                                
-                }
-                this.loadData();
-            },                                       
+            },                                     
         }    
     };
 </script>

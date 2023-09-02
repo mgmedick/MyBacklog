@@ -21,13 +21,17 @@ namespace GameStatsApp.Model.ViewModels
             DefaultListID = userList.DefaultListID;
             AccountTypeID = userList.AccountTypeID;
             Active = userList.Active;
+            SortOrder = userList.SortOrder;
         }
 
         public int ID { get; set; }
+        [Required(AllowEmptyStrings = false, ErrorMessage = "List name required")]
+        [RegularExpression(@"^[._()-\/#&$@+\w\s]{3,30}$", ErrorMessage = @"List name must be between 3 - 30 alphanumeric/special characters")]        
         public string Name { get; set; }
         public int? DefaultListID { get; set; }
         public int? AccountTypeID { get; set; }
         public bool Active { get; set; }
+        public int? SortOrder { get; set; }
     }
 }
 

@@ -54,94 +54,6 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetUserLists()
-        {
-            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));          
-            var userLists = _userService.GetUserLists(userID).ToList();
-
-            return Json(userLists);
-        }
-
-        [HttpPost]
-        public JsonResult SaveUserList(SaveUserListViewModel saveUserListVM)
-        {
-            var success = false;
-            List<string> errorMessages = null;
-
-            try
-            {
-                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                if (_userService.UserListNameExists(userID, saveUserListVM.UserListName))
-                {
-                    ModelState.AddModelError("SaveUserList", "List name already exists");
-                }
-
-                if (ModelState.IsValid)
-                {
-                    _userService.SaveUserList(userID, saveUserListVM.UserListID, saveUserListVM.UserListName);
-                    success = true;
-                }
-                else
-                {
-                    success = false;
-                    errorMessages = ModelState.Values.SelectMany(i => i.Errors).Select(i => i.ErrorMessage).ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "SaveUserList");
-                success = false;
-                errorMessages = new List<string>() { "Error saving user list" };
-            }
-
-            return Json(new { success = success, errorMessages = errorMessages });
-        }
-
-        [HttpPost]
-        public JsonResult DeleteUserList(int userListID)
-        {
-            var success = false;
-            List<string> errorMessages = null;
-
-            try
-            {
-                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                _userService.DeleteUserList(userID, userListID);
-                success = true;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "DeleteUserList");
-                success = false;
-                errorMessages = new List<string>() { "Error deleting user list" };
-            }
-
-            return Json(new { success = success, errorMessages = errorMessages });
-        }
-
-        [HttpPost]
-        public JsonResult UpdateUserListActive(int userListID, bool active)
-        {
-            var success = false;
-            List<string> errorMessages = null;
-
-            try
-            {
-                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                _userService.UpdateUserListActive(userID, userListID, active);
-                success = true;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "UpdateUserListActive");
-                success = false;
-                errorMessages = new List<string>() { "Error updating user list" };
-            }
-
-            return Json(new { success = success, errorMessages = errorMessages });
-        }
-
-        [HttpGet]
         public JsonResult GetUserListGames(int userListID)
         {
             var userListGames = _userService.GetUserListGames(userListID);
@@ -149,6 +61,29 @@ namespace GameStatsApp.Controllers
             return Json(userListGames);
         }        
         
+        [HttpPost]
+        public JsonResult AddNewGameToUserList(int userListID, int gameID)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+            UserListGameViewModel result = null;
+
+            try
+            {
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                result = _userService.AddNewGameToUserList(userID, userListID, gameID);
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "AddNewGameToUserList");
+                success = false;
+                errorMessages = new List<string>() { "Error adding game to list" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages, result = result });
+        }
+
         [HttpPost]
         public JsonResult AddGameToUserList(int userListID, int gameID)
         {
@@ -159,7 +94,7 @@ namespace GameStatsApp.Controllers
             try
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                result = _userService.AddGameToUserList(userID, userListID, gameID);
+                _userService.AddGameToUserList(userID, userListID, gameID);
                 success = true;
             }
             catch (Exception ex)
@@ -309,13 +244,123 @@ namespace GameStatsApp.Controllers
             }          
 
             return Json(results);
-        }                          
+        }                
 
         [HttpGet]
-        public IActionResult UserListNameNotExists(string userListName)
+        public JsonResult ManageUserLists()
+        {
+            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));          
+            var userLists = _userService.GetUserLists(userID).ToList();
+
+            return Json(userLists);
+        }
+
+        [HttpPost]
+        public JsonResult ManageUserLists(UserListViewModel userListVM)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                if (_userService.UserListNameExists(userID, userListVM.ID, userListVM.Name))
+                {
+                    ModelState.AddModelError("ManageUserLists", "List name already exists");
+                }
+
+                if (ModelState.IsValid)
+                {
+                    _userService.SaveUserList(userID, userListVM);
+                    success = true;
+                }
+                else
+                {
+                    success = false;
+                    errorMessages = ModelState.Values.SelectMany(i => i.Errors).Select(i => i.ErrorMessage).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "SaveUserList");
+                success = false;
+                errorMessages = new List<string>() { "Error saving user list" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
+        }
+
+        [HttpPost]
+        public JsonResult DeleteUserList(int userListID)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                _userService.DeleteUserList(userID, userListID);
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "DeleteUserList");
+                success = false;
+                errorMessages = new List<string>() { "Error deleting user list" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
+        }
+
+        [HttpPost]
+        public JsonResult UpdateUserListActive(int userListID, bool active)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                _userService.UpdateUserListActive(userID, userListID, active);
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "UpdateUserListActive");
+                success = false;
+                errorMessages = new List<string>() { "Error updating user list" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
+        }
+
+        [HttpPost]
+        public JsonResult UpdateUserListSortOrders(List<int> userListIDs)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                _userService.UpdateUserListSortOrders(userID, userListIDs);
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "UpdateUserListSortOrders");
+                success = false;
+                errorMessages = new List<string>() { "Error updating user list" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
+        }
+                                 
+        [HttpGet]
+        public IActionResult UserListNameNotExists(int userListID, string userListName)
         {
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var result = !_userService.UserListNameExists(userID, userListName);
+            var result = !_userService.UserListNameExists(userID, userListID, userListName);
 
             return Json(result);
         }                                                   

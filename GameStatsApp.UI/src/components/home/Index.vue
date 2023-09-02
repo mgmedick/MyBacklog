@@ -57,7 +57,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <welcome :username="indexvm.username"></welcome>
+                        <welcome v-if="showWelcomeModal" :username="indexvm.username"></welcome>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -78,6 +78,7 @@
         data: function () {
             return {
                 welcomeModal: {},
+                showWelcomeModal: false,
                 width: document.documentElement.clientWidth,
                 height: document.documentElement.clientHeight
             };
@@ -98,6 +99,14 @@
             var that = this;
             
             window.addEventListener('resize', this.onResize);
+
+            that.$refs.welcomemodal.addEventListener('hidden.bs.modal', event => {
+                that.showWelcomeModal = false;
+            }); 
+
+            that.$refs.welcomemodal.addEventListener('show.bs.modal', event => {
+                that.showWelcomeModal = true;
+            }); 
 
             this.setDemoImages();
 

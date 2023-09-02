@@ -1,15 +1,20 @@
 ﻿<template>
     <form ref="form" @submit.prevent="submitForm" autocomplete="off">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" v-model="form.active">
+            <label class="form-check-label">
+                Active
+            </label>
+        </div>
         <div class="mb-3">
-            <input id="txtUserListName" type="text" class="form-control" autocomplete="off" v-model.lazy="form.UserListName" @blur="v$.form.UserListName.$touch"  aria-describedby="spnUserListNameErrors">
+            <input type="text" class="form-control" autocomplete="off" v-model="form.name" @blur="v$.form.name.$touch"  aria-describedby="spnNameErrors">
             <div>
-                <span id="spnUserListNameErrors" class="form-text text-danger" v-for="error of v$.form.UserListName.$errors">{{ error.$message }}</span>
+                <span id="spnNameErrors" class="form-text text-danger" v-for="error of v$.form.name.$errors">{{ error.$message }}</span>
             </div>
         </div>      
     </form>
 </template>
 <script>
-    import { getFormData, successToast, errorToast } from '../../js/common.js';
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, helpers } from '@vuelidate/validators';
@@ -18,19 +23,9 @@
 
     const userListNameFormat = helpers.regex(/^[._()-\/#&$@+\w\s]{3,30}$/)
 
-    const asyncUserListNameNotExists = async (value) => {  
-        if(value === '' || value === this.origUserListName) { return true; };            
-
-        return await axios.get('/User/UserListNameNotExists', { params: { userListName: value } })
-            .then(res => {
-                return Promise.resolve(res.data);
-            })
-            .catch(err => { console.error(err); return Promise.reject(err); });
-    }
-
     export default {
         name: "EditUserList",
-        emits: ["complete"],
+        emits: ["valid"],
         props: {
             userlist: Object
         },
@@ -39,42 +34,26 @@
         },
         data() {
             return {
-                form: {
-                    UserListID: this.userlist.id,
-                    UserListName: this.userlist.name
-                },
-                origUserListName: this.userlist.name
+                form: this.userlist
             }
-        },  
-        watch: {
-            userlist: function (val, oldVal) {
-                if (val.id != oldVal.id) {
-                    this.form.UserListID = val.id;
-                    this.form.UserListName = val.name;
-                }
-            }     
-        },                  
+        },               
         mounted: function () {
         },
         methods: {
             async submitForm() {
                 const isValid = await this.v$.$validate()
-                if (!isValid) return
-
-                var that = this;
-                var formData = getFormData(this.form);
-                this.loading = true;
-
-                return axios.post('/User/SaveUserList', formData)
-                    .then((res) => {
-                        this.$emit('complete', res);
-                    })
-                    .catch(err => { console.error(err); return Promise.reject(err); });
+                if (isValid) {
+                    this.$emit('valid', this.form);
+                } else {
+                    return;
+                }
             },
             async userListNameNotExists(value) {  
-                if (value === '' || value == (this.origUserListName ?? this.userlist.name)) { return true; };            
+                if (value === '') {
+                    return true; 
+                };            
 
-                return await axios.get('/User/UserListNameNotExists', { params: { userListName: value } })
+                return await axios.get('/User/UserListNameNotExists', { params: { userListID: this.userlist.id, userListName: value } })
                     .then(res => {
                         return Promise.resolve(res.data);
                     })
@@ -84,7 +63,7 @@
         validations() {
             return {
                 form: {
-                    UserListName: {
+                    name: {
                         required: helpers.withMessage('List name is required', required),
                         userListNameFormat: helpers.withMessage('Must be between 3 - 30 characters', userListNameFormat),
                         userListNameNotExists: helpers.withMessage('List name already exists', withAsync(this.userListNameNotExists))

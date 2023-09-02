@@ -5,32 +5,28 @@
                 <ul class="nav nav-pills flex-column mb-auto">
                     <li class="nav-item">
                         <a @click="selectedItemID = 0" href="#" class="nav-link text-dark" :class="{ 'active' : selectedItemID == 0 }">
-                            <font-awesome-icon icon="fa-solid fa-list" size="lg" class="me-3"/>
+                            <font-awesome-icon icon="fa-solid fa-layer-group" size="lg" class="me-3"/>
                             <span>All Games</span>
                         </a>
                     </li>                
-                    <li v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID)" key="userList.id" class="nav-item">
+                    <li v-for="(userList, userListIndex) in userlists" key="userList.id" class="nav-item">
                         <a @click="selectedItemID = userList.id" href="#" class="nav-link text-dark" :class="{ 'active' : selectedItemID == userList.id }">
-                            <font-awesome-icon :icon="getDefaultIconClass(userList.defaultListID)" size="lg" class="me-3"/>
+                            <font-awesome-icon v-if="userList.defaultListID" :icon="getDefaultIconClass(userList.defaultListID)" size="lg" class="me-3"/>
+                            <font-awesome-icon v-else-if="userList.accountTypeID" :icon="getAccountIconClass(userList.accountTypeID)" size="lg" class="me-3"/>
+                            <font-awesome-icon v-else icon="fa-solid fa-list" size="lg" class="me-3"/>
                             <span>{{ userList.name }}</span>
                         </a>
                     </li>
-                    <li v-if="userlists.filter(i => !i.defaultListID).length > 0" class="border-top my-3"></li>
-                    <li v-for="(userList, userListIndex) in userlists.filter(i => !i.defaultListID)" key="userList.id" class="nav-item">
-                        <a @click="selectedItemID = userList.id" href="#" class="nav-link text-dark" :class="{ 'active' : selectedItemID == userList.id }">
-                            <font-awesome-icon v-if="userList.accountTypeID" :icon="getAccountIconClass(userList.accountTypeID)" size="lg" class="me-3"/>
-                            <span>{{ userList.name }}</span>
-                        </a>
-                    </li>    
                 </ul>
             </div>
         </div>
         <div class="show-md row g-2 justify-content-center">
             <div class="btn-group">
                 <button class="btn dropdown-toggle btn-primary d-flex align-items-center" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                    <font-awesome-icon v-if="selectedItemID == 0" icon="fa-solid fa-list" size="lg"/>
+                    <font-awesome-icon v-if="selectedItemID == 0" icon="fa-solid fa-layer-group" size="lg"/>
                     <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.defaultListID" :icon="getDefaultIconClass(userlists.find(i => i.id == selectedItemID)?.defaultListID)" size="lg"/>
                     <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.accountTypeID" :icon="getAccountIconClass(userlists.find(i => i.id == selectedItemID)?.accountTypeID)" size="lg"/>
+                    <font-awesome-icon v-else icon="fa-solid fa-list" size="lg"/>
                     <span class="mx-auto">{{ selectedItemID == 0 ? 'All Games' : userlists.find(i => i.id == selectedItemID)?.name }}</span>
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="width: 100%;">

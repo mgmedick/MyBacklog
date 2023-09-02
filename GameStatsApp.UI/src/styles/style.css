@@ -1,7 +1,12 @@
 ﻿
 .dropdown-item.highlighted {
     color: #1e2125;;
-    background-color: #e9ecef;
+    background-color: rgba(0,0,0,0.075);
+}
+
+.table-hover>tbody>tr.highlighted >* {
+    color: #1e2125;;
+    background-color: rgba(0,0,0,0.075);
 }
 
 .game-image-container.active {
@@ -34,6 +39,7 @@
     cursor: not-allowed;
     pointer-events: none;
 }
+
 
 /* .stretchy-wrapper {
     width: 100%;
