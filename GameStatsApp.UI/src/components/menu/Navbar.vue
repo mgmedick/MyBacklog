@@ -2,8 +2,8 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="/" draggable="false">
-                <font-awesome-icon icon="fa-solid fa-gear" />
-                GameStatsApp
+                <font-awesome-icon icon="fa-solid fa-gamepad" class="me-2" />
+                MyBacklog
             </a>
             <button class="navbar-toggler" type="button" @click="toggleNavbar = !toggleNavbar" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>

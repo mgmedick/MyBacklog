@@ -31,7 +31,7 @@ namespace GameStatsApp.Repository
 
                 return results;
             }
-        }                
+        }                          
     }
 }
 

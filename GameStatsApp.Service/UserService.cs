@@ -496,11 +496,6 @@ namespace GameStatsApp.Service
             var result = _userRepo.GetUserLists(i => i.UserID == userID && i.Name == userListName && i.ID != userListID).Any();
 
             return result;
-        }              
-
-        public IEnumerable<SearchResult> SearchUsers(string searchText)
-        {
-            return _userRepo.SearchUsers(searchText);
-        }        
+        }                     
     }
 }

@@ -11,11 +11,11 @@ namespace GameStatsApp.Service
 {
     public class MenuService : IMenuService
     {
-        private readonly IUserService _userService = null;
+        private readonly IUserRepository _userRepo = null;
 
-        public MenuService(IUserService userService)
+        public MenuService(IUserRepository userRepo)
         {
-            _userService = userService;
+            _userRepo = userRepo;
         }
 
         public IEnumerable<SearchResult> Search(string searchText)
@@ -25,7 +25,7 @@ namespace GameStatsApp.Service
             if (!string.IsNullOrWhiteSpace(searchText))
             {
                 searchText = searchText.Trim();
-                var users = _userService.SearchUsers(searchText).ToList();
+                var users = _userRepo.SearchUsers(searchText).ToList();
                 if (users.Any()){
                     var usersGroup = new SearchResult { Value = "0", Label = "Users", SubItems = users };
                     results.Add(usersGroup);
@@ -34,5 +34,13 @@ namespace GameStatsApp.Service
 
             return results;
         }
+
+        public AboutViewModel GetAbout()
+        {
+            var item = _userRepo.GetAbout();
+            var result = new AboutViewModel() { UserCount = item.UserCount, GameName = item.GameName, UserListName = item.UserListName };
+
+            return result;
+        }          
     }
 }

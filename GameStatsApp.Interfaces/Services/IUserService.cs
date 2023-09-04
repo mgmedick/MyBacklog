@@ -29,7 +29,6 @@ namespace GameStatsApp.Interfaces.Services
         bool EmailExists(string email, bool activeFilter);
         bool UserListNameExists(int userID, int userListID, string userListName);
         Task SendConfirmRegistrationEmail(string email, string username);
-        IEnumerable<SearchResult> SearchUsers(string searchText);
         IEnumerable<UserListViewModel> GetUserLists (int userID);
         void SaveUserList(int userID, UserListViewModel userListVM);
         void DeleteUserList(int userID, int userListID);

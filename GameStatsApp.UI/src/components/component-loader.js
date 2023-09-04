@@ -2,13 +2,14 @@ import { createApp } from "vue";
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon, FontAwesomeLayers } from '@fortawesome/vue-fontawesome'
-import { faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner, faSquarePen, faAt, faList, faInbox, faPlay, faCheck, faEllipsis, faPlus, faCircleXmark, faCloudArrowDown, faCircleExclamation, faArrowDownWideShort, faArrowUpWideShort, faCloud, faCircleInfo, faAngleUp, faAngleDown, faLayerGroup } from '@fortawesome/free-solid-svg-icons'
+import { faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner, faSquarePen, faAt, faList, faInbox, faPlay, faCheck, faEllipsis, faPlus, faCircleXmark, faCloudArrowDown, faCircleExclamation, faArrowDownWideShort, faArrowUpWideShort, faCloud, faCircleInfo, faAngleUp, faAngleDown, faLayerGroup, faGamepad } from '@fortawesome/free-solid-svg-icons'
 import { faGoogle, faFacebook, faSteam, faXbox } from '@fortawesome/free-brands-svg-icons'
-library.add(faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner, faSquarePen, faAt, faList, faInbox, faPlay, faCheck, faEllipsis, faPlus, faCircleXmark, faCloudArrowDown, faCircleExclamation, faArrowDownWideShort, faArrowUpWideShort, faCloud, faCircleInfo, faAngleUp, faAngleDown, faLayerGroup, faGoogle, faFacebook, faSteam, faXbox);
+library.add(faUser, faMoon, faGear, faRightFromBracket, faClipboard, faHourglassEnd, faCircleCheck, faSpinner, faSquarePen, faAt, faList, faInbox, faPlay, faCheck, faEllipsis, faPlus, faCircleXmark, faCloudArrowDown, faCircleExclamation, faArrowDownWideShort, faArrowUpWideShort, faCloud, faCircleInfo, faAngleUp, faAngleDown, faLayerGroup, faGamepad, faGoogle, faFacebook, faSteam, faXbox);
 
 import autocomplete from './shared/Autocomplete.vue';
 import multiselect from './shared/Multiselect.vue';
 import navbar from './menu/Navbar.vue';
+import about from './menu/About.vue';
 
 import index from './home/Index.vue';
 import signUp from './home/SignUp.vue';
@@ -37,6 +38,7 @@ export default {
         app.component("font-awesome-icon", FontAwesomeIcon);
         app.component("font-awesome-layers", FontAwesomeLayers);
         app.component("navbar", navbar);
+        app.component("about", about);
         app.component('autocomplete', autocomplete);
         app.component('multiselect', multiselect);
 
