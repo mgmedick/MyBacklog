@@ -39,20 +39,10 @@
     import { getFormData, successToast, errorToast } from '../../js/common.js';
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
-    import { required, sameAs, helpers } from '@vuelidate/validators';
+    import { required, sameAs, helpers } from '@vuelidate/validators'; 
+    
     const { withAsync } = helpers;
-
     const passwordFormat = helpers.regex(/^(?=.*[A-Za-z])(?=.*\d)[._()-\/#&$@+\w\s]{8,30}$/)
-
-    const asyncPasswordNotMatches = async (value) => {
-        if (value === '') return true;
-
-        return await axios.get('/Home/PasswordNotMatches', { params: { password: value } })
-            .then(res => {
-                return res.data;
-            })
-            .catch(err => { console.error(err); return Promise.reject(err); });
-    }
 
     export default {
         name: "ChangePassword",
@@ -95,7 +85,18 @@
                         }
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            }                                     
+            },
+            async passwordNotMatches(value) {  
+                if (value === '') {
+                    return true; 
+                };
+
+                return await axios.get('/Home/PasswordNotMatches', { params: { password: value } })
+                    .then(res => {
+                        return res.data;
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
+            }                                                    
         },
         validations() {
             return {
@@ -103,7 +104,7 @@
                     Password: {
                         required: helpers.withMessage('Password is required', required),
                         passwordFormat: helpers.withMessage('Must be between 8 - 30 characters with at least 1 number and letter', passwordFormat),
-                        passwordNotMatches: helpers.withMessage('Password must differ from previous password', withAsync(asyncPasswordNotMatches))
+                        passwordNotMatches: helpers.withMessage('Password must differ from previous password', withAsync(this.passwordNotMatches))
 
                     },
                     ConfirmPassword: {

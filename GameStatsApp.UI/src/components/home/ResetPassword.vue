@@ -47,17 +47,8 @@
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, helpers } from '@vuelidate/validators';
+    
     const { withAsync } = helpers;
-
-    const asyncActiveEmailExists = async (value) => {
-        if (value === '') return true;
-
-        return await axios.get('/Home/ActiveEmailExists', { params: { email: value } })
-            .then(res => {
-                return res.data;
-            })
-            .catch(err => { console.error(err); return Promise.reject(err); });
-    }
 
     export default {
         name: "ResetPassword",
@@ -102,14 +93,25 @@
                         that.loading = false;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            }                          
+            },
+            async activeEmailExists(value) {  
+                if (value === '') {
+                    return true; 
+                };
+
+                return await axios.get('/Home/ActiveEmailExists', { params: { email: value } })
+                    .then(res => {
+                        return res.data;
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
+            }                                       
         },
         validations() {
             return {
                 form: {
                     Email: {
                         required: helpers.withMessage('Email is required', required),
-                        activeEmailExists: helpers.withMessage('Email not found', withAsync(asyncActiveEmailExists))
+                        activeEmailExists: helpers.withMessage('Email not found', withAsync(this.activeEmailExists))
                     }
                 }
             }

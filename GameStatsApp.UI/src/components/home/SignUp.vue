@@ -50,17 +50,8 @@
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, email, helpers } from '@vuelidate/validators';
+    
     const { withAsync } = helpers;
-
-    const asyncEmailNotExists = async (value) => {
-        if (value === '') return true;
-
-        return await axios.get('/Home/EmailNotExists', { params: { email: value } })
-            .then(res => {
-                return res.data;
-            })
-            .catch(err => { console.error(err); return Promise.reject(err); });
-    }
 
     export default {
         name: "SignUp",
@@ -221,7 +212,18 @@
                 }
 
                 window.google.accounts.id.renderButton(this.$refs.googleLoginBtn, options);
-            }                      
+            },
+            async emailNotExists(value) {  
+                if (value === '') {
+                    return true; 
+                };
+
+                return await axios.get('/Home/EmailNotExists', { params: { email: value } })
+                    .then(res => {
+                        return res.data;
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
+            }                                   
         },
         validations() {
             return {
@@ -229,7 +231,7 @@
                     Email: {
                         required: helpers.withMessage('Email is required', required),
                         email: helpers.withMessage('Email not found', email),
-                        emailNotExists: helpers.withMessage('Email already exists', withAsync(asyncEmailNotExists))
+                        emailNotExists: helpers.withMessage('Email already exists', withAsync(this.emailNotExists))
                     }
                 }
             }

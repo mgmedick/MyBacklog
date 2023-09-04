@@ -56,20 +56,10 @@
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, helpers, sameAs } from '@vuelidate/validators';
+    
     const { withAsync } = helpers;
-
     const usernameFormat = helpers.regex(/^[._()-\/#&$@+\w\s]{3,30}$/)
     const passwordFormat = helpers.regex(/^(?=.*[A-Za-z])(?=.*\d)[._()-\/#&$@+\w\s]{8,30}$/)
-
-    const asyncUsernameNotExists = async (value) => {  
-        if(value === '') { return true; };            
-
-        return await axios.get('/Home/UsernameNotExists', { params: { username: value } })
-            .then(res => {
-                return Promise.resolve(res.data);
-            })
-            .catch(err => { console.error(err); return Promise.reject(err); });
-    }
 
     export default {
         name: "Activate",
@@ -120,7 +110,18 @@
                         that.loadingModal.hide();
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            }                                                                                                         
+            },
+            async usernameNotExists(value) {  
+                if (value === '') {
+                    return true; 
+                };
+
+                return await axios.get('/Home/UsernameNotExists', { params: { username: value } })
+                    .then(res => {
+                        return Promise.resolve(res.data);
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
+            }                                                                                                                      
         },
         validations() {
             return {
@@ -128,7 +129,7 @@
                     Username: {
                         required: helpers.withMessage('Username is required', required),
                         usernameFormat: helpers.withMessage('Must be between 3 - 30 characters', usernameFormat),
-                        usernameNotExists: helpers.withMessage('Username already exists', withAsync(asyncUsernameNotExists))
+                        usernameNotExists: helpers.withMessage('Username already exists', withAsync(this.usernameNotExists))
                     },
                     Password: {
                         required: helpers.withMessage('Password is required', required),

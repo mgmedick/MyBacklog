@@ -41,17 +41,8 @@
     import useVuelidate from '@vuelidate/core';
     import { required, helpers } from '@vuelidate/validators';
     import { Modal, Toast } from 'bootstrap';
+    
     const { withAsync } = helpers;
-
-    const asyncActiveEmailExists = async (value) => {
-        if (value === '') return true;
-
-        return await axios.get('/Home/ActiveEmailExists', { params: { email: value } })
-            .then(res => {
-                return res.data;
-            })
-            .catch(err => { console.error(err); return Promise.reject(err); });
-    }
 
     export default {
         name: "Login",
@@ -208,14 +199,25 @@
                 }
 
                 window.google.accounts.id.renderButton(this.$refs.googleLoginBtn, options);
-            }                      
+            },
+            async activeEmailExists(value) {  
+                if (value === '') {
+                    return true; 
+                };
+
+                return await axios.get('/Home/ActiveEmailExists', { params: { email: value } })
+                    .then(res => {
+                        return res.data;
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
+            }                                     
         },
         validations() {
             return {
                 form: {
                     Email: {
                         required: helpers.withMessage('Email is required', required),
-                        activeEmailExists: helpers.withMessage('Email not found', withAsync(asyncActiveEmailExists))
+                        activeEmailExists: helpers.withMessage('Email not found', withAsync(this.activeEmailExists))
                     },
                     Password: {
                         required: helpers.withMessage('Password is required', required)
