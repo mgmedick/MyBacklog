@@ -10,12 +10,10 @@ namespace GameStatsApp.Controllers
     public class MenuController : Controller
     {
         private readonly IMenuService _menuService = null;
-        private readonly IUserService _userService = null;
 
-        public MenuController(IMenuService menuService, IUserService userService)
+        public MenuController(IMenuService menuService)
         {
             _menuService = menuService;
-            _userService = userService;
         }
 
         public ViewResult About()
