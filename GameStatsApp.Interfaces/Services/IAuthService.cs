@@ -14,12 +14,12 @@ namespace GameStatsApp.Interfaces.Services
     public interface IAuthService
     {
         string GetSteamAuthUrl(string redirectUri);
-        Task<List<string>> GetSteamUserGameNames(string steamID, DateTime? importLastRunDate);
+        Task<List<string>> GetSteamUserGameNames(string steamID);
         Task<TokenResponse> AuthenticateSteam(Dictionary<string, string> results);
-        string GetWindowsLiveAuthUrl(string redirectUri);
-        Task<TokenResponse> Authenticate(string code, string redirectUri);
-        Task<TokenResponse> ReAuthenticate(string refreshToken);
-        Task<List<string>> GetUserGameNames(string userHash, string xstsToken, ulong userXuid, DateTime? importLastRunDate = null);
+        string GetMicrosoftAuthUrl(string redirectUri);
+        Task<TokenResponse> AuthenticateMicrosoft(string code, string redirectUri);
+        Task<TokenResponse> ReAuthenticateMicrosoft(string refreshToken);
+        Task<List<string>> GetMicrosoftUserGameNames(string userHash, string xstsToken, ulong userXuid, DateTime? importLastRunDate = null);
         Task<SocialTokenResponse> ValidateSocialToken(string accessToken, int socialAccountTypeID);
     }
 }

@@ -69,7 +69,7 @@ namespace GameStatsApp.Service
             return result;
         }    
 
-        public async Task<bool> ValidateSteam(Dictionary<string, string> parameters)
+        private async Task<bool> ValidateSteam(Dictionary<string, string> parameters)
         {
             bool result = false;
             using (HttpClient client = new HttpClient())
@@ -91,11 +91,12 @@ namespace GameStatsApp.Service
             return result;
         }    
 
-        public async Task<List<string>> GetSteamUserGameNames(string steamID, DateTime? importLastRunDate)
+        public async Task<List<string>> GetSteamUserGameNames(string steamID)
         {
             var results = new List<string>();
             var items = await GetSteamUserInventory(steamID);
-            results = items.Select(obj => (string)obj["name"]).ToList();
+            results = items.OrderBy(obj => DateTimeOffset.FromUnixTimeSeconds((long)obj["rtime_last_played"]).UtcDateTime)
+                           .Select(obj => (string)obj["name"]).ToList();
 
             results = results.GroupBy(g => new { g })
                 .Select(i => i.First())
@@ -104,7 +105,7 @@ namespace GameStatsApp.Service
             return results;
         }       
 
-        public async Task<JArray> GetSteamUserInventory(string steamID)
+        private async Task<JArray> GetSteamUserInventory(string steamID)
         {
             var results = new JArray();
 
@@ -136,9 +137,9 @@ namespace GameStatsApp.Service
             return results;
         }           
         #endregion
-        
+
         #region MicrosoftAuth
-        public string GetWindowsLiveAuthUrl(string redirectUri)
+        public string GetMicrosoftAuthUrl(string redirectUri)
         {
             var baseUrl = "https://login.live.com/oauth20_authorize.srf";
             var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientID").Value;
@@ -155,7 +156,7 @@ namespace GameStatsApp.Service
             return authUrl;
         }
 
-        public async Task<TokenResponse> Authenticate(string code, string redirectUri)
+        public async Task<TokenResponse> AuthenticateMicrosoft(string code, string redirectUri)
         {
             var accessResponse = await ExchangeCodeForAccessToken(code, redirectUri);
             var result = await GetTokenResponse(accessResponse);
@@ -163,7 +164,7 @@ namespace GameStatsApp.Service
             return result;
         }
 
-        public async Task<TokenResponse> ReAuthenticate(string refreshToken)
+        public async Task<TokenResponse> ReAuthenticateMicrosoft(string refreshToken)
         {
             var accessResponse = await RefreshAccessToken(refreshToken);
             var result = await GetTokenResponse(accessResponse);
@@ -171,7 +172,7 @@ namespace GameStatsApp.Service
             return result;
         }
 
-        public async Task<TokenResponse> GetTokenResponse(JObject accessResponse)
+        private async Task<TokenResponse> GetTokenResponse(JObject accessResponse)
         {
             RpsTicket = (string)accessResponse.GetValue("access_token");
             RefreshToken = (string)accessResponse.GetValue("refresh_token");
@@ -196,7 +197,7 @@ namespace GameStatsApp.Service
             return tokenResponse;
         }
 
-        public async Task<JObject> ExchangeCodeForAccessToken(string code, string redirectUri)
+        private async Task<JObject> ExchangeCodeForAccessToken(string code, string redirectUri)
         {
             JObject data = null;
             var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientID").Value;
@@ -230,7 +231,7 @@ namespace GameStatsApp.Service
             return data;
         }
 
-        public async Task<JObject> RefreshAccessToken(string refreshToken)
+        private async Task<JObject> RefreshAccessToken(string refreshToken)
         {
             JObject data = null;
             var clientID = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ClientID").Value;
@@ -263,7 +264,7 @@ namespace GameStatsApp.Service
             return data;
         }        
 
-        public async Task<JObject> ExchangeRpsTicketForUserToken(string rpsTicket)
+        private async Task<JObject> ExchangeRpsTicketForUserToken(string rpsTicket)
         {
             JObject data = null;
 
@@ -294,7 +295,7 @@ namespace GameStatsApp.Service
             return data;
         }        
 
-        public async Task<JObject> ExchangeTokenForXSTSToken(string userToken)
+        private async Task<JObject> ExchangeTokenForXSTSToken(string userToken)
         {
             JObject data = null;
 
@@ -326,10 +327,10 @@ namespace GameStatsApp.Service
             return data;
         }
 
-        public async Task<List<string>> GetUserGameNames(string userHash, string xstsToken, ulong userXuid, DateTime? importLastRunDate)
+        public async Task<List<string>> GetMicrosoftUserGameNames(string userHash, string xstsToken, ulong userXuid, DateTime? importLastRunDate)
         {
             var results = new List<string>();
-            var items = await GetUserTitleHistory(userHash, xstsToken, userXuid);
+            var items = await GetMicrosoftUserTitleHistory(userHash, xstsToken, userXuid);
             results = items.Where(obj => ((string)obj["titleType"]) == "Game" && (!importLastRunDate.HasValue || ((DateTime)obj["lastUnlock"]) >= importLastRunDate))
                             .OrderBy(obj => (DateTime)obj["lastUnlock"])
                             .Select(obj => (string)obj["name"]).ToList();
@@ -341,7 +342,7 @@ namespace GameStatsApp.Service
             return results;
         }
         
-        public async Task<JArray> GetUserTitleHistory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null)
+        private async Task<JArray> GetMicrosoftUserTitleHistory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null)
         {
             if (results == null)
             {
@@ -376,7 +377,7 @@ namespace GameStatsApp.Service
                         continuationToken = (string)data["pagingInfo"]["continuationToken"];
                         if (!string.IsNullOrWhiteSpace(continuationToken))
                         {
-                            await GetUserTitleHistory(userHash, xstsToken, userXuid, results, continuationToken);
+                            await GetMicrosoftUserTitleHistory(userHash, xstsToken, userXuid, results, continuationToken);
                         }
                     }
                 }
@@ -385,7 +386,7 @@ namespace GameStatsApp.Service
             return results;
         }   
 
-        public async Task<JArray> GetUserInventory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null)
+        private async Task<JArray> GetMicrosoftUserInventory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null)
         {
             if (results == null)
             {
@@ -427,7 +428,7 @@ namespace GameStatsApp.Service
                         continuationToken = (string)data["pagingInfo"]["continuationToken"];
                         if (!string.IsNullOrWhiteSpace(continuationToken))
                         {
-                            await GetUserInventory(userHash, xstsToken, userXuid, results, continuationToken);
+                            await GetMicrosoftUserInventory(userHash, xstsToken, userXuid, results, continuationToken);
                         }
                     // }
                 }
@@ -461,7 +462,7 @@ namespace GameStatsApp.Service
             return result;
         }
         
-        public async Task<JObject> GetFacebookResponse(string accessToken)
+        private async Task<JObject> GetFacebookResponse(string accessToken)
         {
             JObject data = null;
 

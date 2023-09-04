@@ -384,29 +384,39 @@ namespace GameStatsApp.Service
             
             if (userAccountVW.ExpireDate.HasValue && userAccountVW.ExpireDate < DateTime.UtcNow && !string.IsNullOrWhiteSpace(userAccountVW.RefreshToken))
             {
-                var tokenResponse = await _authService.ReAuthenticate(userAccountVW.RefreshToken);
-                SaveUserAccount(userID, userAccountVW.AccountTypeID, tokenResponse);
-                userAccountVW = _userRepo.GetUserAccountViews(i => i.ID == userAccountID).FirstOrDefault();      
+                TokenResponse tokenResponse = null;
+
+                switch(userAccountVW.AccountTypeID)
+                {
+                    case (int)AccountType.Xbox:
+                        tokenResponse = await _authService.ReAuthenticateMicrosoft(userAccountVW.RefreshToken);
+                        break;
+                }
+
+                if (tokenResponse != null)
+                {
+                    SaveUserAccount(userID, userAccountVW.AccountTypeID, tokenResponse);
+                    userAccountVW = _userRepo.GetUserAccountViews(i => i.ID == userAccountID).FirstOrDefault();  
+                }
             }
 
             return userAccountVW;
         }
         
-        public async Task ImportGamesFromUserAccount(int userID, UserAccountView userAccountVW, bool isImportAll)
+        public async Task ImportGames(int userID, UserAccountView userAccountVW)
         {
             var gameNames = new List<string>();
-            var lastImportDate = isImportAll ? null : userAccountVW.ImportLastRunDate;
 
             switch(userAccountVW.AccountTypeID)
             {
                 case (int)AccountType.Steam:
-                    gameNames = await _authService.GetSteamUserGameNames(userAccountVW.AccountUserID, lastImportDate);
+                    gameNames = await _authService.GetSteamUserGameNames(userAccountVW.AccountUserID);
                     break;           
                 case (int)AccountType.Xbox:
-                    gameNames = await _authService.GetUserGameNames(userAccountVW.AccountUserHash, userAccountVW.Token, Convert.ToUInt64(userAccountVW.AccountUserID), lastImportDate);
+                    gameNames = await _authService.GetMicrosoftUserGameNames(userAccountVW.AccountUserHash, userAccountVW.Token, Convert.ToUInt64(userAccountVW.AccountUserID));
                     break;
             }
-            
+
             var gameIDs = new List<int>();
             var maxBatchCount = 500;
             var batchCount = 0;
@@ -423,10 +433,11 @@ namespace GameStatsApp.Service
             }
 
             var accountTypeID = (int)userAccountVW.AccountTypeID;
-            var userList = _userRepo.GetUserLists(i => i.UserID == userID && i.AccountTypeID == accountTypeID).FirstOrDefault();
+            var userLists =  _userRepo.GetUserLists(i => i.UserID == userID).ToList();
+            var userList = userLists.FirstOrDefault(i => i.AccountTypeID == accountTypeID);
             if (userList == null) {
                 var userListName = string.Format("My {0} Games", ((AccountType)userAccountVW.AccountTypeID).ToString());
-                userList =  new UserList() { UserID = userID, Name = userListName, AccountTypeID = accountTypeID, Active = true, CreatedDate = DateTime.UtcNow };
+                userList =  new UserList() { UserID = userID, Name = userListName, AccountTypeID = accountTypeID, Active = true, SortOrder = userLists.Count() + 1, CreatedDate = DateTime.UtcNow };
                 _userRepo.SaveUserList(userList);
             }
 

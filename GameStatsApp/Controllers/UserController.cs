@@ -153,7 +153,7 @@ namespace GameStatsApp.Controllers
         }
         
         [HttpPost]
-        public async Task<ActionResult> ImportGames(int userAccountID, bool isImportAll)
+        public async Task<ActionResult> ImportGames(int userAccountID)
         {
             var success = false;
             List<string> errorMessages = null;
@@ -174,7 +174,7 @@ namespace GameStatsApp.Controllers
                     }
                     HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);
 
-                    await _userService.ImportGamesFromUserAccount(userID, userAccountVW, isImportAll);
+                    await _userService.ImportGames(userID, userAccountVW);
                     success = true;
 
                     if (importingUserAccounts.ContainsKey(userAccountID))
@@ -194,26 +194,17 @@ namespace GameStatsApp.Controllers
             return Json(new { success = success, errorMessages = errorMessages, isAuthExpired = isAuthExpired });
         }      
 
-        public async Task<ActionResult> MicrosoftAuthCallbackImportGames()
-        {
-            var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
-            var success = await MicrosoftAuthCallback(redirectUri);
-            TempData.Add("AuthSuccess", success);
-            TempData.Add("AuthAccountTypeID", (int)AccountType.Xbox);
-
-            return RedirectToAction("Index", "Home");
-        }
-
-        private async Task<bool> MicrosoftAuthCallback(string redirectUri)
+        public async Task<ActionResult> MicrosoftAuthCallback()
         {
             var success = false;
 
             try
             {
+                var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectUri").Value;
                 var code = Request.Query["code"].ToString();
                 if (!string.IsNullOrWhiteSpace(code))
                 {
-                    var tokenResponse = await _authService.Authenticate(code, redirectUri);
+                    var tokenResponse = await _authService.AuthenticateMicrosoft(code, redirectUri);
 
                     var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
                     _userService.SaveUserAccount(userID, (int)AccountType.Xbox, tokenResponse);
@@ -227,25 +218,19 @@ namespace GameStatsApp.Controllers
                 success = false;
             }   
 
-            return  success;
-        }
-
-        public async Task<ActionResult> SteamAuthCallbackImportGames()
-        {
-            var redirectUri = _config.GetSection("Auth").GetSection("Steam").GetSection("ImportGamesRedirectUri").Value;
-            var success = await SteamAuthCallback(redirectUri);
             TempData.Add("AuthSuccess", success);
-            TempData.Add("AuthAccountTypeID", (int)AccountType.Steam);
+            TempData.Add("AuthAccountTypeID", (int)AccountType.Xbox);
 
             return RedirectToAction("Index", "Home");
         }
 
-        private async Task<bool> SteamAuthCallback(string redirectUri)
+        public async Task<ActionResult> SteamAuthCallback()
         {
             var success = false;
 
             try
             {
+                var redirectUri = _config.GetSection("Auth").GetSection("Steam").GetSection("RedirectUri").Value;
                 var results = new Dictionary<string, string>();
                 foreach (var item in Request.Query)
                 {
@@ -267,7 +252,10 @@ namespace GameStatsApp.Controllers
                 success = false;
             }   
 
-            return  success;
+            TempData.Add("AuthSuccess", success);
+            TempData.Add("AuthAccountTypeID", (int)AccountType.Steam);
+
+            return RedirectToAction("Index", "Home");
         }        
 
         [HttpGet]

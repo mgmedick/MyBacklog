@@ -51,7 +51,7 @@
                 </ul>
             </div>                
         </div>
-        <user-list-games ref="userlistgames" :userlists="userlists" :userlistid="selectedItemID" :emptycoverimagepath="emptycoverimagepath" :useraccounts="useraccounts" :windowsliveauthurl="windowsliveauthurl" :steamauthurl="steamauthurl" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" @delete="onDelete"></user-list-games>           
+        <user-list-games ref="userlistgames" :userlists="userlists" :userlistid="selectedItemID" :emptycoverimagepath="emptycoverimagepath" :useraccounts="useraccounts" :microsoftauthurl="microsoftauthurl" :steamauthurl="steamauthurl" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" @delete="onDelete"></user-list-games>           
     </div>
 </template>
 <script>
@@ -62,7 +62,7 @@
             emptycoverimagepath: String,
             useraccounts: Array,
             steamauthurl: String,
-            windowsliveauthurl: String,
+            microsoftauthurl: String,
             authsuccess: Boolean,
             authaccounttypeid: Number
         },
