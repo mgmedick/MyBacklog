@@ -47,7 +47,7 @@
             </div>
         </div>  
         <div v-else>
-            <user-lists :userlists="indexvm.userLists" :emptycoverimagepath="indexvm.emptyCoverImagePath" :useraccounts="indexvm.userAccounts" :windowsliveauthurl="indexvm.windowsLiveAuthUrl" :authsuccess="indexvm.authSuccess" :authaccounttypeid="indexvm.authAccountTypeID"></user-lists>
+            <user-lists :userlists="indexvm.userLists" :emptycoverimagepath="indexvm.emptyCoverImagePath" :useraccounts="indexvm.userAccounts" :windowsliveauthurl="indexvm.windowsLiveAuthUrl" :steamauthurl="indexvm.steamAuthUrl" :authsuccess="indexvm.authSuccess" :authaccounttypeid="indexvm.authAccountTypeID"></user-lists>
         </div>   
         <div ref="welcomemodal" class="modal modal-lg" tabindex="-1">
             <div class="modal-dialog">

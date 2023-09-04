@@ -90,7 +90,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <import-games :useraccounts="useraccounts" :windowsliveauthurl="windowsliveauthurl" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" :isimporting="isImporting" @update:isimporting="onIsImportingUpdate"></import-games>
+                        <import-games :useraccounts="useraccounts" :windowsliveauthurl="windowsliveauthurl" :steamauthurl="steamauthurl" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" :isimporting="isImporting" @update:isimporting="onIsImportingUpdate"></import-games>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -143,6 +143,7 @@
             emptycoverimagepath: String,
             useraccounts: Array,
             windowsliveauthurl: String,
+            steamauthurl: String,
             authsuccess: Boolean,
             authaccounttypeid: Number
         },

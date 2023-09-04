@@ -179,6 +179,7 @@ namespace GameStatsApp.Service
         public void SaveUserAccount(int userID, int accountTypeID, TokenResponse tokenResponse)
         {
             var userAccount = _userRepo.GetUserAccounts(i => i.UserID == userID && i.AccountTypeID == accountTypeID).FirstOrDefault();
+            var userAccountTokens = new List<UserAccountToken>();
 
             if (userAccount == null)
             {
@@ -198,25 +199,31 @@ namespace GameStatsApp.Service
                 userAccount.ModifiedDate = DateTime.UtcNow;
             }
 
-            var userAccountTokens = new List<UserAccountToken>() {
-                new UserAccountToken() {
-                        TokenTypeID = (int)TokenType.Access,
-                        Token = tokenResponse.Token,
-                        IssuedDate = tokenResponse.IssuedDate,
-                        ExpireDate = tokenResponse.ExpireDate
-                    } 
+            if (!string.IsNullOrWhiteSpace(tokenResponse.Token))
+            {
+                userAccountTokens = new List<UserAccountToken>() {
+                    new UserAccountToken() {
+                            TokenTypeID = (int)TokenType.Access,
+                            Token = tokenResponse.Token,
+                            IssuedDate = tokenResponse.IssuedDate,
+                            ExpireDate = tokenResponse.ExpireDate
+                        } 
                 };
 
-            if (!string.IsNullOrWhiteSpace(tokenResponse.RefreshToken))
-            {
-                userAccountTokens.Add(new UserAccountToken() {
-                    TokenTypeID = (int)TokenType.Refresh,
-                    Token = tokenResponse.RefreshToken
-                });
+                if (!string.IsNullOrWhiteSpace(tokenResponse.RefreshToken))
+                {
+                    userAccountTokens.Add(new UserAccountToken() {
+                        TokenTypeID = (int)TokenType.Refresh,
+                        Token = tokenResponse.RefreshToken
+                    });
+                }
             }
-            
+
             _userRepo.SaveUserAccount(userAccount);
-            _userRepo.SaveUserAccountTokens(userAccount.ID, userAccountTokens);
+            
+            if (userAccountTokens.Any()) {
+                _userRepo.SaveUserAccountTokens(userAccount.ID, userAccountTokens);
+            }
         }
 
         public IEnumerable<UserListViewModel> GetUserLists (int userID)
@@ -375,7 +382,7 @@ namespace GameStatsApp.Service
             var redirectUrl = string.Empty;
             var userAccountVW = _userRepo.GetUserAccountViews(i => i.ID == userAccountID).FirstOrDefault();
             
-            if (userAccountVW.ExpireDate < DateTime.UtcNow && !string.IsNullOrWhiteSpace(userAccountVW.RefreshToken))
+            if (userAccountVW.ExpireDate.HasValue && userAccountVW.ExpireDate < DateTime.UtcNow && !string.IsNullOrWhiteSpace(userAccountVW.RefreshToken))
             {
                 var tokenResponse = await _authService.ReAuthenticate(userAccountVW.RefreshToken);
                 SaveUserAccount(userID, userAccountVW.AccountTypeID, tokenResponse);
@@ -390,11 +397,16 @@ namespace GameStatsApp.Service
             var gameNames = new List<string>();
             var lastImportDate = isImportAll ? null : userAccountVW.ImportLastRunDate;
 
-            if (userAccountVW.AccountTypeID == (int)AccountType.Xbox)
+            switch(userAccountVW.AccountTypeID)
             {
-                gameNames = await _authService.GetUserGameNames(userAccountVW.AccountUserHash, userAccountVW.Token, Convert.ToUInt64(userAccountVW.AccountUserID), lastImportDate);
+                case (int)AccountType.Steam:
+                    gameNames = await _authService.GetSteamUserGameNames(userAccountVW.AccountUserID, lastImportDate);
+                    break;           
+                case (int)AccountType.Xbox:
+                    gameNames = await _authService.GetUserGameNames(userAccountVW.AccountUserHash, userAccountVW.Token, Convert.ToUInt64(userAccountVW.AccountUserID), lastImportDate);
+                    break;
             }
-
+            
             var gameIDs = new List<int>();
             var maxBatchCount = 500;
             var batchCount = 0;

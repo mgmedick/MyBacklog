@@ -48,12 +48,14 @@ namespace GameStatsApp.Controllers
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var redirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("ImportGamesRedirectUri").Value;
-        
+                var steamRedirectUrl = _config.GetSection("Auth").GetSection("Steam").GetSection("ImportGamesRedirectUri").Value;
+      
                 indexVM.UserID = userID;
                 indexVM.Username = User.FindFirstValue(ClaimTypes.Name);
                 indexVM.UserLists = _userService.GetUserLists(userID).Where(i => i.Active).ToList();
                 indexVM.UserAccounts = _userService.GetUserAccounts(userID).ToList();
                 indexVM.WindowsLiveAuthUrl = _authService.GetWindowsLiveAuthUrl(redirectUrl);
+                indexVM.SteamAuthUrl = _authService.GetSteamAuthUrl(steamRedirectUrl);
                 indexVM.EmptyCoverImagePath = _config.GetSection("SiteSettings").GetSection("EmptyCoverImagePath").Value;
 
                 if (TempData["AuthSuccess"] != null) {

@@ -58,6 +58,7 @@
         name: "ImportGames",
         props: {
             useraccounts: Array,
+            steamauthurl: String,
             windowsliveauthurl: String,
             authsuccess: Boolean,
             authaccounttypeid: Number
@@ -146,6 +147,9 @@
                 var result = '';
 
                 switch (accountTypeID) {
+                    case 1:
+                        result = this.steamauthurl;
+                        break;
                     case 2:
                         result = this.windowsliveauthurl;
                         break;

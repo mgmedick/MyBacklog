@@ -33,6 +33,110 @@ namespace GameStatsApp.Service
             _config = config;
         }
 
+        #region SteamAuth
+        public string GetSteamAuthUrl(string redirectUri)
+        {
+            var baseUrl = string.Format("https://steamcommunity.com/openid/login");
+
+            var parameters = new Dictionary<string,string>{
+                {"openid.ns", "http://specs.openid.net/auth/2.0"},
+                {"openid.claimed_id", "http://specs.openid.net/auth/2.0/identifier_select"},
+                {"openid.identity", "http://specs.openid.net/auth/2.0/identifier_select"},
+                {"openid.return_to", redirectUri},
+                {"openid.realm", "https://localhost:5000"},
+                {"openid.mode", "checkid_setup"},
+            };
+
+            var authUrl = QueryHelpers.AddQueryString(baseUrl, parameters);
+            
+            return authUrl;
+        }
+
+        public async Task<TokenResponse> AuthenticateSteam(Dictionary<string, string> results)
+        {
+            TokenResponse result = null;
+            var isValid = await ValidateSteam(results);
+
+            if (isValid)
+            {
+                var steamID = new Uri(results["openid.claimed_id"]).Segments.LastOrDefault();      
+                if(!string.IsNullOrWhiteSpace(steamID))
+                {
+                    result = new TokenResponse() { AccountUserID = steamID };
+                }
+            }
+
+            return result;
+        }    
+
+        public async Task<bool> ValidateSteam(Dictionary<string, string> parameters)
+        {
+            bool result = false;
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                parameters["openid.mode"] = "check_authentication";
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://steamcommunity.com/openid/login") { Content = new FormUrlEncodedContent(parameters) };
+
+                using (var response = await client.SendAsync(request))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        result = dataString.Contains("true");
+                    }
+                }
+            }
+
+            return result;
+        }    
+
+        public async Task<List<string>> GetSteamUserGameNames(string steamID, DateTime? importLastRunDate)
+        {
+            var results = new List<string>();
+            var items = await GetSteamUserInventory(steamID);
+            results = items.Select(obj => (string)obj["name"]).ToList();
+
+            results = results.GroupBy(g => new { g })
+                .Select(i => i.First())
+                .ToList();
+                                      
+            return results;
+        }       
+
+        public async Task<JArray> GetSteamUserInventory(string steamID)
+        {
+            var results = new JArray();
+
+            using (HttpClient client = new HttpClient())
+            {
+                var requestUrl = string.Format("http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/");
+
+                var clientID = _config.GetSection("Auth").GetSection("Steam").GetSection("ClientID").Value;           
+                var parameters = new Dictionary<string, string> {
+                    {"key", clientID },
+                    {"steamid", steamID },
+                    {"include_appinfo", "true"},
+                    {"format", "json" },                       
+                };
+                requestUrl = QueryHelpers.AddQueryString(requestUrl, parameters);
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+
+                using (var response = await client.SendAsync(request))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        var data = JObject.Parse(dataString);
+                        results = (JArray)data["response"]["games"];
+                    }
+                }
+            }
+
+            return results;
+        }           
+        #endregion
+        
         #region MicrosoftAuth
         public string GetWindowsLiveAuthUrl(string redirectUri)
         {

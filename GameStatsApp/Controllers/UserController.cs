@@ -163,7 +163,7 @@ namespace GameStatsApp.Controllers
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var userAccountVW = await _userService.GetRefreshedUserAccount(userID, userAccountID);
-                isAuthExpired = userAccountVW.ExpireDate < DateTime.UtcNow;
+                isAuthExpired = userAccountVW.ExpireDate.HasValue && userAccountVW.ExpireDate < DateTime.UtcNow;
 
                 if (!isAuthExpired)
                 {
@@ -175,7 +175,6 @@ namespace GameStatsApp.Controllers
                     HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);
 
                     await _userService.ImportGamesFromUserAccount(userID, userAccountVW, isImportAll);
-                    Thread.Sleep(TimeSpan.FromMilliseconds(10000));
                     success = true;
 
                     if (importingUserAccounts.ContainsKey(userAccountID))
@@ -224,12 +223,52 @@ namespace GameStatsApp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "MicrosoftAuthCallbackImportGames");
+                _logger.Error(ex, "MicrosoftAuthCallback");
                 success = false;
             }   
 
             return  success;
         }
+
+        public async Task<ActionResult> SteamAuthCallbackImportGames()
+        {
+            var redirectUri = _config.GetSection("Auth").GetSection("Steam").GetSection("ImportGamesRedirectUri").Value;
+            var success = await SteamAuthCallback(redirectUri);
+            TempData.Add("AuthSuccess", success);
+            TempData.Add("AuthAccountTypeID", (int)AccountType.Steam);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        private async Task<bool> SteamAuthCallback(string redirectUri)
+        {
+            var success = false;
+
+            try
+            {
+                var results = new Dictionary<string, string>();
+                foreach (var item in Request.Query)
+                {
+                    results.Add(item.Key, item.Value);
+                }
+
+                if (results.Any())
+                {
+                    var tokenResponse = await _authService.AuthenticateSteam(results);
+                    var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                    _userService.SaveUserAccount(userID, (int)AccountType.Steam, tokenResponse);
+
+                    success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "SteamAuthCallback");
+                success = false;
+            }   
+
+            return  success;
+        }        
 
         [HttpGet]
         public ActionResult GetCompletedImportGames()

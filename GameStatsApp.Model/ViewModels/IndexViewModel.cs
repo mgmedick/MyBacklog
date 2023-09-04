@@ -21,6 +21,7 @@ namespace GameStatsApp.Model.ViewModels
         public bool ShowWelcome { get; set; }
         public List<UserAccountViewModel> UserAccounts { get; set; }    
         public string WindowsLiveAuthUrl { get; set; }  
+        public string SteamAuthUrl { get; set; }  
         public bool? AuthSuccess { get; set; }
         public int? AuthAccountTypeID { get; set; }
     }

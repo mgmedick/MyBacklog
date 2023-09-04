@@ -4,17 +4,29 @@
             <div class="position-absolute top-0 bottom-0 start-0 end-0 pe-3" style="width: 280px; height: 100vh;">
                 <ul class="nav nav-pills flex-column mb-auto">
                     <li class="nav-item">
-                        <a @click="selectedItemID = 0" href="#" class="nav-link text-dark" :class="{ 'active' : selectedItemID == 0 }">
-                            <font-awesome-icon icon="fa-solid fa-layer-group" size="lg" class="me-3"/>
-                            <span>All Games</span>
+                        <a @click="selectedItemID = 0" href="#/" class="nav-link text-dark" :class="{ 'active' : selectedItemID == 0 }">
+                            <div class="row no-gutters">
+                                <div class="col-2">
+                                    <font-awesome-icon icon="fa-solid fa-layer-group" size="lg" class="me-3"/>
+                                </div>
+                                <div class="col">
+                                    <span>All Games</span>
+                                </div>
+                            </div>
                         </a>
                     </li>                
                     <li v-for="(userList, userListIndex) in userlists" key="userList.id" class="nav-item">
                         <a @click="selectedItemID = userList.id" href="#" class="nav-link text-dark" :class="{ 'active' : selectedItemID == userList.id }">
-                            <font-awesome-icon v-if="userList.defaultListID" :icon="getDefaultIconClass(userList.defaultListID)" size="lg" class="me-3"/>
-                            <font-awesome-icon v-else-if="userList.accountTypeID" :icon="getAccountIconClass(userList.accountTypeID)" size="lg" class="me-3"/>
-                            <font-awesome-icon v-else icon="fa-solid fa-list" size="lg" class="me-3"/>
-                            <span>{{ userList.name }}</span>
+                            <div class="row no-gutters">
+                                <div class="col-2">
+                                    <font-awesome-icon v-if="userList.defaultListID" :icon="getDefaultIconClass(userList.defaultListID)" size="lg" class="me-3"/>
+                                    <font-awesome-icon v-else-if="userList.accountTypeID" :icon="getAccountIconClass(userList.accountTypeID)" size="lg" class="me-3"/>
+                                    <font-awesome-icon v-else icon="fa-solid fa-list" size="lg" class="me-3"/>
+                                </div>
+                                <div class="col">
+                                    <span>{{ userList.name }}</span>
+                                </div>
+                            </div>
                         </a>
                     </li>
                 </ul>
@@ -39,7 +51,7 @@
                 </ul>
             </div>                
         </div>
-        <user-list-games ref="userlistgames" :userlists="userlists" :userlistid="selectedItemID" :emptycoverimagepath="emptycoverimagepath" :useraccounts="useraccounts" :windowsliveauthurl="windowsliveauthurl" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" @delete="onDelete"></user-list-games>           
+        <user-list-games ref="userlistgames" :userlists="userlists" :userlistid="selectedItemID" :emptycoverimagepath="emptycoverimagepath" :useraccounts="useraccounts" :windowsliveauthurl="windowsliveauthurl" :steamauthurl="steamauthurl" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" @delete="onDelete"></user-list-games>           
     </div>
 </template>
 <script>
@@ -49,6 +61,7 @@
             userlists: Array,
             emptycoverimagepath: String,
             useraccounts: Array,
+            steamauthurl: String,
             windowsliveauthurl: String,
             authsuccess: Boolean,
             authaccounttypeid: Number
