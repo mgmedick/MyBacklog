@@ -1,7 +1,7 @@
 ﻿<template>
     <div class="mx-auto" style="max-width:400px;">
         <div class="mb-3">
-            <font-awesome-icon icon="fa-solid fa-circle-info" class="text-secondary" size="xl" data-bs-toggle="tooltip" data-bs-title="You can close this window at any time while importing"/>
+            <font-awesome-icon icon="fa-solid fa-circle-info" class="text-secondary" size="xl" data-bs-toggle="tooltip" data-bs-title="Games will be imported into their associated list. Duplicate games will not be created. You can close this window at any time while importing."/>
         </div>
         <div class="row g-2 justify-content-center mb-3">      
             <button type="button" class="btn btn-outline-primary d-flex justify-content-center align-items-center" @click="onImportGamesClick($event, 1)" :disabled="importingUserAccountIDs[useraccounts.find(i => i.accountTypeID == 1)?.id]">

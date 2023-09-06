@@ -1,30 +1,30 @@
 ﻿<template>
     <div class="games-container">
-        <div class="d-flex align-items-center mb-3">
-            <div class="me-2">
-                <div class="btn btn-secondary p-2" tabindex="-1" role="button">
-                    <font-awesome-layers v-if="isImporting" class="fa-2xl" @click="onImportClick" style="width: 35px;">
-                        <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-5" style="color: #adb5bd; z-index: 9999;"/>
-                        <font-awesome-icon icon="fa-solid fa-cloud"/>
-                    </font-awesome-layers>
-                    <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" size="2xl" @click="onImportClick"/>   
-                </div>      
-            </div>              
-            <div class="d-flex ms-auto">   
-                <div class="btn-group me-1" role="group">
-                    <button type="button" class="btn btn-secondary p-2" @click="onOrderByDescClick"><font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-arrow-down-wide-short" size="xl"/><font-awesome-icon v-else icon="fa-solid fa-arrow-up-wide-short" size="xl"/></button>
-                    <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split p-2" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="visually-hidden">Toggle Dropdown</span>
-                    </button>                    
-                    <ul class="dropdown-menu">
-                        <li><a href="#/" @click="onOrderByOptionClick($event, 0)" class="dropdown-item" :class="{ 'active' : orderByID == 0 }">Date Added</a></li>
-                        <li><a href="#/" @click="onOrderByOptionClick($event, 1)" class="dropdown-item" :class="{ 'active' : orderByID == 1 }">Name</a></li>
-                    </ul>
-                </div>  
-                <input type="text" class="form-control" autocomplete="off" v-model="filterText" aria-describedby="spnUserNameErrors" placeholder="Filter games">
-            </div>
-        </div>
         <div class="container m-0 p-0">
+            <div class="d-flex align-items-center mb-3">
+                <div class="me-2">
+                    <div class="btn btn-secondary p-2" tabindex="-1" role="button">
+                        <font-awesome-layers v-if="isImporting" class="fa-2xl" @click="onImportClick" style="width: 35px;">
+                            <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-5" style="color: #adb5bd; z-index: 9999;"/>
+                            <font-awesome-icon icon="fa-solid fa-cloud"/>
+                        </font-awesome-layers>
+                        <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" size="2xl" @click="onImportClick"/>   
+                    </div>      
+                </div>              
+                <div class="d-flex ms-auto">   
+                    <div class="btn-group me-1" role="group">
+                        <button type="button" class="btn btn-secondary p-2" @click="onOrderByDescClick"><font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-arrow-down-wide-short" size="xl"/><font-awesome-icon v-else icon="fa-solid fa-arrow-up-wide-short" size="xl"/></button>
+                        <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split p-2" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>                    
+                        <ul class="dropdown-menu">
+                            <li><a href="#/" @click="onOrderByOptionClick($event, 0)" class="dropdown-item" :class="{ 'active' : orderByID == 0 }">Date Added</a></li>
+                            <li><a href="#/" @click="onOrderByOptionClick($event, 1)" class="dropdown-item" :class="{ 'active' : orderByID == 1 }">Name</a></li>
+                        </ul>
+                    </div>  
+                    <input type="text" class="form-control" autocomplete="off" v-model="filterText" aria-describedby="spnUserNameErrors" placeholder="Filter games">
+                </div>
+            </div>            
             <div v-if="loading">
                 <div class="row g-3">
                     <div class="col-lg-2 col-md-3 col-6">
@@ -110,7 +110,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" @click="onRemoveGameClick($event, game.id)">Continue</button>
+                        <button type="button" class="btn btn-primary" @click="onRemoveGameClick($event, game)">Continue</button>
                     </div>
                 </div>
             </div>
@@ -281,8 +281,8 @@
                     that.removeModal.show();
                 }
             },
-            onRemoveGameClick(e, gameID) {
-                this.removeGameFromAllUserLists(gameID);
+            onRemoveGameClick(e, game) {
+                this.removeGameFromAllUserLists(game);
             },            
             onUserListClick(e, userList, game) {
                 var el = e.target;
@@ -341,8 +341,9 @@
             }, 
             onIsImportingUpdate(e) {
                 this.isImporting = e;
+
                 if (!this.isImporting) {
-                    this.loadData()
+                    this.loadData();
                 }
             },     
             sortGames() {
@@ -393,8 +394,10 @@
                                 that.sortGames();
                             }
 
-                            that.searchModal.hide()
-                            successToast("Added <strong>" + game.name + "</strong> to <strong>" + userList.name + "</strong>");
+                            that.searchModal.hide();
+                            
+                            var userList = that.userlists.find(i => i.id == userListID);
+                            successToast("Added <strong>" + result.name + "</strong> to <strong>" + userList.name + "</strong>");
                         } else {       
                             res.data.errorMessages.forEach(errorMsg => {
                                 errorToast(errorMsg);                           
@@ -437,8 +440,8 @@
                             game.userListIDs = game.userListIDs.filter(i => i != userList.id);
 
                             if (that.userlistid == userList.id) {
-                                that.games = that.games.filter(i => i.id != gameID);            
-                                that.allgames = that.allgames.filter(i => i.id != gameID);  
+                                that.games = that.games.filter(i => i.id != game.id);            
+                                that.allgames = that.allgames.filter(i => i.id != game.id);  
                             }
 
                             successToast("Removed <strong>" + game.name + "</strong> from <strong>" + userList.name + "</strong>");
@@ -450,16 +453,14 @@
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },
-            removeGameFromAllUserLists(gameID) {
+            removeGameFromAllUserLists(game) {
                 var that = this;
 
-                return axios.post('/User/RemoveGameFromAllUserLists', null,{ params: { gameID: gameID } })
+                return axios.post('/User/RemoveGameFromAllUserLists', null,{ params: { gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {    
-                            var game = that.games.find(i => i.id == gameID);
-
-                            that.games = that.games.filter(i => i.id != gameID);            
-                            that.allgames = that.allgames.filter(i => i.id != gameID);
+                            that.games = that.games.filter(i => i.id != game.id);            
+                            that.allgames = that.allgames.filter(i => i.id != game.id);
                                                                
                             successToast("Removed <strong>" + game.name + "</strong> from <strong>all lists</strong>");
                         } else {

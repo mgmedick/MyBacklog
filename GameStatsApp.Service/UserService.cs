@@ -76,7 +76,7 @@ namespace GameStatsApp.Service
                 SupportEmail = _config.GetSection("SiteSettings").GetSection("FromEmail").Value
             };
 
-            await _emailService.SendEmailTemplate(email, "Thanks for registering at gamestatsapp.com", Template.ConfirmRegistration.ToString(), confirmRegistration);
+            await _emailService.SendEmailTemplate(email, "Thanks for registering at mybacklog.io", Template.ConfirmRegistration.ToString(), confirmRegistration);
         }
 
         public async Task SendResetPasswordEmail(string email)

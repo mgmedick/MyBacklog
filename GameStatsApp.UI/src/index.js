@@ -12,7 +12,7 @@ import './images/settings_demo_md.jpg';
 import './images/settings_demo_xs.jpg';
 import './images/emptycover.jpg';
 import './images/nocover.jpg';
-import './fonts/gamepad-solid.svg';
+import './fonts/cube-solid.svg';
 
 ComponentLoader.loadComponents();
 

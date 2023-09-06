@@ -4,7 +4,7 @@
             <div class="position-absolute top-0 bottom-0 start-0 end-0 pe-3" style="width: 280px; height: 100vh;">
                 <ul class="nav nav-pills flex-column mb-auto">
                     <li class="nav-item">
-                        <a @click="selectedItemID = 0" href="#/" class="nav-link text-dark" :class="{ 'active' : selectedItemID == 0 }">
+                        <a @click="onUserListClick(0)" href="#/" class="nav-link text-dark" :class="{ 'active' : selectedItemID == 0 }">
                             <div class="row no-gutters">
                                 <div class="col-2">
                                     <font-awesome-icon icon="fa-solid fa-layer-group" size="lg" class="me-3"/>
@@ -16,7 +16,7 @@
                         </a>
                     </li>                
                     <li v-for="(userList, userListIndex) in userlists" key="userList.id" class="nav-item">
-                        <a @click="selectedItemID = userList.id" href="#" class="nav-link text-dark" :class="{ 'active' : selectedItemID == userList.id }">
+                        <a @click="onUserListClick(userList.id)" href="#" class="nav-link text-dark" :class="{ 'active' : selectedItemID == userList.id }">
                             <div class="row no-gutters">
                                 <div class="col-2">
                                     <font-awesome-icon v-if="userList.defaultListID" :icon="getDefaultIconClass(userList.defaultListID)" size="lg" class="me-3"/>
@@ -43,10 +43,10 @@
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="width: 100%;">
                     <li>
-                        <a @click="selectedItemID = 0" class="dropdown-item" :class="{ 'active' : selectedItemID == 0 }" href="#/" data-toggle="pill">All Games</a>
+                        <a @click="onUserListClick(0)" class="dropdown-item" :class="{ 'active' : selectedItemID == 0 }" href="#/" data-toggle="pill">All Games</a>
                     </li>   
                     <li v-for="(userList, userListIndex) in userlists" :key="userList.id">
-                        <a @click="selectedItemID = userList.id" class="dropdown-item" :class="{ 'active' : selectedItemID == userList.id }" href="#/" data-toggle="pill">{{ userList.name }}</a>
+                        <a @click="onUserListClick(userList.id)" class="dropdown-item" :class="{ 'active' : selectedItemID == userList.id }" href="#/" data-toggle="pill">{{ userList.name }}</a>
                     </li>                 
                 </ul>
             </div>                
@@ -68,7 +68,7 @@
         },
         data: function () {
             return {
-                selectedItemID: 0,
+                selectedItemID: sessionStorage.getItem('selectedUserListID') ?? this.userlists[0].id,
                 successMessages: [],
                 errorMessages: []
             };
@@ -76,12 +76,15 @@
         watch: {},
         created: function () {
             var that = this;
-            //this.selectedItemID = this.userlists[0].id;
         },
         mounted: function() {
             var that = this;      
         },
         methods: {
+            onUserListClick(userListID) {
+                this.selectedItemID = userListID;
+                sessionStorage.setItem('selectedUserListID', userListID.toString());
+            },
             getDefaultIconClass: function (id) {
                 var iconClass = '';
 

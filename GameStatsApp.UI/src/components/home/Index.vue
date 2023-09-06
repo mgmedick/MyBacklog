@@ -4,7 +4,7 @@
             <div class="text-center mb-3">
                 <h2>Welcome to GameStatsApp</h2>
                 <div>
-                    <span>A tool to keep track of your games and progress</span>
+                    <span>A tool to manage your games and keep track of your progress</span>
                 </div>
             </div>
             <div id="carouselExampleDark" class="carousel carousel-dark"> 

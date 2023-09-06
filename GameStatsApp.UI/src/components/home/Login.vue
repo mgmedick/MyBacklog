@@ -40,7 +40,7 @@
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, helpers } from '@vuelidate/validators';
-    import { Modal, Toast } from 'bootstrap';
+    import { Modal } from 'bootstrap';
     
     const { withAsync } = helpers;
 

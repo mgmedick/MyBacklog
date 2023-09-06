@@ -2,7 +2,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="/" draggable="false">
-                <font-awesome-icon icon="fa-solid fa-gamepad" class="me-2" />
+                <font-awesome-icon icon="fa-solid fa-cube" class="me-2" />
                 MyBacklog
             </a>
             <button class="navbar-toggler" type="button" @click="toggleNavbar = !toggleNavbar" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">

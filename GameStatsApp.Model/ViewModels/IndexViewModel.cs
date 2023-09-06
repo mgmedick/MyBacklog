@@ -20,7 +20,7 @@ namespace GameStatsApp.Model.ViewModels
         public string EmptyCoverImagePath { get; set; }
         public bool ShowWelcome { get; set; }
         public List<UserAccountViewModel> UserAccounts { get; set; }    
-        public string MicrosoftLiveAuthUrl { get; set; }  
+        public string MicrosoftAuthUrl { get; set; }  
         public string SteamAuthUrl { get; set; }  
         public bool? AuthSuccess { get; set; }
         public int? AuthAccountTypeID { get; set; }

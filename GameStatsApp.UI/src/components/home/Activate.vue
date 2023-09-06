@@ -54,6 +54,7 @@
 <script>
     import { getFormData, errorToast } from '../../js/common.js';
     import axios from 'axios';
+    import { Modal } from 'bootstrap';
     import useVuelidate from '@vuelidate/core';
     import { required, helpers, sameAs } from '@vuelidate/validators';
     
