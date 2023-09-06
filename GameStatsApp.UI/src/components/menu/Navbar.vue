@@ -95,10 +95,10 @@
                             if (Object.keys(results).length > 0) {
                                 Object.keys(importingUserAccountIDs).forEach(userAccountID => {
                                     if (results.hasOwnProperty(userAccountID)) {
-                                        if (results[userAccountID]) {
-                                            successToast("Successfuly Imported " + importingUserAccountIDs[userAccountID].accountTypeName + " games");
+                                        if (results[userAccountID].item1) {
+                                            successToast("Imported <strong>" + results[userAccountID].item2 + "</strong> new games into <strong>" + importingUserAccountIDs[userAccountID].userListName + "</strong>");
                                         } else {
-                                            errorToast("Error importing " + importingUserAccountIDs[userAccountID].accountTypeName  + "games");
+                                            errorToast("Error importing into <strong>" + importingUserAccountIDs[userAccountID].userListName  + "</strong>");
                                         }
 
                                         delete importingUserAccountIDs[userAccountID];

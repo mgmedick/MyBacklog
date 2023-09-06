@@ -1,7 +1,7 @@
 ﻿<template>
     <div>
         <div class="show-lg position-relative">
-            <div class="position-absolute top-0 bottom-0 start-0 end-0 pe-3" style="width: 280px; height: 100vh;">
+            <div class="position-absolute top-0 bottom-0 start-0 end-0 pe-3" style="width: 280px;">
                 <ul class="nav nav-pills flex-column mb-auto">
                     <li class="nav-item">
                         <a @click="onUserListClick(0)" href="#/" class="nav-link text-dark" :class="{ 'active' : selectedItemID == 0 }">
@@ -20,7 +20,7 @@
                             <div class="row no-gutters">
                                 <div class="col-2">
                                     <font-awesome-icon v-if="userList.defaultListID" :icon="getDefaultIconClass(userList.defaultListID)" size="lg" class="me-3"/>
-                                    <font-awesome-icon v-else-if="userList.accountTypeID" :icon="getAccountIconClass(userList.accountTypeID)" size="lg" class="me-3"/>
+                                    <font-awesome-icon v-else-if="userList.userAccountID" :icon="getAccountIconClass(userList.userAccountID)" size="lg" class="me-3"/>
                                     <font-awesome-icon v-else icon="fa-solid fa-list" size="lg" class="me-3"/>
                                 </div>
                                 <div class="col">
@@ -37,7 +37,7 @@
                 <button class="btn dropdown-toggle btn-primary d-flex align-items-center" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
                     <font-awesome-icon v-if="selectedItemID == 0" icon="fa-solid fa-layer-group" size="lg"/>
                     <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.defaultListID" :icon="getDefaultIconClass(userlists.find(i => i.id == selectedItemID)?.defaultListID)" size="lg"/>
-                    <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.accountTypeID" :icon="getAccountIconClass(userlists.find(i => i.id == selectedItemID)?.accountTypeID)" size="lg"/>
+                    <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.userAccountID" :icon="getAccountIconClass(userlists.find(i => i.id == selectedItemID)?.userAccountID)" size="lg"/>
                     <font-awesome-icon v-else icon="fa-solid fa-list" size="lg"/>
                     <span class="mx-auto">{{ selectedItemID == 0 ? 'All Games' : userlists.find(i => i.id == selectedItemID)?.name }}</span>
                 </button>
@@ -68,7 +68,7 @@
         },
         data: function () {
             return {
-                selectedItemID: sessionStorage.getItem('selectedUserListID') ?? this.userlists[0].id,
+                selectedItemID: sessionStorage.getItem('selectedUserListID') ?? 0,
                 successMessages: [],
                 errorMessages: []
             };
@@ -104,8 +104,9 @@
             },   
             getAccountIconClass: function (id) {
                 var iconClass = '';
+                var accountTypeID = this.useraccounts.find(i => i.id == id).accountTypeID;
 
-                switch (id) {
+                switch (accountTypeID) {
                     case 1:
                         iconClass = 'fa-brands fa-steam';
                         break;

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-
 namespace GameStatsApp.Model.Data
 {
     public class UserAccountView
@@ -10,12 +9,13 @@ namespace GameStatsApp.Model.Data
         public int ID { get; set; }
         public int UserID { get; set; }
         public int AccountTypeID { get; set; }
-        public string AccountTypeName { get; set; }
         public string AccountUserID { get; set; }
         public string AccountUserHash { get; set; }
         public string Token { get; set; }
         public DateTime? ExpireDate { get; set; }
         public string RefreshToken { get; set; }
+        public int UserListID { get; set; }
+        public string UserListName { get; set; }
         public DateTime? ImportLastRunDate { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }

@@ -1,8 +1,5 @@
 ﻿<template>
     <div class="mx-auto" style="max-width:400px;">
-        <div class="mb-3">
-            <font-awesome-icon icon="fa-solid fa-circle-info" class="text-secondary" size="xl" data-bs-toggle="tooltip" data-bs-title="Games will be imported into their associated list. Duplicate games will not be created. You can close this window at any time while importing."/>
-        </div>
         <div class="row g-2 justify-content-center mb-3">      
             <button type="button" class="btn btn-outline-primary d-flex justify-content-center align-items-center" @click="onImportGamesClick($event, 1)" :disabled="importingUserAccountIDs[useraccounts.find(i => i.accountTypeID == 1)?.id]">
                 <font-awesome-icon icon="fa-brands fa-steam" size="xl" style="color: #0a3169;"/>
@@ -28,6 +25,9 @@
                 </div>
                 <font-awesome-icon v-if="importingUserAccountIDs[useraccounts.find(i => i.accountTypeID == 2)?.id]" icon="fa-solid fa-spinner" spin size="xl"/>
             </button>
+        </div>
+        <div class="text-center text-muted">
+            <small>You can close this window at any time while importing</small>
         </div>
     </div>
 </template>
@@ -81,8 +81,8 @@
             }
         },        
         methods: {                    
-            onImportGamesClick(e, accountTypeID, userAccount) {
-                this.importGames(accountTypeID, userAccount)
+            onImportGamesClick(e, accountTypeID) {
+                this.importGames(accountTypeID)
             },
             importGames(accountTypeID) {
                 var that = this;
@@ -90,7 +90,7 @@
                 
                 if (userAccount) {
                     if (!that.importingUserAccountIDs.hasOwnProperty(userAccount.id)) {
-                        that.importingUserAccountIDs[userAccount.id] = { accountTypeName: userAccount.accountTypeName };
+                        that.importingUserAccountIDs[userAccount.id] = { userListName: userAccount.userListName };
                     }
 
                     axios.post('/User/ImportGames', null,{ params: { userAccountID: userAccount?.id } }).then((res) => {
@@ -99,10 +99,9 @@
                             location.href = redirectUrl;
                         } else {
                             if (res.data.success) {
-                                //location.href = '/';
-                                successToast("Imported " + userAccount.accountTypeName + " games");
+                                successToast("Imported <strong>" + res.data.count + "</strong> new games into <strong>" + userAccount.userListName + "</strong>");
                             } else {
-                                errorToast("Error importing " + userAccount.accountTypeName + " games");                                               
+                                errorToast("Error importing into <strong>" + userAccount.userListName + "</strong>");                                               
                             }
                         }                                                                                                                           
                         delete that.importingUserAccountIDs[userAccount.id];

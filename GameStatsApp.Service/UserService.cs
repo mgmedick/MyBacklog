@@ -180,6 +180,7 @@ namespace GameStatsApp.Service
         {
             var userAccount = _userRepo.GetUserAccounts(i => i.UserID == userID && i.AccountTypeID == accountTypeID).FirstOrDefault();
             var userAccountTokens = new List<UserAccountToken>();
+            UserList userList = null;
 
             if (userAccount == null)
             {
@@ -189,6 +190,14 @@ namespace GameStatsApp.Service
                     AccountTypeID = accountTypeID,
                     AccountUserID = tokenResponse.AccountUserID,
                     AccountUserHash = tokenResponse.AccountUserHash,                   
+                    CreatedDate = DateTime.UtcNow
+                };
+
+                userList =  new UserList()
+                { 
+                    UserID = userID,
+                    Name = string.Format("My {0} Games", ((AccountType)userAccount.AccountTypeID).ToString()),
+                    Active = true,
                     CreatedDate = DateTime.UtcNow
                 };
             }
@@ -221,8 +230,15 @@ namespace GameStatsApp.Service
 
             _userRepo.SaveUserAccount(userAccount);
             
-            if (userAccountTokens.Any()) {
+            if (userAccountTokens.Any())
+            {
                 _userRepo.SaveUserAccountTokens(userAccount.ID, userAccountTokens);
+            }
+
+            if (userList != null)
+            {
+                userList.UserAccountID = userAccount.ID;
+                _userRepo.SaveUserList(userList);
             }
         }
 
@@ -230,7 +246,7 @@ namespace GameStatsApp.Service
         { 
             var userLists = _userRepo.GetUserLists(i => i.UserID == userID)
                                     .Select(i => new UserListViewModel(i))
-                                    .OrderBy(i => i.SortOrder)
+                                    .OrderBy(i => i.SortOrder ?? i.ID)
                                     .ToList();
 
             return userLists;
@@ -403,7 +419,7 @@ namespace GameStatsApp.Service
             return userAccountVW;
         }
         
-        public async Task ImportGames(int userID, UserAccountView userAccountVW)
+        public async Task<int> ImportGames(int userID, UserAccountView userAccountVW)
         {
             var gameNames = new List<string>();
 
@@ -432,18 +448,9 @@ namespace GameStatsApp.Service
                 batchCount += maxBatchCount;
             }
 
-            var accountTypeID = (int)userAccountVW.AccountTypeID;
-            var userLists =  _userRepo.GetUserLists(i => i.UserID == userID).ToList();
-            var userList = userLists.FirstOrDefault(i => i.AccountTypeID == accountTypeID);
-            if (userList == null) {
-                var userListName = string.Format("My {0} Games", ((AccountType)userAccountVW.AccountTypeID).ToString());
-                userList =  new UserList() { UserID = userID, Name = userListName, AccountTypeID = accountTypeID, Active = true, SortOrder = userLists.Count() + 1, CreatedDate = DateTime.UtcNow };
-                _userRepo.SaveUserList(userList);
-            }
-
-            var existingGameIDs = _userRepo.GetUserListGameViews(i=>i.UserListID == userList.ID).Select(i => i.ID).ToList();
+            var existingGameIDs = _userRepo.GetUserListGameViews(i=>i.UserListID == userAccountVW.UserListID).Select(i => i.ID).ToList();
             var userListGames = gameIDs.Where(i => !existingGameIDs.Contains(i))
-                                           .Select(i => new UserListGame() { UserListID = userList.ID, GameID = i })
+                                           .Select(i => new UserListGame() { UserListID = userAccountVW.UserListID, GameID = i })
                                            .ToList();
 
             if (userListGames.Any())
@@ -452,7 +459,9 @@ namespace GameStatsApp.Service
             }
 
             userAccountVW.ImportLastRunDate = DateTime.UtcNow;
-            _userRepo.SaveUserAccount(userAccountVW.ConvertToUserAccount());       
+            _userRepo.SaveUserAccount(userAccountVW.ConvertToUserAccount()); 
+
+            return userListGames.Count();
         }
         
         //jqvalidate

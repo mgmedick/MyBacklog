@@ -158,6 +158,7 @@ namespace GameStatsApp.Controllers
             var success = false;
             List<string> errorMessages = null;
             var isAuthExpired = false;
+            var count = 0;
 
             try
             {
@@ -167,20 +168,21 @@ namespace GameStatsApp.Controllers
 
                 if (!isAuthExpired)
                 {
-                    var importingUserAccounts = HttpContext.Session.Get<Dictionary<int,bool?>>("ImportingUserAccounts") ?? new Dictionary<int,bool?>();  
+                    var importingUserAccounts = HttpContext.Session.Get<Dictionary<int,Tuple<bool?, int>>>("ImportingUserAccounts") ?? new Dictionary<int,Tuple<bool?, int>>();  
                     if (!importingUserAccounts.ContainsKey(userAccountID))
                     {
-                        importingUserAccounts.Add(userAccountID, (bool?)null);
+                        importingUserAccounts.Add(userAccountID, new Tuple<bool?, int>((bool?)null, 0));
                     }
-                    HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);
+                    HttpContext.Session.Set<Dictionary<int, Tuple<bool?, int>>>("ImportingUserAccounts", importingUserAccounts);
 
-                    await _userService.ImportGames(userID, userAccountVW);
+                    count = await _userService.ImportGames(userID, userAccountVW);
+                    Thread.Sleep(TimeSpan.FromMilliseconds(10000));
                     success = true;
 
                     if (importingUserAccounts.ContainsKey(userAccountID))
                     {
-                        importingUserAccounts[userAccountID] = success;
-                        HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);
+                        importingUserAccounts[userAccountID] = new Tuple<bool?, int>(success, count);
+                        HttpContext.Session.Set<Dictionary<int, Tuple<bool?, int>>>("ImportingUserAccounts", importingUserAccounts);
                     }
                 }
             }
@@ -191,7 +193,7 @@ namespace GameStatsApp.Controllers
                 errorMessages = new List<string>() { "Error importing games" };
             }
 
-            return Json(new { success = success, errorMessages = errorMessages, isAuthExpired = isAuthExpired });
+            return Json(new { success = success, errorMessages = errorMessages, isAuthExpired = isAuthExpired, count = count });
         }      
 
         public async Task<ActionResult> MicrosoftAuthCallback()
@@ -261,13 +263,13 @@ namespace GameStatsApp.Controllers
         [HttpGet]
         public ActionResult GetCompletedImportGames()
         {
-            var importingUserAccounts = HttpContext.Session.Get<Dictionary<int, bool?>>("ImportingUserAccounts") ?? new Dictionary<int,bool?>();             
-            var results = importingUserAccounts.Where(x => x.Value.HasValue).ToDictionary(x => x.Key, x => x.Value);
+            var importingUserAccounts = HttpContext.Session.Get<Dictionary<int, Tuple<bool?, int>>>("ImportingUserAccounts") ?? new Dictionary<int, Tuple<bool?, int>>();             
+            var results = importingUserAccounts.Where(x => x.Value.Item1.HasValue).ToDictionary(x => x.Key, x => x.Value);
             
             if (results.Any())
             {
                 importingUserAccounts = importingUserAccounts.Where(x => !results.ContainsKey(x.Key)).ToDictionary(x => x.Key, x => x.Value);
-                HttpContext.Session.Set<Dictionary<int, bool?>>("ImportingUserAccounts", importingUserAccounts);  
+                HttpContext.Session.Set<Dictionary<int, Tuple<bool?, int>>>("ImportingUserAccounts", importingUserAccounts);  
             }          
 
             return Json(results);

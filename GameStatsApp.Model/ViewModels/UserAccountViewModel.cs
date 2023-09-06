@@ -18,14 +18,16 @@ namespace GameStatsApp.Model.Data
             ID = userAccount.ID;
             UserID = userAccount.UserID;
             AccountTypeID = userAccount.AccountTypeID;
-            AccountTypeName = userAccount.AccountTypeName;
+            UserListID = userAccount.UserListID;
+            UserListName = userAccount.UserListName;
             ImportLastRunDate = userAccount.ImportLastRunDate;
         }
         
         public int ID { get; set; }
         public int UserID { get; set; }
         public int AccountTypeID { get; set; }
-        public string AccountTypeName { get; set; }
+        public int UserListID { get; set; }
+        public string UserListName { get; set; }
         public DateTime? ImportLastRunDate { get; set; }
         
         public string RelativeImportLastRunDateString
