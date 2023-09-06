@@ -118,6 +118,7 @@ namespace GameStatsApp.Service
                     {"key", clientID },
                     {"steamid", steamID },
                     {"include_appinfo", "true"},
+                    {"include_played_free_games", "true"},
                     {"format", "json" },                       
                 };
                 requestUrl = QueryHelpers.AddQueryString(requestUrl, parameters);
