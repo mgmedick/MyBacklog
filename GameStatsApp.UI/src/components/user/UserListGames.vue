@@ -3,12 +3,12 @@
         <div class="container m-0 p-0">
             <div class="d-flex align-items-center mb-3">
                 <div class="me-2">
-                    <div class="btn btn-secondary p-2" tabindex="-1" role="button">
-                        <font-awesome-layers v-if="isImporting" class="fa-2xl" @click="onImportClick" style="width: 35px;">
-                            <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-5" style="color: #adb5bd; z-index: 9999;"/>
-                            <font-awesome-icon icon="fa-solid fa-cloud"/>
+                    <div class="btn btn-secondary p-2" tabindex="-1" role="button" @click="onImportClick">
+                        <font-awesome-layers v-if="isImporting" class="fa-2xl"  style="width: 35px; z-index: 0;">
+                            <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-5" style="color: #adb5bd;"/>
+                            <font-awesome-icon icon="fa-solid fa-cloud" style="z-index: -1;"/>
                         </font-awesome-layers>
-                        <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" size="2xl" @click="onImportClick"/>   
+                        <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" size="2xl"/>   
                     </div>      
                 </div>              
                 <div class="d-flex ms-auto">   
@@ -65,7 +65,9 @@
                                 <small class="position-relative">{{ game.name }}</small>
                             </div>                
                             <div class="delete-icon mt-2 position-absolute start-0 end-0 d-none" style="z-index: 1;">
-                                <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="d-flex ms-auto me-2" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/> 
+                                <div class="d-flex">
+                                    <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="ms-auto me-2" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/> 
+                                </div>
                             </div>      
                             <img :src="game.coverImagePath" class="img-fluid align-self-center" alt="Responsive image">
                             <div class="gamelist-icons position-absolute start-0 end-0 d-none" style="bottom: 10px; width: 100%; z-index: 1;">
@@ -97,7 +99,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <import-games :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" @isimportingupdate="onIsImportingUpdate"></import-games>
+                        <import-games :isimportshown="isImportShown" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" @isimportingupdate="onIsImportingUpdate"></import-games>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -158,6 +160,7 @@
                 game: {},
                 loading: false,
                 importModal: {},
+                isImportShown: false,
                 removeModal: {},
                 searchModal: {},
                 searchText: null,
@@ -197,9 +200,13 @@
                 }
             });
 
-            that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {
-                that.$refs.searchAutocomplete.clear();
+            that.$refs.searchmodal.addEventListener('show.bs.modal', event => {
+                that.isImportShown = true;
             }); 
+
+            that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {
+                that.isImportShown = false;
+            });             
 
             window.addEventListener('resize', that.onResize);
 

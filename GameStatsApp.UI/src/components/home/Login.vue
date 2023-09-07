@@ -1,6 +1,6 @@
 ﻿<template>
     <div class="mx-auto">
-        <h2 class="text-center mb-3">Welcome to GameStatsApp</h2>
+        <h2 class="text-center mb-3">Welcome to MyBacklog</h2>
         <div class="mx-auto" style="max-width:400px;">
             <form @submit.prevent="submitForm">
                 <div class="mb-2">

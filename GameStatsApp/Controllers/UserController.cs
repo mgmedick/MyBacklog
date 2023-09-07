@@ -191,8 +191,7 @@ namespace GameStatsApp.Controllers
                     }
                     HttpContext.Session.Set<Dictionary<int, Tuple<bool?, int>>>("ImportingUserAccounts", importingUserAccounts);
 
-                    count = await _userService.ImportGames(userID, userAccountVW);
-                    Thread.Sleep(TimeSpan.FromMilliseconds(10000));
+                    count = await _userService.ImportGames(userID, userAccountVW);                 
                     success = true;
 
                     if (importingUserAccounts.ContainsKey(userAccountID))

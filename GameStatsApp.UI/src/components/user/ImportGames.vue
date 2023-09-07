@@ -47,9 +47,7 @@
         name: "ImportGames",
         emits: ["isimportingupdate"],
         props: {
-            useraccounts: Array,
-            steamauthurl: String,
-            microsoftauthurl: String,
+            isimportshown: Boolean,
             authsuccess: Boolean,
             authaccounttypeid: Number
         },
@@ -61,6 +59,11 @@
             }
         },                                 
         watch: {
+            isimportshown: function (val, oldVal) {
+                if (val) {
+                    this.loadData();
+                }
+            },
             importingUserAccountIDs: {
                 handler(val, oldVal) {
                     sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(val));
@@ -71,7 +74,16 @@
             }             
         },          
         created: function() {
-            this.loadData();
+            var that = this;
+            that.loadData().then(i => {
+                if (that.authsuccess != null) {
+                    if (that.authsuccess) {
+                        that.importGames(that.authaccounttypeid);
+                    } else {            
+                        that.errorToast("Error authorizing account");       
+                    }
+                }
+            });
         },         
         mounted: function () {
             var that = this;
@@ -85,18 +97,9 @@
                 var that = this;
                 this.loading = true;
 
-                axios.get('/User/ImportGames')
+                return axios.get('/User/ImportGames')
                     .then(res => {
                         that.importGamesVM = res.data;
-
-                        if (that.authsuccess != null) {
-                            if (that.authsuccess) {
-                                that.importGames(that.authaccounttypeid);
-                            } else {            
-                                that.errorToast("Error authorizing account");       
-                            }
-                        }
-
                         that.loading = false;
 
                         return res;
@@ -127,6 +130,7 @@
                             }
                         }                                                                                                                           
                         delete that.importingUserAccountIDs[userAccount.id];
+                        that.loadData();
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
                 } else {
