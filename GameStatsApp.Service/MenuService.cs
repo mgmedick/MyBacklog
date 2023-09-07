@@ -33,19 +33,6 @@ namespace GameStatsApp.Service
             }
 
             return results;
-        }
-
-        public AboutViewModel GetAbout()
-        {
-            var result = new AboutViewModel();
-
-            var item = _userRepo.GetAbout();
-            if (item != null)
-            {
-                result = new AboutViewModel() { UserCount = item.UserCount, GameName = item.GameName, UserListName = item.UserListName };
-            }
-
-            return result;
-        }          
+        }       
     }
 }

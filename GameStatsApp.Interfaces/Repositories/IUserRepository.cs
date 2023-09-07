@@ -28,7 +28,6 @@ namespace GameStatsApp.Interfaces.Repositories
         IEnumerable<UserListGameView> GetUserListGameViews(Expression<Func<UserListGameView, bool>> predicate);
         IEnumerable<UserListGameView> GetUserListGames(int userListID);
         IEnumerable<SearchResult> SearchUsers(string searchText);
-        AboutResult GetAbout();
     }
 }
 

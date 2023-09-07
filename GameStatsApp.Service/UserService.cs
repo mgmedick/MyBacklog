@@ -126,8 +126,6 @@ namespace GameStatsApp.Service
 
         public void CreateUser(string email, string username, string pass)
         {
-            var isdarktheme = (_context.HttpContext.Request.Cookies["theme"] ?? _config.GetSection("SiteSettings").GetSection("DefaultTheme").Value) == "theme-dark";
-
             var user = new User()
             {
                 Email = email,
@@ -142,7 +140,7 @@ namespace GameStatsApp.Service
 
             var userSetting = new UserSetting() {
                 UserID = user.ID,
-                IsDarkTheme = isdarktheme
+                IsDarkTheme = false
             };
 
             _userRepo.SaveUserSetting(userSetting);      

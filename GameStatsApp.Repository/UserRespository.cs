@@ -228,17 +228,7 @@ namespace GameStatsApp.Repository
 
                 return results;
             }
-        }
-
-        public AboutResult GetAbout()
-        {
-            using (IDatabase db = DBFactory.GetDatabase())
-            {
-                var result = db.Query<AboutResult>("CALL GetAbout();").FirstOrDefault();
-
-                return result;
-            }
-        }                       
+        }                     
     }
 }
 

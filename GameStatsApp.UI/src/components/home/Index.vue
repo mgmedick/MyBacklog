@@ -2,7 +2,7 @@
     <div>
         <div v-if="!indexvm.isAuth">
             <div class="text-center mb-3">
-                <h2>Welcome to MyBacklog</h2>
+                <h2>Welcome to mybacklog.io</h2>
                 <div>
                     <span>A tool to manage your games and keep track of your progress</span>
                 </div>
@@ -101,8 +101,8 @@
 
             this.setDemoImages();
 
-            that.welcomeModal = new Modal(that.$refs.welcomemodal);         
-            
+            that.welcomeModal = new Modal(that.$refs.welcomemodal);
+
             if (that.indexvm.showWelcome) {
                 that.welcomeModal.show();
             }            

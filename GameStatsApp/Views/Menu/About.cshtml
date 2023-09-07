@@ -1,12 +1,7 @@
-﻿@using Microsoft.Extensions.Configuration;
-@using System.Text.Json;
-@inject IConfiguration Configuration;
-
-@model GameStatsApp.Model.ViewModels.AboutViewModel
-
+﻿
 @{ ViewBag.Title = "About"; }
 
-<about :aboutvm="@JsonSerializer.Serialize(Model, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase})"/>
+<about />
 
 
 

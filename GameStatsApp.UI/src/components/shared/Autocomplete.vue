@@ -1,7 +1,7 @@
 ﻿<template>
     <div class="dropdown">
         <div>
-            <input type="text" class="form-control" :value="model" @input="model = $event.target.value" @click="onClick" @focus="onFocus" @keydown.down="onArrowDown" @keydown.up="onArrowUp" @keydown.enter="onEnter($event)" :placeholder="placeholder"/>
+            <input type="search" class="form-control" :value="model" @input="model = $event.target.value" @click="onClick" @focus="onFocus" @keydown.down="onArrowDown" @keydown.up="onArrowUp" @keydown.enter="onEnter($event)" :placeholder="placeholder"/>
         </div>
         <div v-if="isimgresults" class="container">
             <div class="row g-3 mt-3">

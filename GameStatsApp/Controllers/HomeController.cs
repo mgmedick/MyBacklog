@@ -424,8 +424,7 @@ namespace GameStatsApp.Controllers
                         {
                             new Claim(ClaimTypes.NameIdentifier, userVW.UserID.ToString()),
                             new Claim(ClaimTypes.Email, userVW.Email),
-                            new Claim(ClaimTypes.Name, userVW.Username),
-                            new Claim("theme", userVW.IsDarkTheme ? "theme-dark" : "theme-light")
+                            new Claim(ClaimTypes.Name, userVW.Username)
                         };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

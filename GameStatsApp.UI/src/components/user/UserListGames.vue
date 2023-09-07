@@ -12,7 +12,7 @@
                     </div>      
                 </div>              
                 <div class="d-flex ms-auto">   
-                    <div class="btn-group me-1" role="group">
+                    <div class="btn-group me-2" role="group">
                         <button type="button" class="btn btn-secondary p-2" @click="onOrderByDescClick"><font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-arrow-down-wide-short" size="xl"/><font-awesome-icon v-else icon="fa-solid fa-arrow-up-wide-short" size="xl"/></button>
                         <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split p-2" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="visually-hidden">Toggle Dropdown</span>
@@ -21,14 +21,17 @@
                             <li><a href="#/" @click="onOrderByOptionClick($event, 0)" class="dropdown-item" :class="{ 'active' : orderByID == 0 }">Date Added</a></li>
                             <li><a href="#/" @click="onOrderByOptionClick($event, 1)" class="dropdown-item" :class="{ 'active' : orderByID == 1 }">Name</a></li>
                         </ul>
-                    </div>  
-                    <input type="text" class="form-control" autocomplete="off" v-model="filterText" aria-describedby="spnUserNameErrors" placeholder="Filter games">
+                    </div>
+                    <div class="input-group">
+                        <button type="button" class="btn btn-secondary p-2" @click="showFilterText = !showFilterText"><font-awesome-icon icon="fa-solid fa-filter" size="xl"/></button> 
+                        <input v-if="showFilterText" type="search" class="form-control" placeholder="Filter games">
+                    </div>
                 </div>
             </div>            
             <div v-if="loading">
                 <div class="row g-3">
                     <div class="col-lg-2 col-md-3 col-6">
-                        <div class="position-relative add-game-container">
+                        <div class="position-relative add-game-container" role="button">
                             <div class="position-absolute top-0 bottom-0 start-0 end-0">
                                 <div class="d-flex" style="width: 100%; height: 100%;">
                                     <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px;"/>                    
@@ -43,14 +46,14 @@
                 </div>
             </div>
             <div v-else>
-                <div v-if="userlistid == 0 && games.length == 0" class="center text-center">
+                <div v-if="games.length == 0 && userlistid == 0" class="center text-center">
                     <div class="text-muted lead">
-                        <span>Add games to your lists to get started</span>
+                        <span>Add <font-awesome-icon icon="fa-solid fa-plus"/> or import <font-awesome-icon icon="fa-solid fa-cloud-arrow-down"/> games to your lists to get started</span>
                     </div>
                 </div>   
                 <div v-else class="row g-3">        
                     <div class="col-lg-2 col-md-3 col-6">
-                        <div class="position-relative add-game-container" @click="onSearchGamesClick">
+                        <div class="position-relative add-game-container" role="button" @click="onSearchGamesClick">
                             <div class="position-absolute top-0 bottom-0 start-0 end-0">
                                 <div class="d-flex" style="width: 100%; height: 100%;">
                                     <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px;"/>                    
@@ -167,6 +170,7 @@
                 searchResults: [],
                 searchLoading: false,
                 filterText: null,
+                showFilterText: false,
                 orderByDesc: true,             
                 orderByID: 0,
                 isImporting: Object.keys(JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {}).length > 0,
@@ -217,7 +221,16 @@
             if (that.authsuccess != null) {
                 that.importModal.show();
             }
-        },     
+        },  
+        updated: function() {
+            var that = this;
+            
+            that.$nextTick(function() {
+                if (that.userlistid == 0) {
+                    document.querySelector('.add-game-container')?.parentElement.classList.add('d-none');
+                }
+            });
+        },
         methods: {
             loadData: function () {
                 var that = this;
@@ -490,12 +503,6 @@
                 if (defaultheight > 0) {
                     document.querySelectorAll('.game-image-container').forEach(item => {
                         item.style.height = defaultheight + 'px';
-                    });
-
-                    that.$nextTick(function() {
-                        if(this.userlistid == 0) {
-                            document.querySelector('.add-game-container')?.parentElement.classList.add('d-none');
-                        }
                     });
                 }
             }                                                                                          

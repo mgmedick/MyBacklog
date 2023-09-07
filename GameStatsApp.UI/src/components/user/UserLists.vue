@@ -34,7 +34,7 @@
         </div>
         <div class="show-md row g-2 justify-content-center">
             <div class="btn-group">
-                <button class="btn dropdown-toggle btn-primary d-flex align-items-center" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                <button class="btn btn-lg dropdown-toggle btn-primary d-flex align-items-center" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
                     <font-awesome-icon v-if="selectedItemID == 0" icon="fa-solid fa-layer-group" size="lg"/>
                     <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.defaultListID" :icon="getDefaultIconClass(userlists.find(i => i.id == selectedItemID)?.defaultListID)" size="lg"/>
                     <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.accountTypeID" :icon="getAccountIconClass(userlists.find(i => i.id == selectedItemID)?.accountTypeID)" size="lg"/>

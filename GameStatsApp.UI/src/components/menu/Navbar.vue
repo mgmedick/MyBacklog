@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="/" draggable="false">
                 <font-awesome-icon icon="fa-solid fa-cube" class="me-2" />
-                MyBacklog
+                mybacklog.io
             </a>
             <button class="navbar-toggler" type="button" @click="toggleNavbar = !toggleNavbar" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -22,14 +22,6 @@
                                 <font-awesome-icon icon="fa-solid fa-user" />
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                                <li>
-                                    <div class="dropdown-item">
-                                        <div class="form-check form-switch">
-                                            <input id="chkNightMode" class="form-check-input" type="checkbox" data-toggle="toggle" v-model="isDarkTheme">
-                                            <label class="form-check-label" for="chkNightMode"><font-awesome-icon icon="fa-solid fa-moon" /><span class="ps-2">Night Mode</span></label>
-                                        </div>
-                                    </div>
-                                </li>
                                 <li>
                                     <a href="/UserSettings" class="dropdown-item"><font-awesome-icon icon="fa-solid fa-gear" /><span class="ps-2">Settings</span></a>
                                 </li>
@@ -60,7 +52,6 @@
         name: "Navbar",
         props: {
             isauth: Boolean,
-            isdarktheme: Boolean,
             username: String,
             userid: String
         },
@@ -74,7 +65,6 @@
                 showSignUpModal: false,
                 showDropdown: false,
                 toggleNavbar: false,
-                isDarkTheme: this.isdarktheme,
                 state: false
             }
         },       
@@ -159,17 +149,6 @@
                 
                 location.href = encodeURI('/' + controller + "/" + action + "/" + result.value);
             },            
-            updateTheme: function(val){
-                var el = document.body;
-
-                if (val){
-                    el.classList.remove("theme-light");
-                    el.classList.add("theme-dark");
-                } else {
-                    el.classList.remove("theme-dark");
-                    el.classList.add("theme-light");
-                }
-            },
             toggleDropdown(e) {
                 this.state = !this.state
             }

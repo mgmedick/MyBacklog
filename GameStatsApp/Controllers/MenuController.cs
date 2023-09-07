@@ -18,9 +18,7 @@ namespace GameStatsApp.Controllers
 
         public ViewResult About()
         {
-            var aboutVM = _menuService.GetAbout();
-
-            return View(aboutVM);
+            return View();
         }
 
         [HttpGet]
