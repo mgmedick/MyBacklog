@@ -244,7 +244,7 @@ namespace GameStatsApp.Service
 
         public IEnumerable<UserListViewModel> GetUserLists (int userID)
         { 
-            var userLists = _userRepo.GetUserLists(i => i.UserID == userID)
+            var userLists = _userRepo.GetUserListViews(i => i.UserID == userID)
                                     .Select(i => new UserListViewModel(i))
                                     .OrderBy(i => i.SortOrder ?? i.ID)
                                     .ToList();
@@ -351,10 +351,9 @@ namespace GameStatsApp.Service
 
         public void AddGameToUserList(int userID, int userListID, int gameID)
         {         
-            var userListVW = _userRepo.GetUserListViews(i => i.ID == userListID).FirstOrDefault();
-            var gameIDs = userListVW.GameIDs.Split(',').ToList();
+            var gameIDs = _userRepo.GetUserListGameViews(i => i.UserListID == userListID).Select(i => i.ID).ToList();
 
-            if (!gameIDs.Contains(gameID.ToString()))
+            if (!gameIDs.Contains(gameID))
             {
                 var userListGame = new UserListGame() { UserListID = userListID, GameID = gameID };
                 _userRepo.SaveUserListGame(userListGame);
@@ -363,10 +362,9 @@ namespace GameStatsApp.Service
 
         public void RemoveGameFromUserList(int userID, int userListID, int gameID)
         {         
-            var userListVW = _userRepo.GetUserListViews(i => i.ID == userListID).FirstOrDefault();
-            var gameIDs = userListVW.GameIDs.Split(',').ToList();
+            var gameIDs = _userRepo.GetUserListGameViews(i => i.UserListID == userListID).Select(i => i.ID).ToList();
 
-            if (gameIDs.Contains(gameID.ToString()))
+            if (gameIDs.Contains(gameID))
             {
                 _userRepo.DeleteUserListGame(userListID, gameID);
             }
@@ -374,10 +372,10 @@ namespace GameStatsApp.Service
 
         public void RemoveGameFromAllUserLists(int userID, int gameID)
         {         
-            var userListIDs = _userRepo.GetUserListViews(i => i.UserID == userID)
-                                          .Where(i => i.GameIDs.Split(',').ToList().Contains(gameID.ToString()))
-                                          .Select(i => i.ID)
-                                          .ToList();
+            var userListIDs = _userRepo.GetUserListGameViews(i => i.UserID == userID && i.ID == gameID)
+                                        .Select(i => i.UserListID)
+                                        .Distinct()
+                                        .ToList();
 
             foreach(var userListID in userListIDs)
             {

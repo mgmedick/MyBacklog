@@ -14,14 +14,15 @@ namespace GameStatsApp.Model.ViewModels
         {
         }
         
-        public UserListViewModel(UserList userList)
+        public UserListViewModel(UserListView userListVW)
         {
-            ID = userList.ID;
-            Name = userList.Name;
-            DefaultListID = userList.DefaultListID;
-            UserAccountID = userList.UserAccountID;
-            Active = userList.Active;
-            SortOrder = userList.SortOrder;
+            ID = userListVW.ID;
+            Name = userListVW.Name;
+            DefaultListID = userListVW.DefaultListID;
+            UserAccountID = userListVW.UserAccountID;
+            AccountTypeID = userListVW.AccountTypeID;
+            Active = userListVW.Active;
+            SortOrder = userListVW.SortOrder;
         }
 
         public int ID { get; set; }
@@ -30,6 +31,7 @@ namespace GameStatsApp.Model.ViewModels
         public string Name { get; set; }
         public int? DefaultListID { get; set; }
         public int? UserAccountID { get; set; }
+        public int? AccountTypeID { get; set; }
         public bool Active { get; set; }
         public int? SortOrder { get; set; }
     }

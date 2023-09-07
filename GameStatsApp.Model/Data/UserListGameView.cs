@@ -13,5 +13,6 @@ namespace GameStatsApp.Model.Data
         public string CoverImagePath { get; set; }
         public string UserListIDs { get; set; }
         public int UserListGameID { get; set; }
+        public int UserID { get; set; }
     }
 } 

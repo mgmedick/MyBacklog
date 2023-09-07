@@ -97,7 +97,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <import-games :useraccounts="useraccounts" :microsoftauthurl="microsoftauthurl" :steamauthurl="steamauthurl" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" :isimporting="isImporting" @update:isimporting="onIsImportingUpdate"></import-games>
+                        <import-games :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" @isimportingupdate="onIsImportingUpdate"></import-games>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -148,9 +148,6 @@
             userlistid: Number,
             userlists: Array,
             emptycoverimagepath: String,
-            useraccounts: Array,
-            microsoftauthurl: String,
-            steamauthurl: String,
             authsuccess: Boolean,
             authaccounttypeid: Number
         },
@@ -196,7 +193,7 @@
                 that.isImporting = Object.keys(JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {}).length > 0;
                 
                 if (!that.isImporting) {
-                    location.href = '/';
+                    that.loadData();
                 }
             });
 
@@ -350,7 +347,7 @@
                 this.isImporting = e;
 
                 if (!this.isImporting) {
-                    location.href = '/';
+                    this.loadData();
                 }
             },     
             sortGames() {
@@ -482,7 +479,7 @@
             resizeColumns() {
                 var that = this;
 
-                var defaultheight = document.querySelector('.add-game-container').clientHeight;
+                var defaultheight = document.querySelector('.add-game-container')?.clientHeight;
                 if (defaultheight > 0) {
                     document.querySelectorAll('.game-image-container').forEach(item => {
                         item.style.height = defaultheight + 'px';
@@ -490,7 +487,7 @@
 
                     that.$nextTick(function() {
                         if(this.userlistid == 0) {
-                            document.querySelector('.add-game-container').parentElement.classList.add('d-none');
+                            document.querySelector('.add-game-container')?.parentElement.classList.add('d-none');
                         }
                     });
                 }

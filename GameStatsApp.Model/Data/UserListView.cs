@@ -10,6 +10,9 @@ namespace GameStatsApp.Model.Data
         public int UserID { get; set; }
         public string Name { get; set; }
         public int? DefaultListID { get; set; }
-        public string GameIDs { get; set; }
+        public int? UserAccountID { get; set; }
+        public int? AccountTypeID { get; set; } 
+        public bool Active { get; set; }
+        public int? SortOrder { get; set; }
     }
 } 

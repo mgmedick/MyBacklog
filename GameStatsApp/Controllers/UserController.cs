@@ -152,6 +152,22 @@ namespace GameStatsApp.Controllers
             return Json(new { success = success, errorMessages = errorMessages });
         }
         
+        [HttpGet]
+        public JsonResult ImportGames()
+        {
+            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var microsoftRedirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectUri").Value;
+            var steamRedirectUrl = _config.GetSection("Auth").GetSection("Steam").GetSection("RedirectUri").Value;
+      
+            var importGamesVM = new ImportGamesViewModel() {
+                UserAccounts = _userService.GetUserAccounts(userID).ToList(),
+                MicrosoftAuthUrl = _authService.GetMicrosoftAuthUrl(microsoftRedirectUrl),
+                SteamAuthUrl = _authService.GetSteamAuthUrl(steamRedirectUrl)
+            };
+
+            return Json(importGamesVM);
+        }
+
         [HttpPost]
         public async Task<ActionResult> ImportGames(int userAccountID)
         {

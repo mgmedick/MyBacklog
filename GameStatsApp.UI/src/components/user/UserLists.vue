@@ -20,7 +20,7 @@
                             <div class="row no-gutters">
                                 <div class="col-2">
                                     <font-awesome-icon v-if="userList.defaultListID" :icon="getDefaultIconClass(userList.defaultListID)" size="lg" class="me-3"/>
-                                    <font-awesome-icon v-else-if="userList.userAccountID" :icon="getAccountIconClass(userList.userAccountID)" size="lg" class="me-3"/>
+                                    <font-awesome-icon v-else-if="userList.accountTypeID" :icon="getAccountIconClass(userList.accountTypeID)" size="lg" class="me-3"/>
                                     <font-awesome-icon v-else icon="fa-solid fa-list" size="lg" class="me-3"/>
                                 </div>
                                 <div class="col">
@@ -37,7 +37,7 @@
                 <button class="btn dropdown-toggle btn-primary d-flex align-items-center" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
                     <font-awesome-icon v-if="selectedItemID == 0" icon="fa-solid fa-layer-group" size="lg"/>
                     <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.defaultListID" :icon="getDefaultIconClass(userlists.find(i => i.id == selectedItemID)?.defaultListID)" size="lg"/>
-                    <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.userAccountID" :icon="getAccountIconClass(userlists.find(i => i.id == selectedItemID)?.userAccountID)" size="lg"/>
+                    <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.accountTypeID" :icon="getAccountIconClass(userlists.find(i => i.id == selectedItemID)?.accountTypeID)" size="lg"/>
                     <font-awesome-icon v-else icon="fa-solid fa-list" size="lg"/>
                     <span class="mx-auto">{{ selectedItemID == 0 ? 'All Games' : userlists.find(i => i.id == selectedItemID)?.name }}</span>
                 </button>
@@ -51,7 +51,7 @@
                 </ul>
             </div>                
         </div>
-        <user-list-games ref="userlistgames" :userlists="userlists" :userlistid="selectedItemID" :emptycoverimagepath="emptycoverimagepath" :useraccounts="useraccounts" :microsoftauthurl="microsoftauthurl" :steamauthurl="steamauthurl" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" @delete="onDelete"></user-list-games>           
+        <user-list-games ref="userlistgames" :userlists="userlists" :userlistid="selectedItemID" :emptycoverimagepath="emptycoverimagepath" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid"></user-list-games>           
     </div>
 </template>
 <script>
@@ -60,9 +60,6 @@
         props: {
             userlists: Array,
             emptycoverimagepath: String,
-            useraccounts: Array,
-            steamauthurl: String,
-            microsoftauthurl: String,
             authsuccess: Boolean,
             authaccounttypeid: Number
         },
@@ -104,9 +101,8 @@
             },   
             getAccountIconClass: function (id) {
                 var iconClass = '';
-                var accountTypeID = this.useraccounts.find(i => i.id == id).accountTypeID;
 
-                switch (accountTypeID) {
+                switch (id) {
                     case 1:
                         iconClass = 'fa-brands fa-steam';
                         break;

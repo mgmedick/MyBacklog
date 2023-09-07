@@ -43,7 +43,7 @@ namespace GameStatsApp.Service
                 {"openid.claimed_id", "http://specs.openid.net/auth/2.0/identifier_select"},
                 {"openid.identity", "http://specs.openid.net/auth/2.0/identifier_select"},
                 {"openid.return_to", redirectUri},
-                {"openid.realm", "https://localhost:5000"},
+                {"openid.realm", new Uri(redirectUri).GetLeftPart(UriPartial.Authority)},
                 {"openid.mode", "checkid_setup"},
             };
 
@@ -96,12 +96,12 @@ namespace GameStatsApp.Service
             var results = new List<string>();
             var items = await GetSteamUserInventory(steamID);
             results = items.OrderBy(obj => DateTimeOffset.FromUnixTimeSeconds((long)obj["rtime_last_played"]).UtcDateTime)
-                           .Select(obj => (string)obj["name"]).ToList();
+                        .Select(obj => (string)obj["name"]).ToList();
 
             results = results.GroupBy(g => new { g })
                 .Select(i => i.First())
                 .ToList();
-                                      
+                                          
             return results;
         }       
 
@@ -130,7 +130,8 @@ namespace GameStatsApp.Service
                     {
                         var dataString = await response.Content.ReadAsStringAsync();
                         var data = JObject.Parse(dataString);
-                        results = (JArray)data["response"]["games"];
+                        var items = (JArray)((JObject)data.GetValue("response")).GetValue("games");
+                        results.Merge(items);
                     }
                 }
             }
