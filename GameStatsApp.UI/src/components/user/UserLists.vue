@@ -65,7 +65,7 @@
         },
         data: function () {
             return {
-                selectedItemID: sessionStorage.getItem('selectedUserListID') ?? 0,
+                selectedItemID: sessionStorage.getItem('selectedUserListID') ?? this.userlists[0].id,
                 successMessages: [],
                 errorMessages: []
             };

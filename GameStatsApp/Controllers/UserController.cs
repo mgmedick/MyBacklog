@@ -56,7 +56,8 @@ namespace GameStatsApp.Controllers
         [HttpGet]
         public JsonResult GetUserListGames(int userListID)
         {
-            var userListGames = _userService.GetUserListGames(userListID);
+            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userListGames = _userService.GetUserListGames(userID, userListID);
 
             return Json(userListGames);
         }        

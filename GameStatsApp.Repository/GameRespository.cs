@@ -27,11 +27,11 @@ namespace GameStatsApp.Repository
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                var results = db.Query<SearchResult>("SELECT ID AS Value, Name AS Label, YEAR(ReleaseDate) AS LabelSecondary, CoverImagePath AS ImagePath FROM vw_Game WHERE Name LIKE CONCAT('%', @0, '%') ORDER BY ReleaseDate LIMIT 10;", searchText).ToList();
+                var results = db.Query<SearchResult>("CALL SearchGames (@0);", searchText).ToList();
 
                 return results;
             }
-        }                          
+        }                       
     }
 }
 

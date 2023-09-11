@@ -154,11 +154,11 @@ namespace GameStatsApp.Repository
             }
         }       
 
-        public IEnumerable<UserListGameView> GetUserListGames(int userListID)
+        public IEnumerable<UserListGameView> GetUserListGames(int userID, int userListID)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                var results = db.Query<UserListGameView>("CALL GetUserListGames (@0);", userListID).ToList();
+                var results = db.Query<UserListGameView>("CALL GetUserListGames (@0, @1);", userID, userListID).ToList();
 
                 return results;
             }

@@ -24,7 +24,7 @@ namespace GameStatsApp
                         {
                             services.AddControllers();
                         });
-                        //webBuilder.UseUrls("http://*:5050");
+                        //webBuilder.UseUrls("http://*:5001");
                     })
                     .UseSerilog((hostingContext, loggerConfiguration) =>
                     {

@@ -34,7 +34,7 @@ namespace GameStatsApp.Interfaces.Services
         void DeleteUserList(int userID, int userListID);
         void UpdateUserListSortOrders(int userID, List<int> userListIDs);
         void UpdateUserListActive(int userID, int userListID, bool active);
-        IEnumerable<UserListGameViewModel> GetUserListGames (int userListID);               
+        IEnumerable<UserListGameViewModel> GetUserListGames (int userID, int userListID);               
         void SaveUserAccount(int userID, int accountTypeID, TokenResponse tokenResponse);
         IEnumerable<UserAccountViewModel> GetUserAccounts(int userID);   
         Task<UserAccountView> GetRefreshedUserAccount(int userID, int userAccountID);

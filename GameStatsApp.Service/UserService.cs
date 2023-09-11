@@ -333,9 +333,9 @@ namespace GameStatsApp.Service
             }        
         }                  
 
-        public IEnumerable<UserListGameViewModel> GetUserListGames (int userListID)
+        public IEnumerable<UserListGameViewModel> GetUserListGames (int userID, int userListID)
         { 
-            var gameVMs = _userRepo.GetUserListGames(userListID).Select(i => new UserListGameViewModel(i)).ToList();
+            var gameVMs = _userRepo.GetUserListGames(userID, userListID).Select(i => new UserListGameViewModel(i)).ToList();
 
             return gameVMs;
         }
