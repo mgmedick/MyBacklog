@@ -95,8 +95,9 @@ namespace GameStatsApp.Service
         {
             var results = new List<string>();
             var items = await GetSteamUserInventory(steamID);
-            results = items.OrderBy(obj => DateTimeOffset.FromUnixTimeSeconds((long)obj["rtime_last_played"]).UtcDateTime)
-                        .Select(obj => (string)obj["name"]).ToList();
+            results = items.OrderBy(obj => DateTimeOffset.FromUnixTimeSeconds((long)(obj["rtime_last_played"] ?? 0)).UtcDateTime)
+                            .ThenBy(obj => (string)obj["name"])
+                            .Select(obj => (string)obj["name"]).ToList();
 
             results = results.GroupBy(g => new { g })
                 .Select(i => i.First())
@@ -335,6 +336,7 @@ namespace GameStatsApp.Service
             var items = await GetMicrosoftUserTitleHistory(userHash, xstsToken, userXuid);
             results = items.Where(obj => ((string)obj["titleType"]) == "Game" && (!importLastRunDate.HasValue || ((DateTime)obj["lastUnlock"]) >= importLastRunDate))
                             .OrderBy(obj => (DateTime)obj["lastUnlock"])
+                            .ThenBy(obj => (string)obj["name"])
                             .Select(obj => (string)obj["name"]).ToList();
 
             results = results.GroupBy(g => new { g })

@@ -1,11 +1,11 @@
 ﻿<template>
     <div class="games-container">
         <div class="container m-0 p-0">
-            <div class="d-flex align-items-center mb-3">
+            <div class="d-flex align-items-end mb-3">
                 <div class="me-2">
                     <div class="btn btn-secondary p-2" tabindex="-1" role="button" @click="onImportClick">
-                        <font-awesome-layers v-if="isImporting" class="fa-2xl"  style="width: 35px; z-index: 0;" size="2xl">
-                            <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-5" style="color: #adb5bd;" size="2xl"/>
+                        <font-awesome-layers v-if="isImporting" class="fa-2xl" style="width: 35px; z-index: 0;">
+                            <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-5" style="color: #adb5bd;"/>
                             <font-awesome-icon icon="fa-solid fa-cloud" style="z-index: -1;"/>
                         </font-awesome-layers>
                         <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" size="2xl"/>   
@@ -13,7 +13,7 @@
                 </div>              
                 <div class="d-flex ms-auto">   
                     <div class="btn-group me-2" role="group">
-                        <button type="button" class="btn btn-secondary p-2" @click="onOrderByDescClick"><font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-arrow-down-wide-short" size="2xl"/><font-awesome-icon v-else icon="fa-solid fa-arrow-up-wide-short" size="2xl"/></button>
+                        <button type="button" class="btn btn-secondary p-2" @click="onOrderByDescClick"><font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-arrow-down-wide-short" size="xl"/><font-awesome-icon v-else icon="fa-solid fa-arrow-up-wide-short" size="xl"/></button>
                         <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split p-2" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="visually-hidden">Toggle Dropdown</span>
                         </button>                    
@@ -23,7 +23,7 @@
                         </ul>
                     </div>
                     <div class="input-group">
-                        <button type="button" class="btn btn-secondary p-2" @click="showFilterText = !showFilterText"><font-awesome-icon icon="fa-solid fa-filter" size="2xl"/></button> 
+                        <button type="button" class="btn btn-secondary p-2" @click="showFilterText = !showFilterText"><font-awesome-icon icon="fa-solid fa-filter" size="xl"/></button> 
                         <input v-if="showFilterText" type="search" class="form-control" placeholder="Filter games">
                     </div>
                 </div>

@@ -5,12 +5,14 @@
         </div>
         <div v-if="isimgresults" class="container">
             <div class="row g-2 mt-3">
-                <div v-if="results.length > 0" v-for="(result, i) in results" class="col-lg-2 col-md-3 col-4" :class="{ 'highlighted': i === arrowCounter }" @click="onSearchSelected(result)">
-                    <img v-if="result.imagePath" :src="result.imagePath" class="img-fluid rounded" alt="Responsive image">
-                    <div class="text-xs">
-                        <span> {{ result.label }}</span>
-                        <div v-if="result.labelSecondary" class="text-muted">
-                            <span>{{ result.labelSecondary }}</span>
+                <div v-if="results.length > 0" v-for="(result, i) in results" class="col-lg-2 col-md-3 col-4" :class="{ 'highlighted': i === arrowCounter }">
+                    <div @click="onSearchSelected(result)" role="button">
+                        <img v-if="result.imagePath" :src="result.imagePath" class="img-fluid rounded" alt="Responsive image">
+                        <div class="text-xs">
+                            <span> {{ result.label }}</span>
+                            <div v-if="result.labelSecondary" class="text-muted">
+                                <span>{{ result.labelSecondary }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
