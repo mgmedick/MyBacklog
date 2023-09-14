@@ -1,8 +1,5 @@
 ﻿<template>
     <div id="divimportgames" class="mx-auto" style="max-width:400px;">
-        <div class="mb-2">
-            <font-awesome-icon icon="fa-solid fa-circle-info" class="text-secondary" size="xl" data-bs-toggle="tooltip" data-bs-title="For Steam import the Game Details section under your Steam Privacy Settings must be set to Public" />
-        </div>         
         <div v-if="loading">
             <div class="d-flex m-3">
                 <div class="mx-auto">
@@ -10,7 +7,13 @@
                 </div>
             </div>
         </div>
-        <div v-else class="row g-2 justify-content-center mb-3">   
+        <div v-else class="row g-2 justify-content-center mb-3">  
+            <div class="d-flex mb-1">
+                <font-awesome-icon icon="fa-solid fa-triangle-exclamation me-1" size="lg" class="text-warning me-2"/>
+                <div class="align-self-end text-center text-xs text-muted">
+                    <span>Your Steam Profile must be <a href="https://help.steampowered.com/en/faqs/view/588C-C67D-0251-C276">Public</a> to import Steam games</span>
+                </div>
+            </div>             
             <div class="btn-group me-1 useraccount-btn-group" role="group">
                 <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center" @click="onImportGamesClick($event, 1)" :disabled="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.id]">
                     <font-awesome-icon icon="fa-brands fa-steam" size="2xl"/>
@@ -50,10 +53,7 @@
                 <ul class="dropdown-menu">
                     <li><a :href="importGamesVM.microsoftAuthUrl" class="dropdown-item" data-value="0">Reauthenticate</a></li>
                 </ul> 
-            </div>  
-        </div>
-        <div class="text-center text-muted">
-            <small>You can close this window at any time while importing</small>
+            </div>
         </div>
         <div ref="steamimportwarnmodal" class="modal" tabindex="-1">
             <div class="modal-dialog">

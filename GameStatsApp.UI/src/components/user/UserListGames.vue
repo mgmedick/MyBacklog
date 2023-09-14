@@ -13,7 +13,7 @@
                 </div>              
                 <div class="d-flex ms-auto">   
                     <div class="btn-group me-2" role="group">
-                        <button type="button" class="btn btn-secondary p-2" @click="onOrderByDescClick"><font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-arrow-down-wide-short" size="xl"/><font-awesome-icon v-else icon="fa-solid fa-arrow-up-wide-short" size="xl"/></button>
+                        <button type="button" class="btn btn-secondary p-2" @click="onOrderByDescClick"><font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-arrow-up-wide-short" size="xl"/><font-awesome-icon v-else icon="fa-solid fa-arrow-down-wide-short" size="xl"/></button>
                         <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split p-2" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="visually-hidden">Toggle Dropdown</span>
                         </button>                    
@@ -23,8 +23,8 @@
                         </ul>
                     </div>
                     <div class="input-group">
-                        <button type="button" class="btn btn-secondary p-2" @click="showFilterText = !showFilterText"><font-awesome-icon icon="fa-solid fa-filter" size="xl"/></button> 
-                        <input v-if="showFilterText" type="search" class="form-control" placeholder="Filter games">
+                        <button type="button" class="btn btn-secondary p-2" @click="onShowFilterTextClick"><font-awesome-icon icon="fa-solid fa-filter" size="xl"/></button> 
+                        <input v-if="showFilterText" v-model="filterText" type="search" class="form-control" placeholder="Filter games">
                     </div>
                 </div>
             </div>            
@@ -171,8 +171,8 @@
                 searchLoading: false,
                 filterText: null,
                 showFilterText: false,
-                orderByDesc: true,             
-                orderByID: 0,
+                orderByDesc: localStorage.getItem('orderByDesc') ? localStorage.getItem('orderByDesc') == 'true' : false,             
+                orderByID: localStorage.getItem('orderByID') ?? 0,
                 isImporting: Object.keys(JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {}).length > 0,
                 width: document.documentElement.clientWidth,
                 height: document.documentElement.clientHeight
@@ -350,11 +350,19 @@
             },
             onOrderByDescClick(e){
                 this.orderByDesc = !this.orderByDesc;
+                localStorage.setItem('orderByDesc', this.orderByDesc.toString());
                 this.sortGames();                
             },            
             onOrderByOptionClick(e, val){
                 this.orderByID = val;
+                localStorage.setItem('orderByID', this.orderByID.toString());
                 this.sortGames();                
+            },
+            onShowFilterTextClick(e) {
+                this.showFilterText = !this.showFilterText;
+                if(!this.showFilterText) {
+                    this.filterText = '';
+                }
             },
             onResize: function() {
                 var that = this;
@@ -375,9 +383,9 @@
                 }
             },     
             sortGames() {
-                switch (this.orderByID)
+                switch (this.orderByID.toString())
                 {
-                    case 0:
+                    case '0':
                         if (this.orderByDesc) {
                             this.games = this.games.sort((a, b) => { return b.userListGameID - a.userListGameID });
                             this.allgames = this.allgames.sort((a, b) => { return b.userListGameID - a.userListGameID });
@@ -386,7 +394,7 @@
                             this.allgames = this.allgames.sort((a, b) => { return a.userListGameID - b.userListGameID });
                         }
                         break;                    
-                    case 1:
+                    case '1':
                         if (this.orderByDesc) {
                             this.games = this.games.sort((a, b) => { return b.name.localeCompare(a.name) });
                             this.allgames = this.allgames.sort((a, b) => { return b.name.localeCompare(a.name) });

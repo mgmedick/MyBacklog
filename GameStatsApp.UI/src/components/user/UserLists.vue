@@ -65,7 +65,7 @@
         },
         data: function () {
             return {
-                selectedItemID: sessionStorage.getItem('selectedUserListID') ?? this.userlists[0].id,
+                selectedItemID: localStorage.getItem('selectedUserListID') ?? this.userlists[0].id,
                 successMessages: [],
                 errorMessages: []
             };
@@ -80,7 +80,7 @@
         methods: {
             onUserListClick(userListID) {
                 this.selectedItemID = userListID;
-                sessionStorage.setItem('selectedUserListID', userListID.toString());
+                localStorage.setItem('selectedUserListID', userListID.toString());
             },
             getDefaultIconClass: function (id) {
                 var iconClass = '';

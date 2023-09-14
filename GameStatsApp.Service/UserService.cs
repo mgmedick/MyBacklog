@@ -194,7 +194,7 @@ namespace GameStatsApp.Service
                 userList =  new UserList()
                 { 
                     UserID = userID,
-                    Name = string.Format("My {0} Games", ((AccountType)userAccount.AccountTypeID).ToString()),
+                    Name = ((AccountType)userAccount.AccountTypeID).ToString(),
                     Active = true,
                     CreatedDate = DateTime.UtcNow
                 };
