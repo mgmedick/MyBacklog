@@ -12,7 +12,13 @@
                 </div>
                 <div class="mb-3">
                     <label for="txtPassword" class="form-label">Password</label>
-                    <input id="txtPassword" type="password" class="form-control" autocomplete="off" v-model.lazy="form.Password" @blur="v$.form.Password.$touch" aria-describedby="spnPasswordErrors">
+                    <div class="d-flex">
+                        <input id="txtPassword" :type="isShowPassword ? 'text' : 'password'" class="form-control" autocomplete="off" v-model.lazy="form.Password" @blur="v$.form.Password.$touch" aria-describedby="spnPasswordErrors">
+                        <div class="align-self-center text-muted" style="margin-left: -35px;" role="button" @click="isShowPassword = !isShowPassword">
+                            <font-awesome-icon v-if="isShowPassword" icon="fa-solid fa-eye-slash"/>
+                            <font-awesome-icon v-else icon="fa-solid fa-eye"/>
+                        </div>
+                    </div>                     
                     <div>
                         <span id="spnPasswordErrors" class="form-text text-danger" v-for="error of v$.form.Password.$errors">{{ error.$message }}</span>
                     </div>
@@ -58,6 +64,7 @@
                     Email: '',
                     Password: ''
                 },
+                isShowPassword: false,
                 loadingModal: {},
                 errorMessages: [],
                 width: document.documentElement.clientWidth

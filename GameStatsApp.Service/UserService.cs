@@ -52,7 +52,7 @@ namespace GameStatsApp.Service
                 ActivateLink = string.Format("{0}/Activate?{1}&token={2}", baseUrl, queryParams, token)
             };
 
-            await _emailService.SendEmailTemplate(email, "Create your gamestatsapp.com account", Template.ActivateEmail.ToString(), activateUser);
+            await _emailService.SendEmailTemplate(email, "Create your mybacklog.io account", Template.ActivateEmail.ToString(), activateUser);
         }
 
         public ActivateViewModel GetActivateUser(string email, long expirationTime, string token)
@@ -93,7 +93,7 @@ namespace GameStatsApp.Service
                 ResetPassLink = string.Format("{0}/Home/ChangePassword?{1}&token={2}", baseUrl, queryParams, token)
             };
 
-            await _emailService.SendEmailTemplate(user.Email, "Reset your gamestatsapp.com password", Template.ResetPasswordEmail.ToString(), passwordReset);
+            await _emailService.SendEmailTemplate(user.Email, "Reset your mybacklog.io password", Template.ResetPasswordEmail.ToString(), passwordReset);
         }
         
         public ChangePasswordViewModel GetChangePassword(string email, long expirationTime, string token)
@@ -194,7 +194,7 @@ namespace GameStatsApp.Service
                 userList =  new UserList()
                 { 
                     UserID = userID,
-                    Name = ((AccountType)userAccount.AccountTypeID).ToString(),
+                    Name = string.Format("My {0} Games", ((AccountType)userAccount.AccountTypeID).ToString()),
                     Active = true,
                     CreatedDate = DateTime.UtcNow
                 };

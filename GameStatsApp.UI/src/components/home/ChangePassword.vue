@@ -5,14 +5,26 @@
             <form v-if="islinkvalid" @submit.prevent="submitForm">         
                 <div class="mb-2">
                     <label for="txtPassword" class="form-label">New Password</label>
-                    <input id="txtPassword" type="password" class="form-control" autocomplete="off" v-model.lazy="form.Password" @blur="v$.form.Password.$touch" aria-describedby="spnPasswordErrors">
+                    <div class="d-flex">
+                        <input id="txtPassword" :type="isShowPassword ? 'text' : 'password'" class="form-control" autocomplete="off" v-model.lazy="form.Password" @blur="v$.form.Password.$touch" aria-describedby="spnPasswordErrors">
+                        <div class="align-self-center text-muted" style="margin-left: -35px;" role="button" @click="isShowPassword = !isShowPassword">
+                            <font-awesome-icon v-if="isShowPassword" icon="fa-solid fa-eye-slash"/>
+                            <font-awesome-icon v-else icon="fa-solid fa-eye"/>
+                        </div>
+                    </div>                    
                     <div>
                         <span id="spnPasswordErrors" class="form-text text-danger" v-for="error of v$.form.Password.$errors">{{ error.$message }}</span>
                     </div>
                 </div>
                 <div class="mb-3">
                     <label for="txtConfirmPassword" class="form-label">Confirm New Password</label>
-                    <input id="txtConfirmPassword" type="password" class="form-control" autocomplete="off" v-model.lazy="form.ConfirmPassword" @blur="v$.form.ConfirmPassword.$touch" aria-describedby="spnConfirmPasswordErrors">
+                    <div class="d-flex">
+                        <input id="txtConfirmPassword" :type="isShowConfirmPassword ? 'text' : 'password'" class="form-control" autocomplete="off" v-model.lazy="form.ConfirmPassword" @blur="v$.form.ConfirmPassword.$touch" aria-describedby="spnConfirmPasswordErrors">
+                        <div class="align-self-center text-muted" style="margin-left: -35px;" role="button" @click="isShowConfirmPassword = !isShowConfirmPassword">
+                            <font-awesome-icon v-if="isShowConfirmPassword" icon="fa-solid fa-eye-slash"/>
+                            <font-awesome-icon v-else icon="fa-solid fa-eye"/>
+                        </div>
+                    </div>                      
                     <div>
                         <span id="spnConfirmPasswordErrors" class="form-text text-danger" v-for="error of v$.form.ConfirmPassword.$errors">{{ error.$message }}</span>
                     </div>
@@ -42,7 +54,7 @@
     import { required, sameAs, helpers } from '@vuelidate/validators'; 
     
     const { withAsync } = helpers;
-    const passwordFormat = helpers.regex(/^(?=.*[A-Za-z])(?=.*\d)[._()-\/#&$@+\w\s]{8,30}$/)
+    const passwordFormat = helpers.regex(/^(?=.*[A-Za-z])(?=.*\d)[._()-\/#&!$@+\w\s]{8,30}$/)
 
     export default {
         name: "ChangePassword",
@@ -58,6 +70,8 @@
                     Password: '',
                     ConfirmPassword: ''
                 },
+                isShowPassword: false,
+                isShowConfirmPassword: false,
                 showResetModal: false,
                 showSuccess: false
             }
