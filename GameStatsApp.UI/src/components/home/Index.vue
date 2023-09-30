@@ -77,7 +77,6 @@
         },
         data: function () {
             return {
-                welcomeModal: {},
                 width: document.documentElement.clientWidth,
                 height: document.documentElement.clientHeight
             };
@@ -101,11 +100,9 @@
 
             this.setDemoImages();
 
-            that.welcomeModal = new Modal(that.$refs.welcomemodal);
-
             if (that.indexvm.showWelcome) {
-                that.welcomeModal.show();
-            }            
+                new Modal(that.$refs.welcomemodal).show();
+            }  
         },        
         methods: {
             onResize: function() {

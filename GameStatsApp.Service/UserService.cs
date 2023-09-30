@@ -253,18 +253,19 @@ namespace GameStatsApp.Service
         public void SaveUserList(int userID, UserListViewModel userListVM)
         {
             var userList = new UserList();
+            var userLists = _userRepo.GetUserLists(i=> i.UserID == userID).ToList();
 
             if (userListVM.ID == 0)
-            {
+            {            
                 userList = new UserList() { UserID = userID, 
                                             Name = userListVM.Name,
                                             Active = userListVM.Active,
-                                            SortOrder = userListVM.SortOrder,
+                                            SortOrder = userLists.Count() + 1,
                                             CreatedDate = DateTime.UtcNow }; 
             }
             else
             {
-                userList = _userRepo.GetUserLists(i=> i.ID == userListVM.ID).FirstOrDefault();
+                userList = userLists.FirstOrDefault(i=> i.ID == userListVM.ID);
                 userList.Name = userListVM.Name;
                 userList.Active = userListVM.Active;
                 userList.SortOrder = userListVM.SortOrder;

@@ -54,11 +54,11 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <edit-user-list v-if="showEditModal" ref="editlist" :userlist="userList" @valid="onEditListValid"></edit-user-list>
+                        <edit-user-list ref="editlist" :userlist="userList" @saved="onEditListSaved"></edit-user-list>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary" @click="$refs.editlist.submitForm()">Submit</button>
+                        <button type="submit" class="btn btn-primary" @click="$refs.editlist.submitForm">Submit</button>
                     </div>                                     
                 </div>
             </div>
@@ -93,9 +93,6 @@
             return {
                 userLists: [],
                 userList: {},
-                editListModal: {},
-                showEditModal: false,
-                deleteListModal: {},   
                 selectedRow: -1,
                 throttleTimer: null,
                 throttleDelay: 300,                
@@ -110,18 +107,13 @@
         mounted: function () {
             var that = this;
 
-            that.$refs.editlistmodal.addEventListener('hidden.bs.modal', event => {
-                that.showEditModal = false;
-            }); 
-
-            that.$refs.editlistmodal.addEventListener('show.bs.modal', event => {
-                that.showEditModal = true;
-            }); 
+            document.addEventListener('click', that.handleClickOutside);    
             
-            document.addEventListener('click', that.handleClickOutside)
-            
-            that.editListModal = new Modal(that.$refs.editlistmodal, { backdrop: 'static' });
-            that.deleteListModal = new Modal(that.$refs.deletelistmodal, { backdrop: 'static' });              
+            // document.querySelectorAll('.modal').forEach(el => {
+            //     el.addEventListener('hidden.bs.modal', event => {
+            //         Modal.getInstance(event.target).dispose();
+            //     });
+            // });              
         },
         methods: {   
             loadData: function () {
@@ -136,45 +128,28 @@
                         return res;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            },  
-            saveData: function (result) {
-                var that = this;
-                var formData = getFormData(result);
-
-                return axios.post('/User/ManageUserLists', formData)
-                    .then((res) => {
-                        if (res.data.success) {
-                            that.editListModal.hide();
-                            successToast("Saved <strong>" + result.name + "</strong> list");                           
-                        } else {
-                            res.data.errorMessages.forEach(errorMsg => {
-                                errorToast(errorMsg);                           
-                            });                                
-                        }
-                        that.loadData();
-                    })
-                    .catch(err => { console.error(err); return Promise.reject(err); });
-            },                                  
+            },
+            onEditListSaved(result) {
+                Modal.getInstance(this.$refs.editlistmodal).hide();
+                this.loadData();
+            },                                
             onAddListClick() {
-                this.userList = { id: 0, name: '', active: true, sortOrder: this.userLists.length + 1 };
-                this.editListModal.show();
+                this.userList = { id: 0, name: '', active: true, sortOrder: 0 };
+                new Modal(this.$refs.editlistmodal, { backdrop: 'static' }).show();
             },                      
             onEditListClick(e, userList) {
                 this.userList = {...userList};
-                this.editListModal.show();
-            },
-            onEditListValid: function (result) {
-                this.saveData(result);
-            },                
+                new Modal(this.$refs.editlistmodal, { backdrop: 'static' }).show();
+            },            
             onShowDeleteListClick(e, userList) {
                 this.userList = userList;
-                this.deleteListModal.show();  
+                new Modal(this.$refs.deletelistmodal, { backdrop: 'static' }).show(); 
             },                                      
             onDeleteListClick(e, userList) {
                 var that = this;
                 return axios.post('/User/DeleteUserList', null,{ params: { userListID: userList.id } })
                     .then((res) => {
-                        that.deleteListModal.hide();
+                        Modal.getInstance(that.$refs.deletelistmodal).hide();
 
                         if (res.data.success) {
                             successToast("Deleted <strong>" + userList.name + "</strong> list");                           

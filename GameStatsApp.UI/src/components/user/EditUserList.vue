@@ -1,13 +1,13 @@
 ﻿<template>
-    <form ref="form" @submit.prevent="submitForm" autocomplete="off">
+    <form @submit.prevent="submitForm" autocomplete="off">
         <div class="form-check">
-            <input class="form-check-input" type="checkbox" v-model="form.active">
+            <input class="form-check-input" type="checkbox" v-model="form.active" />
             <label class="form-check-label">
                 Active
             </label>
         </div>
         <div class="mb-3">
-            <input type="text" class="form-control" autocomplete="off" v-model.lazy="form.name" @blur="v$.form.name.$touch"  aria-describedby="spnNameErrors">
+            <input type="text" class="form-control" autocomplete="off" v-model.lazy="form.name" @blur="v$.form.name.$touch"  aria-describedby="spnNameErrors" />
             <div>
                 <span id="spnNameErrors" class="form-text text-danger" v-for="error of v$.form.name.$errors">{{ error.$message }}</span>
             </div>
@@ -15,6 +15,7 @@
     </form>
 </template>
 <script>
+    import { getFormData, successToast, errorToast } from '../../js/common.js';
     import axios from 'axios';
     import useVuelidate from '@vuelidate/core';
     import { required, helpers } from '@vuelidate/validators';  
@@ -24,7 +25,7 @@
 
     export default {
         name: "EditUserList",
-        emits: ["valid"],
+        emits: ["saved"],
         props: {
             userlist: Object
         },
@@ -33,26 +34,54 @@
         },
         data() {
             return {
-                form: this.userlist
+                form: {
+                    id: 0,
+                    name: '',
+                    active: true,
+                    sortOrder: 0
+                }
             }
-        },               
+        },    
+        watch: {
+            userlist: {
+                handler(val, oldVal) {
+                    this.form.id = val.id;
+                    this.form.name = val.name;
+                    this.form.active = val.active;
+                    this.form.sortOrder = val.sortOrder;
+                    this.v$.$reset();
+                },
+                deep: true
+            }             
+        },                    
         mounted: function () {
         },
         methods: {
             async submitForm() {
                 const isValid = await this.v$.$validate()
-                if (isValid) {
-                    this.$emit('valid', this.form);
-                } else {
-                    return;
-                }
+                if (!isValid) return
+
+                var that = this;
+                var formData = getFormData(this.form);
+
+                return await axios.post('/User/ManageUserLists', formData).then((res) => {
+                    that.$emit('saved', res.data.success);
+                    if (res.data.success) {
+                        successToast("Saved <strong>" + that.form.name + "</strong> list");                           
+                    } else {
+                        res.data.errorMessages.forEach(errorMsg => {
+                            errorToast(errorMsg);                           
+                        });                                
+                    }
+                })
+                .catch(err => { console.error(err); return Promise.reject(err); });        
             },
             async userListNameNotExists(value) {  
                 if (value === '') {
                     return true; 
                 };            
 
-                return await axios.get('/User/UserListNameNotExists', { params: { userListID: this.userlist.id, userListName: value } })
+                return await axios.get('/User/UserListNameNotExists', { params: { userListID: this.form.id, userListName: value } })
                     .then(res => {
                         return Promise.resolve(res.data);
                     })
