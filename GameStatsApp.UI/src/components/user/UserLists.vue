@@ -51,7 +51,7 @@
                 </ul>
             </div>                
         </div>
-        <user-list-games ref="userlistgames" :userlists="userlists" :userlistid="selectedItemID" :emptycoverimagepath="emptycoverimagepath" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid"></user-list-games>           
+        <user-list-games ref="userlistgames" :userlists="userlists" :userlistid="selectedItemID" :emptycoverimagepath="emptycoverimagepath" :showimport="showimport"></user-list-games>           
     </div>
 </template>
 <script>
@@ -60,8 +60,7 @@
         props: {
             userlists: Array,
             emptycoverimagepath: String,
-            authsuccess: Boolean,
-            authaccounttypeid: Number
+            showimport: Boolean
         },
         data: function () {
             return {

@@ -18,9 +18,8 @@ namespace GameStatsApp.Model.ViewModels
         public string Username { get; set; }        
         public List<UserListViewModel> UserLists { get; set; }
         public string EmptyCoverImagePath { get; set; }
-        public bool ShowWelcome { get; set; } 
-        public bool? AuthSuccess { get; set; }
-        public int? AuthAccountTypeID { get; set; }
+        public bool ShowWelcome { get; set; }
+        public bool ShowImport { get; set; }
     }
 }
 

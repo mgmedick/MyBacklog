@@ -22,7 +22,7 @@
                             <span class="mx-auto useraccount-btn-text">{{ (importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.id] ? 'Importing ' : 'Import ') + 'Steam games' }}</span>
                         </div>
                         <div v-if="importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.relativeImportLastRunDateString" class="align-self-end">
-                            <small>{{ 'Imported ' + importGamesVM.userAccounts.find(i => i.accountTypeID == 1).relativeImportLastRunDateString }}</small>
+                            <small>{{ 'Imported ' + importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.relativeImportLastRunDateString }}</small>
                         </div>
                     </div>
                     <font-awesome-icon v-if="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.id]" icon="fa-solid fa-spinner" spin size="xl"/>
@@ -42,7 +42,7 @@
                             <span class="mx-auto useraccount-btn-text">{{ (importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.id] ? 'Importing ' : 'Import ') + 'Xbox games' }}</span>
                         </div>
                         <div v-if="importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.relativeImportLastRunDateString" class="align-self-end">
-                            <small>{{ 'Imported ' + importGamesVM.userAccounts.find(i => i.accountTypeID == 2).relativeImportLastRunDateString }}</small>
+                            <small>{{ 'Imported ' + importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.relativeImportLastRunDateString }}</small>
                         </div>
                     </div>
                     <font-awesome-icon v-if="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.id]" icon="fa-solid fa-spinner" spin size="xl"/>
@@ -82,23 +82,21 @@
         name: "ImportGames",
         emits: ["isimportingupdate"],
         props: {
-            isimportshown: Boolean,
-            authsuccess: Boolean,
-            authaccounttypeid: Number
         },
         data() {
             return {
-                importGamesVM: {},
+                importGamesVM: {
+                    userAccounts: [],
+                    steamAuthUrl: '',
+                    microsoftAuthUrl: '',
+                    authSuccess: null,
+                    authAccountTypeID: null
+                },
                 importingUserAccountIDs: JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {},
                 loading: false
             }
         },                                 
         watch: {
-            isimportshown: function (val, oldVal) {
-                if (val) {
-                    this.loadData();
-                }
-            },
             importingUserAccountIDs: {
                 handler(val, oldVal) {
                     sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(val));
@@ -107,31 +105,33 @@
                 },
                 deep: true
             }             
-        },          
-        created: function() {
-            var that = this;
-            that.loadData().then(i => {
-                if (that.authsuccess != null) {
-                    if (that.authsuccess) {
-                        that.importGames(that.authaccounttypeid);
-                    } else {            
-                        that.errorToast("Error authorizing account");       
-                    }
-                }
-            });
-        },         
+        },     
         mounted: function () {
             var that = this;
-
-            document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-                    new Tooltip(el);
-                });
-
+            
             window.addEventListener('importingUserAccountIDsUpdate', (event) => {
                 that.importingUserAccountIDs = JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {};
             });
         },        
-        methods: {       
+        methods: {
+            init: function() {
+                var that = this;
+                that.loadData().then(i => {
+                    that.$nextTick(function() {
+                        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+                            new Tooltip(el);
+                        });
+
+                        if (that.importGamesVM.authSuccess != null) {
+                            if (that.importGamesVM.authSuccess) {
+                                that.importGames(that.importGamesVM.authAccountTypeID);
+                            } else {            
+                                that.errorToast("Error authorizing account");       
+                            }
+                        }
+                    });
+                });
+            },       
             loadData: function () {
                 var that = this;
                 this.loading = true;

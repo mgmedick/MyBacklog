@@ -13,6 +13,8 @@ namespace GameStatsApp.Model.ViewModels
         public List<UserAccountViewModel> UserAccounts { get; set; }    
         public string MicrosoftAuthUrl { get; set; }  
         public string SteamAuthUrl { get; set; }
+        public bool? AuthSuccess { get; set; }
+        public int? AuthAccountTypeID { get; set; }        
     }
 }
 

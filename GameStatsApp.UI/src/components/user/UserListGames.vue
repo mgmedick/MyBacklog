@@ -102,7 +102,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <import-games :isimportshown="isImportShown" :authsuccess="authsuccess" :authaccounttypeid="authaccounttypeid" @isimportingupdate="onIsImportingUpdate"></import-games>
+                        <import-games ref="importgames" @isimportingupdate="onIsImportingUpdate"></import-games>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -135,7 +135,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <autocomplete ref="searchAutocomplete" v-model="searchText" @search="onSearch" @selected="onSearchSelected" :options="searchResults" :isasync="true" :isimgresults="true" :loading="searchLoading" :placeholder="'Search games'"/>    
+                        <autocomplete ref="searchautocomplete" v-model="searchText" @search="onSearch" @selected="onSearchSelected" :options="searchResults" :isasync="true" :isimgresults="true" :loading="searchLoading" :placeholder="'Search games'"/>    
                     </div>
                 </div>
             </div>
@@ -153,8 +153,7 @@
             userlistid: Number,
             userlists: Array,
             emptycoverimagepath: String,
-            authsuccess: Boolean,
-            authaccounttypeid: Number
+            showimport: Boolean
         },
         data: function () {
             return {
@@ -162,10 +161,6 @@
                 allgames: [],
                 game: {},
                 loading: false,
-                importModal: {},
-                isImportShown: false,
-                removeModal: {},
-                searchModal: {},
                 searchText: null,
                 searchResults: [],
                 searchLoading: false,
@@ -204,26 +199,18 @@
                 }
             });
 
-            that.$refs.searchmodal.addEventListener('show.bs.modal', event => {
-                that.isImportShown = true;
+            that.$refs.importmodal.addEventListener('show.bs.modal', event => {
+                that.$refs.importgames.init();
             }); 
 
             that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {
-                that.isImportShown = false;
-            });
-            
-            that.$refs.searchmodal.addEventListener('hidden.bs.modal', event => {
-                that.$refs.searchAutocomplete.clear();
+                that.$refs.searchautocomplete.clear();
             });            
 
             window.addEventListener('resize', that.onResize);
-
-            that.importModal = new Modal(that.$refs.importmodal);
-            that.removeModal = new Modal(that.$refs.removemodal);
-            that.searchModal = new Modal(that.$refs.searchmodal);         
             
-            if (that.authsuccess != null) {
-                that.importModal.show();
+            if (that.showimport) {
+                new Modal(that.$refs.importmodal).show();
             }
         },  
         updated: function() {
@@ -298,7 +285,7 @@
                 }
             },  
             onImportClick(e) {
-                this.importModal.show();
+                new Modal(this.$refs.importmodal).show();
             },
             onDeleteClick(e, game) {
                 var that = this;
@@ -306,7 +293,7 @@
                 
                 if (!el.closest('.delete-icon').classList.contains('d-none')){
                     that.game = game;
-                    that.removeModal.show();
+                    new Modal(that.$refs.removemodal).show();
                 }
             },
             onRemoveGameClick(e, game) {
@@ -323,7 +310,7 @@
                 }
             },
             onSearchGamesClick(e){
-                this.searchModal.show();
+                new Modal(this.$refs.searchmodal).show();
             },         
             onSearch: function() {
                 var that = this;
@@ -430,8 +417,8 @@
                                 that.sortGames();
                             }
 
-                            that.searchModal.hide();
-                            
+                            Modal.getInstance(that.$refs.searchmodal).hide();
+
                             var userList = that.userlists.find(i => i.id == userListID);
                             successToast("Added <strong>" + result.name + "</strong> to <strong>" + userList.name + "</strong>");
                         } else {       
@@ -504,7 +491,7 @@
                                 errorToast(errorMsg);                           
                             });                           
                         }   
-                        that.removeModal.hide();  
+                        Modal.getInstance(that.$refs.removemodal).hide();                                           
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });                
             },

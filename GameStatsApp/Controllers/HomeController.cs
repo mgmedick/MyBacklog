@@ -51,11 +51,10 @@ namespace GameStatsApp.Controllers
                 indexVM.Username = User.FindFirstValue(ClaimTypes.Name);
                 indexVM.UserLists = _userService.GetUserLists(userID).Where(i => i.Active).ToList();
                 indexVM.EmptyCoverImagePath = _config.GetSection("SiteSettings").GetSection("EmptyCoverImagePath").Value;
-
-                if (TempData["AuthSuccess"] != null) {
-                    indexVM.AuthSuccess = (bool)TempData["AuthSuccess"];
-                    indexVM.AuthAccountTypeID = (int)TempData["AuthAccountTypeID"];
-                }
+                
+                if (TempData["ShowImport"] != null) {
+                    indexVM.ShowImport = true;
+                }   
 
                 if (TempData["ShowWelcome"] != null) {
                     indexVM.ShowWelcome = true;

@@ -107,13 +107,7 @@
         mounted: function () {
             var that = this;
 
-            document.addEventListener('click', that.handleClickOutside);    
-            
-            // document.querySelectorAll('.modal').forEach(el => {
-            //     el.addEventListener('hidden.bs.modal', event => {
-            //         Modal.getInstance(event.target).dispose();
-            //     });
-            // });              
+            document.addEventListener('click', that.handleClickOutside);            
         },
         methods: {   
             loadData: function () {

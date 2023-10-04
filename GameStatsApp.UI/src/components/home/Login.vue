@@ -65,15 +65,12 @@
                     Password: ''
                 },
                 isShowPassword: false,
-                loadingModal: {},
                 errorMessages: [],
                 width: document.documentElement.clientWidth
             }
         },
         mounted: function () {
             var that = this;
-
-            this.loadingModal = new Modal(this.$refs.loadingmodal);
 
             this.createGoogleLoginScript().then(function() {
                 window.google.accounts.id.initialize({
@@ -123,7 +120,7 @@
             },
             checkFBLoginState() {
                 var that = this;
-                this.loadingModal.show();
+                new Modal(this.$refs.loadingmodal).show();
 
                 FB.getLoginStatus(function(response) {
                     that.handleFacebookCredentialResponse(response);
@@ -135,8 +132,8 @@
                 if (response && response.status == 'connected') { 
                         this.loginOrSignUpWithSocial(response.authResponse.accessToken, 2);
                 } else {
-                    errorToast("Failed to connect");                           
-                    that.loadingModal.hide();
+                    errorToast("Failed to connect");   
+                    Modal.getInstance(that.$refs.loadingmodal).hide();                                           
                 }
             },            
             async handleGoogleCredentialResponse(response) {
@@ -144,7 +141,7 @@
             },
             async loginOrSignUpWithSocial(accessToken, socialAccountTypeID) {
                 var that = this;
-                this.loadingModal.show();
+                new Modal(this.$refs.loadingmodal).show();
 
                 axios.post('/Home/LoginOrSignUpWithSocial', null,{ params: { accessToken: accessToken, socialAccountTypeID: socialAccountTypeID } })
                     .then((res) => {
@@ -155,7 +152,7 @@
                                 errorToast(errorMsg);                           
                             });                          
                         }
-                        that.loadingModal.hide();
+                        Modal.getInstance(that.$refs.loadingmodal).hide();                                           
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },        

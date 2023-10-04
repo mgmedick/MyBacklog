@@ -92,8 +92,7 @@
                     ConfirmPassword: ''
                 },
                 isShowPassword: false,
-                isShowConfirmPassword: false,
-                loadingModal: {}
+                isShowConfirmPassword: false
             }
         },
         computed: {
@@ -101,7 +100,6 @@
         created: function () {
         },
         mounted: function () {
-            this.loadingModal = new Modal(this.$refs.loadingmodal);
         },        
         methods: {
             async submitForm() {
@@ -110,7 +108,7 @@
 
                 var that = this;
                 var formData = getFormData(this.form);
-                this.loadingModal.show();
+                new Modal(this.$refs.loadingmodal).show();
 
                 axios.post('/Home/Activate', formData)
                     .then((res) => {
@@ -121,8 +119,8 @@
                                 errorToast(errorMsg);                           
                             });                              
                         }
-                                                                        
-                        that.loadingModal.hide();
+                        
+                        Modal.getInstance(that.$refs.loadingmodal).hide();                                           
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },

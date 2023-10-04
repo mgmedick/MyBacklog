@@ -41,7 +41,7 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpGet]
-        public ViewResult UserSettings(bool? authSuccess = null)
+        public ViewResult UserSettings()
         {
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
@@ -159,12 +159,20 @@ namespace GameStatsApp.Controllers
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var microsoftRedirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectUri").Value;
             var steamRedirectUrl = _config.GetSection("Auth").GetSection("Steam").GetSection("RedirectUri").Value;
-      
+
             var importGamesVM = new ImportGamesViewModel() {
                 UserAccounts = _userService.GetUserAccounts(userID).ToList(),
                 MicrosoftAuthUrl = _authService.GetMicrosoftAuthUrl(microsoftRedirectUrl),
                 SteamAuthUrl = _authService.GetSteamAuthUrl(steamRedirectUrl)
             };
+
+            if (HttpContext.Session.Keys.Contains("AuthSuccess"))
+            {
+                importGamesVM.AuthSuccess = HttpContext.Session.Get<bool>("AuthSuccess");
+                importGamesVM.AuthAccountTypeID = HttpContext.Session.Get<int>("AuthAccountTypeID");
+                HttpContext.Session.Remove("AuthSuccess");
+                HttpContext.Session.Remove("AuthAccountTypeID");
+            }
 
             return Json(importGamesVM);
         }
@@ -236,8 +244,9 @@ namespace GameStatsApp.Controllers
                 success = false;
             }   
 
-            TempData.Add("AuthSuccess", success);
-            TempData.Add("AuthAccountTypeID", (int)AccountType.Xbox);
+            HttpContext.Session.Set<bool>("AuthSuccess", success); 
+            HttpContext.Session.Set<int>("AuthAccountTypeID", (int)AccountType.Xbox); 
+            TempData.Add("ShowImport", true);
 
             return RedirectToAction("Index", "Home");
         }
@@ -270,8 +279,9 @@ namespace GameStatsApp.Controllers
                 success = false;
             }   
 
-            TempData.Add("AuthSuccess", success);
-            TempData.Add("AuthAccountTypeID", (int)AccountType.Steam);
+            HttpContext.Session.Set<bool>("AuthSuccess", success); 
+            HttpContext.Session.Set<int>("AuthAccountTypeID", (int)AccountType.Steam); 
+            TempData.Add("ShowImport", true);
 
             return RedirectToAction("Index", "Home");
         }        
