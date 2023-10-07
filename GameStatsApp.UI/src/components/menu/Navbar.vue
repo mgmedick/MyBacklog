@@ -3,7 +3,8 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="/" draggable="false">
                 <font-awesome-icon icon="fa-solid fa-cube" class="me-2"/>
-                mybacklog.io
+                <span class="me-2">mybacklog.io</span>
+                <span v-if="isdemo" class="text-warning">demo</span>
             </a>
             <button class="navbar-toggler" type="button" @click="toggleNavbar = !toggleNavbar" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -37,7 +38,10 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/SignUp">Sign Up</a>
-                        </li>                  
+                        </li>          
+                        <li class="nav-item">
+                            <a class="nav-link" href="#/" @click="onDemoClick">Demo</a>
+                        </li>                                      
                     </ul>
                 </div>
             </div>
@@ -53,7 +57,8 @@
         props: {
             isauth: Boolean,
             username: String,
-            userid: String
+            userid: String,
+            isdemo: Boolean
         },
         data: function () {
             return {
@@ -104,12 +109,25 @@
             }
         },        
         methods: {
+            onDemoClick() {
+                axios.post('/Home/LoginDemo')
+                    .then((res) => {
+                        if (res.data.success) {
+                            location.href = '/';
+                        } else {
+                            res.data.errorMessages.forEach(errorMsg => {
+                                errorToast(errorMsg);                           
+                            }); 
+                        }
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
+            },
             onInput: function(e){
                 this.searchText = e;
             },
             onChange: function() {
                 var a = this.searchText;
-            },
+            },            
             onSearch: function() {
                 var that = this;
                 this.searchLoading = true;
@@ -148,7 +166,7 @@
                 }
                 
                 location.href = encodeURI('/' + controller + "/" + action + "/" + result.value);
-            },            
+            },           
             toggleDropdown(e) {
                 this.state = !this.state
             }

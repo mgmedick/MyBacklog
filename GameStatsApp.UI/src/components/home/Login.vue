@@ -7,7 +7,7 @@
                     <label for="txtEmail" class="form-label">Email</label>
                     <input id="txtEmail" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Email" @blur="v$.form.Email.$touch" aria-describedby="spnEmailErrors">
                     <div>
-                        <span id="spnEmailErrors" class="form-text text-danger" v-for="error of v$.form.Email.$errors">{{ error.$message }}</span>
+                        <div id="spnEmailErrors" class="form-text text-danger" v-for="error of v$.form.Email.$errors">{{ error.$message }}</div>
                     </div>
                 </div>
                 <div class="mb-3">
@@ -20,7 +20,7 @@
                         </div>
                     </div>                     
                     <div>
-                        <span id="spnPasswordErrors" class="form-text text-danger" v-for="error of v$.form.Password.$errors">{{ error.$message }}</span>
+                        <div id="spnPasswordErrors" class="form-text text-danger" v-for="error of v$.form.Password.$errors">{{ error.$message }}</div>
                     </div>
                     <div>
                         <a :href="'/Home/ResetPassword?email=' + form.Email" class="link-dark small">Forgot your password?</a>

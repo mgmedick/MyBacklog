@@ -9,7 +9,7 @@
         <div class="mb-3">
             <input type="text" class="form-control" autocomplete="off" v-model.lazy="form.name" @blur="v$.form.name.$touch"  aria-describedby="spnNameErrors" />
             <div>
-                <span id="spnNameErrors" class="form-text text-danger" v-for="error of v$.form.name.$errors">{{ error.$message }}</span>
+                <div id="spnNameErrors" class="form-text text-danger" v-for="error of v$.form.name.$errors">{{ error.$message }}</div>
             </div>
         </div>      
     </form>
@@ -77,7 +77,7 @@
                 .catch(err => { console.error(err); return Promise.reject(err); });        
             },
             async userListNameNotExists(value) {  
-                if (value === '') {
+                if (value === '' || value == this.userlist.name) {
                     return true; 
                 };            
 

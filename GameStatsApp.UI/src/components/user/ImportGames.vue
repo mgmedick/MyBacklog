@@ -9,7 +9,7 @@
         </div>
         <div v-else class="row g-2 justify-content-center mb-3">  
             <div class="d-flex mb-1">
-                <font-awesome-icon icon="fa-solid fa-triangle-exclamation me-1" size="lg" class="text-warning me-2"/>
+                <font-awesome-icon icon="fa-solid fa-triangle-exclamation" size="lg" class="text-warning me-2"/>
                 <div class="align-self-end text-center text-xs text-muted">
                     <span>Your Steam Profile must be <a href="https://help.steampowered.com/en/faqs/view/588C-C67D-0251-C276">Public</a> to import Steam games</span>
                 </div>

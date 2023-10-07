@@ -13,12 +13,14 @@ namespace GameStatsApp.Interfaces.Services
     {
         Task SendActivationEmail(string email);
         ActivateViewModel GetActivateUser(string email, long expirationTime, string token);
-        void CreateUser(string email, string username, string pass);
+        int CreateDemoUser();
+        int CreateUser(string email, string username, string pass);
         IEnumerable<UserView> GetUserViews(Expression<Func<UserView, bool>> predicate);        
         Task SendResetPasswordEmail(string email);
         ChangePasswordViewModel GetChangePassword(string email, long expirationTime, string token);
         void ChangeUserPassword(string email, string pass);
-        void ChangeUsername(string email, string username);
+        void ChangeUsername(int userID, string username);
+        void DeleteUser(int userID);
         UserListGameViewModel AddNewGameToUserList(int userID, int userListID, int gameID);
         void AddGameToUserList(int userID, int userListID, int gameID);
         void RemoveGameFromUserList(int userID, int userListID, int gameID);

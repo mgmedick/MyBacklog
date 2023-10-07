@@ -5,9 +5,9 @@
             <input v-if="editUsername" id="txtUserName" type="text" class="form-control fs-5" autocomplete="off" v-model.lazy="form.Username" @blur="onUserNameBlur" aria-describedby="spnUserNameErrors">
             <label v-else class="form-control fs-5 border-0 ps-0 w-auto">{{ form.Username }}</label>
             <font-awesome-icon icon="fa-solid fa-square-pen" size="lg" @click="editUsername = !editUsername"/>
-            <div>
-                <span id="spnUserNameErrors" class="form-text text-danger" v-for="error of v$.form.Username.$errors">{{ error.$message }}</span>
-            </div>
+        </div>
+        <div class="ms-5">
+            <div id="spnUserNameErrors" class="form-text text-danger" v-for="error of v$.form.Username.$errors">{{ error.$message }}</div>
         </div>
     </form>
 </template>
@@ -18,7 +18,7 @@
     import { required, helpers, sameAs } from '@vuelidate/validators';  
     
     const { withAsync } = helpers;
-    const usernameFormat = helpers.regex(/^[._()-\/#&$@+\w\s]{3,30}$/)
+    const usernameFormat = helpers.regex(/^[._()-\/#&!$@+%^=[{\]};:>|?\w\s]{3,30}$/)
 
     export default {
         name: "ChangeUsername",
@@ -71,7 +71,7 @@
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },
             async usernameNotExists(value) {  
-                if (value === '') {
+                if (value === '' || value == this.username) {
                     return true; 
                 };
 

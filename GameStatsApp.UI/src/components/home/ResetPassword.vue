@@ -7,7 +7,7 @@
                     <label for="txtEmail" class="form-label">Email</label>
                     <input id="txtEmail" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Email" @blur="v$.form.Email.$touch" aria-describedby="spnEmailErrors">
                     <div>
-                        <small id="spnEmailErrors" class="form-text text-danger" v-for="error of v$.form.Email.$errors">{{ error.$message }}</small>
+                        <div id="spnEmailErrors" class="form-text text-danger" v-for="error of v$.form.Email.$errors">{{ error.$message }}</div>
                     </div>
                 </div>
                 <div class="row g-2 justify-content-center mb-3 mx-auto">

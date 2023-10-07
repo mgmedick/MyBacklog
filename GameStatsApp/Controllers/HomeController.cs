@@ -47,11 +47,15 @@ namespace GameStatsApp.Controllers
             if (indexVM.IsAuth)
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));            
+                var email = User.FindFirstValue(ClaimTypes.Email);         
+                var emailDomain = _config.GetSection("SiteSettings").GetSection("EmailDomain").Value;            
+
                 indexVM.UserID = userID;
                 indexVM.Username = User.FindFirstValue(ClaimTypes.Name);
                 indexVM.UserLists = _userService.GetUserLists(userID).Where(i => i.Active).ToList();
                 indexVM.EmptyCoverImagePath = _config.GetSection("SiteSettings").GetSection("EmptyCoverImagePath").Value;
-                
+                indexVM.IsDemo = email.EndsWith("demo@" + emailDomain);
+
                 if (TempData["ShowImport"] != null) {
                     indexVM.ShowImport = true;
                 }   
@@ -121,6 +125,30 @@ namespace GameStatsApp.Controllers
             return Json(new { success = success, errorMessages = errorMessages });
         }
 
+        [HttpPost]
+        public JsonResult LoginDemo()
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {
+                var userID = _userService.CreateDemoUser();
+                var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
+                LoginUser(userVW);
+                success = true;
+                TempData.Add("ShowWelcome", true); 
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "LoginDemo");
+                success = false;
+                errorMessages = new List<string>() { "Error logging demo user in." };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
+        }
+
         [HttpGet]
         public async Task<ActionResult> Logout()
         {
@@ -128,6 +156,15 @@ namespace GameStatsApp.Controllers
             var baseUrl = string.Format("{0}://{1}{2}", Request.Scheme, Request.Host, Request.PathBase);
             var refUrl = Request.Headers["Referer"].ToString();
             var url = !string.IsNullOrWhiteSpace(refUrl) ? refUrl : baseUrl;
+            
+            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));            
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var emailDomain = _config.GetSection("SiteSettings").GetSection("EmailDomain").Value;
+            var isDemo = email.EndsWith("demo@" + emailDomain);
+
+            if (isDemo) {
+                _userService.DeleteUser(userID);
+            }
 
             return Redirect(url);
         }
@@ -214,9 +251,8 @@ namespace GameStatsApp.Controllers
                             username += '_' + ((String)result.Email).GetHashCode();
                         }
                         var pass = StringExtensions.GeneratePassword(15, 2);
-
-                        _userService.CreateUser(result.Email, username, pass);
-                        userVW = _userService.GetUserViews(i => i.Email == result.Email).FirstOrDefault();
+                        var userID = _userService.CreateUser(result.Email, username, pass);
+                        userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
                         LoginUser(userVW);
                         _ = _userService.SendConfirmRegistrationEmail(userVW.Email, userVW.Username).ContinueWith(t => _logger.Error(t.Exception, "SendConfirmRegistrationEmail"), TaskContinuationOptions.OnlyOnFaulted);
                         isNewUser = true;
@@ -271,8 +307,8 @@ namespace GameStatsApp.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    _userService.CreateUser(activateUserVM.Email, activateUserVM.Username, activateUserVM.Password);
-                    var userVW = _userService.GetUserViews(i => i.Email == activateUserVM.Email).FirstOrDefault();
+                    var userID = _userService.CreateUser(activateUserVM.Email, activateUserVM.Username, activateUserVM.Password);
+                    var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
                     LoginUser(userVW);
                     _ = _userService.SendConfirmRegistrationEmail(userVW.Email, userVW.Username).ContinueWith(t => _logger.Error(t.Exception, "SendConfirmRegistrationEmail"), TaskContinuationOptions.OnlyOnFaulted);
                     success = true;
@@ -388,7 +424,7 @@ namespace GameStatsApp.Controllers
 
             try
             {
-                var email = User.FindFirstValue(ClaimTypes.Email);
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));            
                 if (_userService.UsernameExists(changeUsernameVM.Username, false))
                 {
                     ModelState.AddModelError("Activate", "Username already exists for another user");
@@ -396,8 +432,8 @@ namespace GameStatsApp.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    _userService.ChangeUsername(email, changeUsernameVM.Username);
-                    var userVW = _userService.GetUserViews(i => i.Email == email).FirstOrDefault();
+                    _userService.ChangeUsername(userID, changeUsernameVM.Username);
+                    var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
                     LoginUser(userVW);
                     success = true;
                 }
@@ -432,7 +468,7 @@ namespace GameStatsApp.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(identity));
         }
-        
+
         [AllowAnonymous]
         [HttpGet]
         public IActionResult ActiveEmailExists(string email)

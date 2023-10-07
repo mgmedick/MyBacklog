@@ -124,7 +124,19 @@ namespace GameStatsApp.Service
             return _userRepo.GetUserViews(predicate);
         }
 
-        public void CreateUser(string email, string username, string pass)
+        public int CreateDemoUser()
+        {
+            var emailDomain = _config.GetSection("SiteSettings").GetSection("EmailDomain").Value;
+            var username = StringExtensions.GeneratePassword(10, 0) + "demo";
+            var email = string.Format("{0}@{1}", username, emailDomain);
+            var password = StringExtensions.GeneratePassword(15, 2);
+
+            var userID = CreateUser(email, username, password);
+
+            return userID;     
+        }
+
+        public int CreateUser(string email, string username, string pass)
         {
             var user = new User()
             {
@@ -151,29 +163,51 @@ namespace GameStatsApp.Service
                                                                    Active = true,
                                                                    CreatedDate = DateTime.UtcNow }).ToList();
 
-            _userRepo.SaveUserLists(userLists);      
+            _userRepo.SaveUserLists(userLists);    
+
+            return user.ID;  
         }
 
         public void ChangeUserPassword(string email, string pass)
         {
             var user = _userRepo.GetUsers(i => i.Email == email).FirstOrDefault();
-            user.Password = pass.HashString();
-            user.ModifiedBy = user.ID;
-            user.ModifiedDate = DateTime.UtcNow;
+            if (user != null)
+            {
+                user.Password = pass.HashString();
+                user.ModifiedBy = user.ID;
+                user.ModifiedDate = DateTime.UtcNow;
 
-            _userRepo.SaveUser(user);
+                _userRepo.SaveUser(user);
+            }
         }
 
-        public void ChangeUsername(string email, string username)
+        public void ChangeUsername(int userID, string username)
         {
-            var user = _userRepo.GetUsers(i => i.Email == email).FirstOrDefault();
-            user.Username = username; 
-            user.ModifiedBy = user.ID;
-            user.ModifiedDate = DateTime.UtcNow;
+            var user = _userRepo.GetUsers(i => i.ID == userID).FirstOrDefault();
+            if (user != null)
+            {
+                user.Username = username; 
+                user.ModifiedBy = user.ID;
+                user.ModifiedDate = DateTime.UtcNow;
 
-            _userRepo.SaveUser(user);
+                _userRepo.SaveUser(user);
+            }            
         }        
           
+        public void DeleteUser(int userID)
+        {
+            var user = _userRepo.GetUsers(i => i.ID == userID).FirstOrDefault();
+            if (user != null)
+            {
+                user.Active = false; 
+                user.Deleted = true; 
+                user.ModifiedBy = user.ID;
+                user.ModifiedDate = DateTime.UtcNow;
+
+                _userRepo.SaveUser(user);
+            }
+        }
+
         public void SaveUserAccount(int userID, int accountTypeID, TokenResponse tokenResponse)
         {
             var userAccount = _userRepo.GetUserAccounts(i => i.UserID == userID && i.AccountTypeID == accountTypeID).FirstOrDefault();

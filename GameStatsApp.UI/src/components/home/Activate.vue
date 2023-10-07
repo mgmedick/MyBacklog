@@ -11,7 +11,7 @@
                     <label for="txtUserName" class="form-label">Username</label>
                     <input id="txtUserName" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Username" @blur="v$.form.Username.$touch" aria-describedby="spnUserNameErrors">
                     <div>
-                        <span id="spnUserNameErrors" class="form-text text-danger" v-for="error of v$.form.Username.$errors">{{ error.$message }}</span>
+                        <div id="spnUserNameErrors" class="form-text text-danger" v-for="error of v$.form.Username.$errors">{{ error.$message }}</div>
                     </div>
                 </div>
                 <div class="mb-2">
@@ -24,7 +24,7 @@
                         </div>
                     </div>
                     <div>
-                        <span id="spnPasswordErrors" class="form-text text-danger" v-for="error of v$.form.Password.$errors">{{ error.$message }}</span>
+                        <div id="spnPasswordErrors" class="form-text text-danger" v-for="error of v$.form.Password.$errors">{{ error.$message }}</div>
                     </div>
                 </div>
                 <div class="mb-3">
@@ -37,7 +37,7 @@
                         </div>
                     </div>                    
                     <div>
-                        <span id="spnConfirmPasswordErrors" class="form-text text-danger" v-for="error of v$.form.ConfirmPassword.$errors">{{ error.$message }}</span>
+                        <div id="spnConfirmPasswordErrors" class="form-text text-danger" v-for="error of v$.form.ConfirmPassword.$errors">{{ error.$message }}</div>
                     </div>
                 </div>
                 <div class="row g-2 justify-content-center mb-3 mx-auto">
@@ -134,11 +134,7 @@
                         return Promise.resolve(res.data);
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            },
-            onShowPasswordClick(userListID) {
-                this.selectedItemID = userListID;
-                localStorage.setItem('selectedUserListID', userListID.toString());
-            },                                                                                                                                  
+            }                                                                                                                                                        
         },
         validations() {
             return {

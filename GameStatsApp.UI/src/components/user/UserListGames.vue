@@ -166,8 +166,8 @@
                 searchLoading: false,
                 filterText: null,
                 showFilterText: false,
-                orderByDesc: localStorage.getItem('orderByDesc') ? localStorage.getItem('orderByDesc') == 'true' : false,             
-                orderByID: localStorage.getItem('orderByID') ?? 0,
+                orderByDesc: sessionStorage.getItem('orderByDesc') ? sessionStorage.getItem('orderByDesc') == 'true' : false,             
+                orderByID: sessionStorage.getItem('orderByID') ?? 0,
                 isImporting: Object.keys(JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {}).length > 0,
                 width: document.documentElement.clientWidth,
                 height: document.documentElement.clientHeight
@@ -337,12 +337,12 @@
             },
             onOrderByDescClick(e){
                 this.orderByDesc = !this.orderByDesc;
-                localStorage.setItem('orderByDesc', this.orderByDesc.toString());
+                sessionStorage.setItem('orderByDesc', this.orderByDesc.toString());
                 this.sortGames();                
             },            
             onOrderByOptionClick(e, val){
                 this.orderByID = val;
-                localStorage.setItem('orderByID', this.orderByID.toString());
+                sessionStorage.setItem('orderByID', this.orderByID.toString());
                 this.sortGames();                
             },
             onShowFilterTextClick(e) {

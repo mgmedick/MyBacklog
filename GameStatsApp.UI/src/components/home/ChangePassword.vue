@@ -13,7 +13,7 @@
                         </div>
                     </div>                    
                     <div>
-                        <span id="spnPasswordErrors" class="form-text text-danger" v-for="error of v$.form.Password.$errors">{{ error.$message }}</span>
+                        <div id="spnPasswordErrors" class="form-text text-danger" v-for="error of v$.form.Password.$errors">{{ error.$message }}</div>
                     </div>
                 </div>
                 <div class="mb-3">
@@ -26,7 +26,7 @@
                         </div>
                     </div>                      
                     <div>
-                        <span id="spnConfirmPasswordErrors" class="form-text text-danger" v-for="error of v$.form.ConfirmPassword.$errors">{{ error.$message }}</span>
+                        <div id="spnConfirmPasswordErrors" class="form-text text-danger" v-for="error of v$.form.ConfirmPassword.$errors">{{ error.$message }}</div>
                     </div>
                 </div>
                 <div class="row g-2 justify-content-center mb-3 mx-auto">
@@ -54,7 +54,7 @@
     import { required, sameAs, helpers } from '@vuelidate/validators'; 
     
     const { withAsync } = helpers;
-    const passwordFormat = helpers.regex(/^(?=.*[A-Za-z])(?=.*\d)[._()-\/#&!$@+\w\s]{8,30}$/)
+    const passwordFormat = helpers.regex(/^(?=.*[A-Za-z])(?=.*\d)[._()-\/#&!$@+%^=[{\]};:>|?\w\s]{8,30}$/)
 
     export default {
         name: "ChangePassword",

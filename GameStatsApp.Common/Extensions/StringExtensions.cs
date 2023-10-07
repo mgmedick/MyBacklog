@@ -49,74 +49,57 @@ namespace GameStatsApp.Common.Extensions
             result = string.Join(string.Empty, baHashedText.ToList().Select(b => b.ToString("x2")).ToArray());
             return result;
         }
-        
-        public static string GeneratePassword(int length, int numberOfNonAlphanumericCharacters)
+                
+        public static string GeneratePassword(int Length, int NonAlphaNumericChars)
         {
-            var punctuations = "!@#$%^&*()_-+=[{]};:>|./?".ToCharArray();
-            if (length < 1 || length > 128)
+            string allowedChars = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ0123456789";
+            string allowedNonAlphaNum = "._()-/#&*!$@+%^=[{]};:>|?";
+            Random rd = new Random();
+
+            if (NonAlphaNumericChars > Length || Length <= 0 || NonAlphaNumericChars < 0)
+                throw new ArgumentOutOfRangeException();
+
+            char[] pass = new char[Length];
+            int[] pos = new int[Length];
+            int i = 0, j = 0, temp = 0;
+            bool flag = false;
+
+            //Random the position values of the pos array for the string Pass
+            while (i < Length - 1)
             {
-                throw new ArgumentException(nameof(length));
+                j = 0;
+                flag = false;
+                temp = rd.Next(0, Length);
+                for (j = 0; j < Length; j++)
+                    if (temp == pos[j])
+                    {
+                        flag = true;
+                        j = Length;
+                    }
+
+                if (!flag)
+                {
+                    pos[i] = temp;
+                    i++;
+                }
             }
 
-            if (numberOfNonAlphanumericCharacters > length || numberOfNonAlphanumericCharacters < 0)
-            {
-                throw new ArgumentException(nameof(numberOfNonAlphanumericCharacters));
-            }
+            //Random the AlphaNumericChars
+            for (i = 0; i < Length - NonAlphaNumericChars; i++)
+                pass[i] = allowedChars[rd.Next(0, allowedChars.Length)];
 
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                var byteBuffer = new byte[length];
+            //Random the NonAlphaNumericChars
+            for (i = Length - NonAlphaNumericChars; i < Length; i++)
+                pass[i] = allowedNonAlphaNum[rd.Next(0, allowedNonAlphaNum.Length)];
 
-                rng.GetBytes(byteBuffer);
+            //Set the sorted array values by the pos array for the rigth posistion
+            char[] sorted = new char[Length];
+            for (i = 0; i < Length; i++)
+                sorted[i] = pass[pos[i]];
 
-                var count = 0;
-                var characterBuffer = new char[length];
+            string Pass = new String(sorted);
 
-                for (var iter = 0; iter < length; iter++)
-                {
-                    var i = byteBuffer[iter] % 87;
-
-                    if (i < 10)
-                    {
-                        characterBuffer[iter] = (char)('0' + i);
-                    }
-                    else if (i < 36)
-                    {
-                        characterBuffer[iter] = (char)('A' + i - 10);
-                    }
-                    else if (i < 62)
-                    {
-                        characterBuffer[iter] = (char)('a' + i - 36);
-                    }
-                    else
-                    {
-                        characterBuffer[iter] = punctuations[i - 62];
-                        count++;
-                    }
-                }
-
-                if (count >= numberOfNonAlphanumericCharacters)
-                {
-                    return new string(characterBuffer);
-                }
-
-                int j;
-                var rand = new Random();
-
-                for (j = 0; j < numberOfNonAlphanumericCharacters - count; j++)
-                {
-                    int k;
-                    do
-                    {
-                        k = rand.Next(0, length);
-                    }
-                    while (!char.IsLetterOrDigit(characterBuffer[k]));
-
-                    characterBuffer[k] = punctuations[rand.Next(0, punctuations.Length)];
-                }
-
-                return new string(characterBuffer);
-            }
-        }      
+            return Pass;
+        }        
     }
 }

@@ -2,9 +2,14 @@
     <div class="mx-auto">
         <h3 class="text-center mb-1">Welcome to mybacklog.io</h3>
         <div class="mx-auto" style="max-width:400px;">
-            <div class="mb-3">
-                <change-username :username="username"></change-username>
-            </div>      
+            <div v-if="isdemo">
+                <div class="mx-auto text-center mb-3">
+                    <div class="d-flex">
+                        <font-awesome-icon icon="fa-solid fa-triangle-exclamation" size="lg" class="text-warning me-2"/>
+                        <div class="text-dark"><span>You are in Demo mode so your changes won't be retained beyond this session</span></div>
+                    </div>
+                </div>
+            </div>       
             <div class="text-center">
                 <span class="lead text-dark">Instructions:</span>
             </div>            
@@ -23,7 +28,8 @@
     export default {
         name: "Welcome",
         props: {
-            username: String
+            username: String,
+            isdemo: Boolean
         },
         data() {
             return {
