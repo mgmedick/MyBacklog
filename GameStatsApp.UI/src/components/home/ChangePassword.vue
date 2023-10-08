@@ -62,13 +62,17 @@
             return { v$: useVuelidate() }
         },
         props: {
-            islinkvalid: Boolean
+            islinkvalid: Boolean,
+            email: String,
+            emailtoken: String
         },
         data() {
             return {
                 form: {
                     Password: '',
-                    ConfirmPassword: ''
+                    ConfirmPassword: '',
+                    Email: this.email,
+                    EmailToken: this.emailtoken
                 },
                 isShowPassword: false,
                 isShowConfirmPassword: false,
@@ -105,7 +109,7 @@
                     return true; 
                 };
 
-                return await axios.get('/Home/PasswordNotMatches', { params: { password: value } })
+                return await axios.get('/Home/PasswordNotMatches', { params: { password: value, email: this.form.Email } })
                     .then(res => {
                         return res.data;
                     })

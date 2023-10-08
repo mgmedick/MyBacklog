@@ -16,7 +16,8 @@ namespace GameStatsApp.Model.ViewModels
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Confirm Password required")]
         public string ConfirmPassword { get; set; }
-
+        public string Email { get; set; }
+        public string EmailToken { get; set; }
         public bool IsValid { get; set; }
     }
 }

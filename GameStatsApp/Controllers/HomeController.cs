@@ -43,7 +43,10 @@ namespace GameStatsApp.Controllers
             indexVM.IndexDemoImagePath = _config.GetSection("SiteSettings").GetSection("IndexDemoImagePath").Value;
             indexVM.ImportDemoImagePath = _config.GetSection("SiteSettings").GetSection("ImportDemoImagePath").Value;
             indexVM.SettingsDemoImagePath = _config.GetSection("SiteSettings").GetSection("SettingsDemoImagePath").Value;
-            
+            var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
+            indexVM.DemoKey = StringExtensions.GeneratePassword(10, 0);
+            indexVM.DemoToken = indexVM.DemoKey.GetHMACSHA256Hash(hashKey);
+
             if (indexVM.IsAuth)
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));            
@@ -126,18 +129,22 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpPost]
-        public JsonResult LoginDemo()
+        public JsonResult LoginDemo(string demoKey, string demoToken)
         {
             var success = false;
             List<string> errorMessages = null;
 
             try
             {
-                var userID = _userService.CreateDemoUser();
-                var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
-                LoginUser(userVW);
-                success = true;
-                TempData.Add("ShowWelcome", true); 
+                var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
+                if (demoKey.GetHMACSHA256Hash(hashKey) == demoToken)
+                {
+                    var userID = _userService.CreateDemoUser();
+                    var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
+                    LoginUser(userVW);
+                    success = true;
+                    TempData.Add("ShowWelcome", true); 
+                }
             }
             catch (Exception ex)
             {
@@ -280,7 +287,6 @@ namespace GameStatsApp.Controllers
         public ViewResult Activate(string email, long expirationTime, string token)
         {
             var activateUserVM = _userService.GetActivateUser(email, expirationTime, token);
-            HttpContext.Session.Set<string>("Email", email);
 
             return View(activateUserVM);
         }
@@ -293,7 +299,11 @@ namespace GameStatsApp.Controllers
 
             try
             {
-                activateUserVM.Email = HttpContext.Session.Get<string>("Email");
+                var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
+                if (activateUserVM.Email.GetHMACSHA256Hash(hashKey) == activateUserVM.EmailToken)
+                {
+                    ModelState.AddModelError("Activate", "Email does not match registration");
+                }
 
                 if (_userService.EmailExists(activateUserVM.Email, false))
                 {
@@ -376,7 +386,6 @@ namespace GameStatsApp.Controllers
         public ViewResult ChangePassword(string email, long expirationTime, string token)
         {
             var changePassVM = _userService.GetChangePassword(email, expirationTime, token);
-            HttpContext.Session.Set<string>("Email", email);
 
             return View(changePassVM);
         }
@@ -389,15 +398,20 @@ namespace GameStatsApp.Controllers
 
             try
             {
-                var email = HttpContext.Session.Get<string>("Email");
-                if (_userService.PasswordMatches(changePassVM.Password, email))
+                var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
+                if (changePassVM.Email.GetHMACSHA256Hash(hashKey) == changePassVM.EmailToken)
+                {
+                    ModelState.AddModelError("ChangePassword", "Email does not match registration");
+                }
+
+                if (_userService.PasswordMatches(changePassVM.Password, changePassVM.Email))
                 {
                     ModelState.AddModelError("ChangePassword", "Password must differ from previous password");
                 }
 
                 if (ModelState.IsValid)
                 {
-                    _userService.ChangeUserPassword(email, changePassVM.Password);
+                    _userService.ChangeUserPassword(changePassVM.Email, changePassVM.Password);
                     success = true;
                 }
                 else
@@ -489,9 +503,8 @@ namespace GameStatsApp.Controllers
      
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult PasswordNotMatches(string password)
+        public IActionResult PasswordNotMatches(string password, string email)
         {
-            var email = HttpContext.Session.Get<string>("Email");
             var result = !_userService.PasswordMatches(password, email);
 
             return Json(result);

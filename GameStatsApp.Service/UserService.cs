@@ -108,6 +108,8 @@ namespace GameStatsApp.Service
                 var hash = strToHash.GetHMACSHA256Hash(hashKey);
                 var expireDate = new DateTime(expirationTime);
                 var isValid = (hash == token) && expireDate > DateTime.UtcNow;
+                changePassVM.Email = user.Email;
+                changePassVM.EmailToken = user.Email.GetHMACSHA256Hash(hashKey);
                 changePassVM.IsValid = isValid;
             }
 

@@ -12,7 +12,7 @@ namespace GameStatsApp.Model.ViewModels
         [Required(AllowEmptyStrings = false, ErrorMessage = "Email required")]
         [EmailAddress(ErrorMessage = "Invalid Email format")]
         public string Email { get; set; }
-
+        public string EmailToken { get; set; }
         [Required(AllowEmptyStrings = false, ErrorMessage = "Username required")]
         [RegularExpression(@"^[._()-\/#&$@+\w\s]{3,30}$", ErrorMessage = @"Username must be between 3 - 30 alphanumeric/special characters")]
         public string Username { get; set; }

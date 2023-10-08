@@ -78,7 +78,8 @@
         name: "Activate",
         props: {
             islinkvalid: Boolean,
-            email: String
+            email: String,
+            emailtoken: String
         },
         setup() {
             return { v$: useVuelidate() }
@@ -87,6 +88,7 @@
             return {
                 form: {
                     Email: this.email,
+                    EmailToken: this.emailtoken,
                     Username: '',
                     Password: '',
                     ConfirmPassword: ''
