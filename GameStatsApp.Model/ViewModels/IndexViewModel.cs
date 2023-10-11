@@ -14,13 +14,12 @@ namespace GameStatsApp.Model.ViewModels
         public string IndexDemoImagePath { get; set; }
         public string ImportDemoImagePath { get; set; }
         public string SettingsDemoImagePath { get; set; }
-        public string DemoKey { get; set; }
-        public string DemoToken { get; set; }
         public int UserID { get; set; }
         public string Username { get; set; }        
         public List<UserListViewModel> UserLists { get; set; }
         public string EmptyCoverImagePath { get; set; }
         public bool IsDemo { get; set; }
+        public string ReturnUrl { get; set; }
         public bool ShowWelcome { get; set; }
         public bool ShowImport { get; set; }
     }

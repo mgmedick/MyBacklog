@@ -18,6 +18,7 @@ using Google.Apis.Auth;
 using Microsoft.AspNetCore.Http.Extensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Hosting;
 
 namespace GameStatsApp.Controllers
 {
@@ -26,38 +27,35 @@ namespace GameStatsApp.Controllers
         private readonly IUserService _userService = null;
         private readonly IAuthService _authService = null;
         private readonly IConfiguration _config = null;
+        private readonly IWebHostEnvironment _env = null;
         private readonly ILogger _logger = null;
 
-        public HomeController(IUserService userService, IAuthService authService, IConfiguration config, ILogger logger)
+        public HomeController(IUserService userService, IAuthService authService, IConfiguration config, IWebHostEnvironment env, ILogger logger)
         {
             _userService = userService;
             _authService = authService;
             _config = config;
-            _logger = logger;
+            _env = env;
+            _logger = logger;                       
         }
 
         public ActionResult Index()
         {
-            var indexVM = new IndexViewModel();
+            var indexVM = new IndexViewModel();            
             indexVM.IsAuth = User.Identity.IsAuthenticated;
             indexVM.IndexDemoImagePath = _config.GetSection("SiteSettings").GetSection("IndexDemoImagePath").Value;
             indexVM.ImportDemoImagePath = _config.GetSection("SiteSettings").GetSection("ImportDemoImagePath").Value;
             indexVM.SettingsDemoImagePath = _config.GetSection("SiteSettings").GetSection("SettingsDemoImagePath").Value;
-            var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
-            indexVM.DemoKey = StringExtensions.GeneratePassword(10, 0);
-            indexVM.DemoToken = indexVM.DemoKey.GetHMACSHA256Hash(hashKey);
+            indexVM.IsDemo = _env.EnvironmentName == "Demo";
+            indexVM.ReturnUrl = string.Format("{0}://{1}{2}", Request.Scheme, Request.Host, Request.PathBase).Replace("demo.", string.Empty);
 
             if (indexVM.IsAuth)
             {
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));            
-                var email = User.FindFirstValue(ClaimTypes.Email);         
-                var emailDomain = _config.GetSection("SiteSettings").GetSection("EmailDomain").Value;            
-
                 indexVM.UserID = userID;
                 indexVM.Username = User.FindFirstValue(ClaimTypes.Name);
                 indexVM.UserLists = _userService.GetUserLists(userID).Where(i => i.Active).ToList();
                 indexVM.EmptyCoverImagePath = _config.GetSection("SiteSettings").GetSection("EmptyCoverImagePath").Value;
-                indexVM.IsDemo = email.EndsWith("demo@" + emailDomain);
 
                 if (TempData["ShowImport"] != null) {
                     indexVM.ShowImport = true;
@@ -65,7 +63,7 @@ namespace GameStatsApp.Controllers
 
                 if (TempData["ShowWelcome"] != null) {
                     indexVM.ShowWelcome = true;
-                }                            
+                }                                 
             }
 
             return View(indexVM);
@@ -129,22 +127,18 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpPost]
-        public JsonResult LoginDemo(string demoKey, string demoToken)
+        public JsonResult LoginDemo()
         {
             var success = false;
             List<string> errorMessages = null;
 
             try
             {
-                var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
-                if (demoKey.GetHMACSHA256Hash(hashKey) == demoToken)
-                {
-                    var userID = _userService.CreateDemoUser();
-                    var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
-                    LoginUser(userVW);
-                    success = true;
-                    TempData.Add("ShowWelcome", true); 
-                }
+                var userID = _userService.CreateDemoUser();
+                var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
+                LoginUser(userVW);
+                success = true;
+                TempData.Add("ShowWelcome", true);                 
             }
             catch (Exception ex)
             {
@@ -154,7 +148,7 @@ namespace GameStatsApp.Controllers
             }
 
             return Json(new { success = success, errorMessages = errorMessages });
-        }
+        }    
 
         [HttpGet]
         public async Task<ActionResult> Logout()
@@ -163,15 +157,6 @@ namespace GameStatsApp.Controllers
             var baseUrl = string.Format("{0}://{1}{2}", Request.Scheme, Request.Host, Request.PathBase);
             var refUrl = Request.Headers["Referer"].ToString();
             var url = !string.IsNullOrWhiteSpace(refUrl) ? refUrl : baseUrl;
-            
-            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));            
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var emailDomain = _config.GetSection("SiteSettings").GetSection("EmailDomain").Value;
-            var isDemo = email.EndsWith("demo@" + emailDomain);
-
-            if (isDemo) {
-                _userService.DeleteUser(userID);
-            }
 
             return Redirect(url);
         }

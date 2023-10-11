@@ -20,11 +20,11 @@ namespace GameStatsApp
                     .ConfigureWebHostDefaults(webBuilder =>
                     {
                         webBuilder.UseStartup<Startup>();
-                        webBuilder.ConfigureServices(services =>
+                        webBuilder.ConfigureServices((ctx, services) =>
                         {
                             services.AddControllers();
                         });
-                        //webBuilder.UseUrls("http://*:5001");
+                        // webBuilder.UseUrls("http://*:5001");
                     })
                     .UseSerilog((hostingContext, loggerConfiguration) =>
                     {

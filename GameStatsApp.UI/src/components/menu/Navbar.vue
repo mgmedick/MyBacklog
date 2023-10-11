@@ -16,7 +16,6 @@
                     </li>                    
                 </ul>
                 <div class="d-flex">
-                    <!-- <autocomplete v-model="searchText" class="me-2" @change="onChange" @search="onSearch" @selected="onSearchSelected" :options="searchResults" :isasync="true" :loading="searchLoading" :placeholder="'Search users'"/> -->
                     <div v-if="isauth" class="ms-auto">
                         <div class="btn-group">
                             <button class="btn dropdown-toggle btn-secondary" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
@@ -32,20 +31,20 @@
                             </ul>
                         </div>
                     </div>
-                    <ul v-else class="navbar-nav">
+                    <ul v-else-if="!isdemo" class="navbar-nav">
                         <li class="nav-item">
                             <a class="nav-link" href="/Login">Log In</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/SignUp">Sign Up</a>
-                        </li>          
+                        </li>  
                         <li class="nav-item">
-                            <a class="nav-link" href="#/" @click="onDemoClick">Demo</a>
+                            <a class="nav-link" :href="demourl">Demo</a>
                         </li>                                      
                     </ul>
                 </div>
             </div>
-        </div> 
+        </div>                        
     </nav>       
 </template>
 <script>
@@ -58,19 +57,12 @@
             isauth: Boolean,
             username: String,
             userid: String,
-            isdemo: Boolean
+            isdemo: Boolean,
+            demourl: String
         },
         data: function () {
             return {
-                searchText: null,
-                searchResults: [],
-                searchLoading: false,
-                showLoginModal: false,
-                showResetModal: false,
-                showSignUpModal: false,
-                showDropdown: false,
-                toggleNavbar: false,
-                state: false
+                toggleNavbar: false
             }
         },       
         computed: {
@@ -78,7 +70,7 @@
         created: function () {
         },         
         mounted() {
-            var that = this;
+            var that = this;         
             var importingUserAccountIDs = JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {};
             
             if (Object.keys(importingUserAccountIDs).length > 0) {
@@ -108,68 +100,7 @@
                 }, 10000);
             }
         },        
-        methods: {
-            onDemoClick() {
-                axios.post('/Home/LoginDemo')
-                    .then((res) => {
-                        if (res.data.success) {
-                            location.href = '/';
-                        } else {
-                            res.data.errorMessages.forEach(errorMsg => {
-                                errorToast(errorMsg);                           
-                            }); 
-                        }
-                    })
-                    .catch(err => { console.error(err); return Promise.reject(err); });
-            },
-            onInput: function(e){
-                this.searchText = e;
-            },
-            onChange: function() {
-                var a = this.searchText;
-            },            
-            onSearch: function() {
-                var that = this;
-                this.searchLoading = true;
-                               
-                axios.get('/Menu/Search', { params: { term: this.searchText } })
-                        .then(res => {
-                            that.searchResults = res.data.reduce((flat, groupheader) => {
-                                return flat
-                                    .concat({
-                                        label: groupheader.label,
-                                        value: groupheader.subItems.map(method => method.value),
-                                        isGroupHeader: true,
-                                        disabled: true
-                                    })
-                                    .concat(groupheader.subItems.map(method => ({ label: method.label, value: method.value, category: groupheader.label })))
-                            }, []);
-
-                            if(that.searchResults.length == 0)
-                            {
-                                var noResult = { value: "", label: "No results found", category: null, disabled: true };
-                                that.searchResults.push(noResult);
-                            }
-
-                            that.searchLoading = false;
-                            return res;
-                        })
-                        .catch(err => { console.error(err); return Promise.reject(err); });
-            },              
-            onSearchSelected: function (result) {
-                var controller;
-                var action;
-
-                if (result.category == 'Users') {
-                    controller = "User";
-                    action = "UserDetails"
-                }
-                
-                location.href = encodeURI('/' + controller + "/" + action + "/" + result.value);
-            },           
-            toggleDropdown(e) {
-                this.state = !this.state
-            }
+        methods: {                    
         }
     };
 </script>

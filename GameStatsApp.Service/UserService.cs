@@ -128,8 +128,8 @@ namespace GameStatsApp.Service
 
         public int CreateDemoUser()
         {
-            var emailDomain = _config.GetSection("SiteSettings").GetSection("EmailDomain").Value;
-            var username = StringExtensions.GeneratePassword(10, 0) + "demo";
+            var emailDomain = _context.HttpContext.Request.Host;
+            var username = "demo" + StringExtensions.GeneratePassword(10, 0);
             var email = string.Format("{0}@{1}", username, emailDomain);
             var password = StringExtensions.GeneratePassword(15, 2);
 

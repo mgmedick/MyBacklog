@@ -24,7 +24,7 @@
 </head>
 <body id="vue-app">
     <header>
-        <navbar :isauth="@Json.Serialize(User.Identity.IsAuthenticated)" :userid="'@User.FindFirstValue(ClaimTypes.NameIdentifier)'" :username="'@User.FindFirstValue(ClaimTypes.Name)'" :isdemo="@Json.Serialize(User.FindFirstValue(ClaimTypes.Email)?.EndsWith("demo@" + Configuration.GetSection("SiteSettings").GetSection("EmailDomain").Value))"></navbar>
+        <navbar :isauth="@Json.Serialize(User.Identity.IsAuthenticated)" :userid="'@User.FindFirstValue(ClaimTypes.NameIdentifier)'" :username="'@User.FindFirstValue(ClaimTypes.Name)'" :demourl="'@(string.Format("{0}://demo.{1}", Context.Request.Scheme, Context.Request.Host))'" :isdemo="@Json.Serialize(hostingEnv.EnvironmentName == "Demo")"></navbar>
         <div id="toastcontainer" class="toast-container position-fixed p-3 bottom-0 end-0"> 
             <div id="successtoast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">

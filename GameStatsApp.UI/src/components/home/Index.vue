@@ -2,12 +2,18 @@
     <div>
         <div v-if="!indexvm.isAuth">
             <div class="text-center mb-3">
-                <h2>Welcome to mybacklog.io</h2>
+                <h2><span class="me-2">Welcome to mybacklog.io</span><span v-if="indexvm.isDemo" class="text-warning">demo</span></h2>
                 <div>
                     <span>A tool to manage your games and keep track of your progress</span>
                 </div>
             </div>
-            <div id="carouselExampleDark" class="carousel carousel-dark"> 
+            <div v-if="indexvm.isDemo" class="mx-auto" style="max-width: 400px;">
+                <div class="row g-2">
+                    <button type="button" class="btn btn-primary" @click="onDemoClick">Start Demo</button>
+                    <a :href="indexvm.returnUrl" class="btn btn-primary">Back to mybacklog.io</a>
+                </div>
+            </div>
+            <div v-else id="carouselExampleDark" class="carousel carousel-dark"> 
                 <div class="carousel-indicators">
                     <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
                     <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1" aria-label="Slide 2"></button>
@@ -57,17 +63,23 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <welcome :username="indexvm.username"></welcome>
+                        <welcome :username="indexvm.username" :isdemo="indexvm.isDemo"></welcome>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
-        </div>               
+        </div>
+        <div ref="loadingmodal" class="modal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered justify-content-center" style="color: #fff;">
+                <font-awesome-icon icon="fa-solid fa-spinner" spin size="2xl" />
+            </div>
+        </div>                          
     </div>    
 </template>
 <script>
+    import axios from 'axios';
     import { Modal } from 'bootstrap';
 
     export default {
@@ -99,12 +111,29 @@
             window.addEventListener('resize', this.onResize);
 
             this.setDemoImages();
-
+            
             if (that.indexvm.showWelcome) {
                 new Modal(that.$refs.welcomemodal).show();
             }  
         },        
         methods: {
+            onDemoClick() {
+                var that = this;
+
+                new Modal(this.$refs.loadingmodal).show();
+                axios.post('/Home/LoginDemo')
+                    .then((res) => {
+                        if (res.data.success) {
+                            location.href = '/';
+                        } else {
+                            res.data.errorMessages.forEach(errorMsg => {
+                                errorToast(errorMsg);                           
+                            }); 
+                        }
+                        Modal.getInstance(that.$refs.loadingmodal).hide();                                           
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
+            },  
             onResize: function() {
                 var that = this;
                 if (that.width != document.documentElement.clientWidth || that.height != document.documentElement.clientHeight) {     
