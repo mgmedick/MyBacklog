@@ -63,6 +63,7 @@ namespace GameStatsApp.Controllers
         }        
         
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult AddNewGameToUserList(int userListID, int gameID)
         {
             var success = false;
@@ -86,6 +87,7 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult AddGameToUserList(int userListID, int gameID)
         {
             var success = false;
@@ -108,7 +110,8 @@ namespace GameStatsApp.Controllers
             return Json(new { success = success, errorMessages = errorMessages, result = result });
         }
 
-        [HttpPost]
+        [HttpPost]  
+        [ValidateAntiForgeryToken]
         public JsonResult RemoveGameFromUserList(int userListID, int gameID)
         {
             var success = false;
@@ -132,6 +135,7 @@ namespace GameStatsApp.Controllers
         }   
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult RemoveGameFromAllUserLists(int gameID)
         {
             var success = false;
@@ -178,6 +182,7 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> ImportGames(int userAccountID)
         {
             var success = false;
@@ -311,6 +316,7 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult ManageUserLists(UserListViewModel userListVM)
         {
             var success = false;
@@ -346,6 +352,7 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult DeleteUserList(int userListID)
         {
             var success = false;
@@ -368,6 +375,7 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult UpdateUserListActive(int userListID, bool active)
         {
             var success = false;
@@ -390,6 +398,7 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult UpdateUserListSortOrders(List<int> userListIDs)
         {
             var success = false;

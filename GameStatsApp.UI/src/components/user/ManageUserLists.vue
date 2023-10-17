@@ -141,7 +141,8 @@
             },                                      
             onDeleteListClick(e, userList) {
                 var that = this;
-                return axios.post('/User/DeleteUserList', null,{ params: { userListID: userList.id } })
+                return axios.post('/User/DeleteUserList', null,{ headers: { '__csrf': document.getElementsByName('__csrf')[0].value },
+                                                                 params: { userListID: userList.id } })
                     .then((res) => {
                         Modal.getInstance(that.$refs.deletelistmodal).hide();
 
@@ -159,7 +160,8 @@
             },
             onUpdateActive(e, userList) {
                 var that = this;
-                return axios.post('/User/UpdateUserListActive', null,{ params: { userListID: userList.id, active: userList.active } })
+                return axios.post('/User/UpdateUserListActive', null,{ headers: { '__csrf': document.getElementsByName('__csrf')[0].value },
+                                                                       params: { userListID: userList.id, active: userList.active } })
                     .then((res) => {
                         if (res.data.success) {
 
@@ -200,8 +202,9 @@
                 var that = this;
                 var userListIDs = that.userLists.map(i => { return i.id });
                 var formData = getFormData({ userListIDs: userListIDs });
+                var config = { headers: { '__csrf': document.getElementsByName('__csrf')[0].value } };
 
-                return axios.post('/User/UpdateUserListSortOrders', formData)
+                return axios.post('/User/UpdateUserListSortOrders', formData, config)
                     .then((res) => {
                         if (res.data.success) {
                             successToast("Updated user lists");                           

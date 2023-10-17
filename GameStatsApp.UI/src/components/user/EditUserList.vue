@@ -63,8 +63,9 @@
 
                 var that = this;
                 var formData = getFormData(this.form);
+                var config = { headers: { '__csrf': document.getElementsByName('__csrf')[0].value } };
 
-                return await axios.post('/User/ManageUserLists', formData).then((res) => {
+                return await axios.post('/User/ManageUserLists', formData, config).then((res) => {
                     that.$emit('saved', res.data.success);
                     if (res.data.success) {
                         successToast("Saved <strong>" + that.form.name + "</strong> list");                           

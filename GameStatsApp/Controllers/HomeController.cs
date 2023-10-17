@@ -207,6 +207,7 @@ namespace GameStatsApp.Controllers
             return Json(new { success = success, errorMessages = errorMessages });
         }
 
+        [HttpPost]
         public async Task<JsonResult> LoginOrSignUpWithSocial(string accessToken, int socialAccountTypeID)
         {
             var success = false;
@@ -332,8 +333,8 @@ namespace GameStatsApp.Controllers
             return View(resetPassVM);
         }
 
-        [AllowAnonymous]
         [HttpPost]
+        [AllowAnonymous]
         public JsonResult ResetPassword(ResetPasswordViewModel resetPassVM)
         {
             var success = false;
@@ -416,6 +417,7 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult ChangeUsername(ChangeUsernameViewModel changeUsernameVM)
         {
             var success = false;

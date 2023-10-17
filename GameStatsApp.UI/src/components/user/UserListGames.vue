@@ -406,7 +406,8 @@
             addNewGameToUserList(userListID, gameID) {
                 var that = this;
 
-                return axios.post('/User/addNewGameToUserList', null,{ params: { userListID: userListID, gameID: gameID } })
+                return axios.post('/User/addNewGameToUserList', null,{ headers: { '__csrf': document.getElementsByName('__csrf')[0].value },
+                                                                       params: { userListID: userListID, gameID: gameID } })
                     .then((res) => {
                         if (res.data.success) {                            
                             var result = res.data.result;
@@ -435,7 +436,8 @@
                 el.closest('.gamelist-item').classList.add('active');
                 el.closest('.dropdown-menu')?.previousSibling.classList.add('active');
 
-                return axios.post('/User/AddGameToUserList', null,{ params: { userListID: userList.id, gameID: game.id } })
+                return axios.post('/User/AddGameToUserList', null,{ headers: { '__csrf': document.getElementsByName('__csrf')[0].value },
+                                                                    params: { userListID: userList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {                            
                             if (game.userListIDs.indexOf(userList.id) == -1) {
@@ -457,7 +459,8 @@
                 el.closest('.gamelist-item').classList.remove('active');
                 el.closest('.dropdown-menu')?.previousSibling.classList.remove('active');
 
-                return axios.post('/User/RemoveGameFromUserList', null,{ params: { userListID: userList.id, gameID: game.id } })
+                return axios.post('/User/RemoveGameFromUserList', null,{ headers: { '__csrf': document.getElementsByName('__csrf')[0].value },
+                                                                         params: { userListID: userList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {                            
                             game.userListIDs = game.userListIDs.filter(i => i != userList.id);
@@ -479,7 +482,8 @@
             removeGameFromAllUserLists(game) {
                 var that = this;
 
-                return axios.post('/User/RemoveGameFromAllUserLists', null,{ params: { gameID: game.id } })
+                return axios.post('/User/RemoveGameFromAllUserLists', null,{ headers: { '__csrf': document.getElementsByName('__csrf')[0].value },
+                                                                             params: { gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {    
                             that.games = that.games.filter(i => i.id != game.id);            

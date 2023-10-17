@@ -56,9 +56,10 @@
 
                 var that = this;
                 var formData = getFormData(this.form);
+                var config = { headers: { '__csrf': document.getElementsByName('__csrf')[0].value } };
                 this.loading = true;
 
-                return axios.post('/Home/ChangeUsername', formData)
+                return axios.post('/Home/ChangeUsername', formData, config)
                     .then((res) => {
                         if (res.data.success) {
                             successToast("Updated username");                           
