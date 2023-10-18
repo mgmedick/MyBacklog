@@ -27,6 +27,7 @@ import manageUserLists from './user/ManageUserLists.vue';
 import editUserList from './user/EditUserList.vue';
 import userListGames from './user/UserListGames.vue';
 
+
 export default {
     loadComponents() {
         const app = createApp({
@@ -57,6 +58,9 @@ export default {
         app.component('user-lists', userLists); 
         app.component('user-list-games', userListGames);
         app.component("import-games", importGames);
+        app.config.globalProperties.getCsrfToken = () => { 
+            return document.getElementsByName("__RequestVerificationToken")[0].value; 
+        }
 
         app.mount('#vue-app');
         app.provide('app', 'Vue3');

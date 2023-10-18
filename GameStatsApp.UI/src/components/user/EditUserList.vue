@@ -63,7 +63,7 @@
 
                 var that = this;
                 var formData = getFormData(this.form);
-                var config = { headers: { '__csrf': document.getElementsByName('__csrf')[0].value } };
+                var config = { headers: { 'RequestVerificationToken': that.getCsrfToken() } };
 
                 return await axios.post('/User/ManageUserLists', formData, config).then((res) => {
                     that.$emit('saved', res.data.success);

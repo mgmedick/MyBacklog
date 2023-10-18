@@ -56,7 +56,7 @@
 
                 var that = this;
                 var formData = getFormData(this.form);
-                var config = { headers: { '__csrf': document.getElementsByName('__csrf')[0].value } };
+                var config = { headers: { 'RequestVerificationToken': that.getCsrfToken() } };
                 this.loading = true;
 
                 return axios.post('/Home/ChangeUsername', formData, config)

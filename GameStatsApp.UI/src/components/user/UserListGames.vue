@@ -406,7 +406,7 @@
             addNewGameToUserList(userListID, gameID) {
                 var that = this;
 
-                return axios.post('/User/addNewGameToUserList', null,{ headers: { '__csrf': document.getElementsByName('__csrf')[0].value },
+                return axios.post('/User/addNewGameToUserList', null,{ headers: { 'RequestVerificationToken': $root.csrftoken },
                                                                        params: { userListID: userListID, gameID: gameID } })
                     .then((res) => {
                         if (res.data.success) {                            
@@ -436,7 +436,7 @@
                 el.closest('.gamelist-item').classList.add('active');
                 el.closest('.dropdown-menu')?.previousSibling.classList.add('active');
 
-                return axios.post('/User/AddGameToUserList', null,{ headers: { '__csrf': document.getElementsByName('__csrf')[0].value },
+                return axios.post('/User/AddGameToUserList', null,{ headers: { 'RequestVerificationToken': that.getCsrfToken() },
                                                                     params: { userListID: userList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {                            
@@ -459,7 +459,7 @@
                 el.closest('.gamelist-item').classList.remove('active');
                 el.closest('.dropdown-menu')?.previousSibling.classList.remove('active');
 
-                return axios.post('/User/RemoveGameFromUserList', null,{ headers: { '__csrf': document.getElementsByName('__csrf')[0].value },
+                return axios.post('/User/RemoveGameFromUserList', null,{ headers: { 'RequestVerificationToken': that.getCsrfToken() },
                                                                          params: { userListID: userList.id, gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {                            
@@ -482,7 +482,7 @@
             removeGameFromAllUserLists(game) {
                 var that = this;
 
-                return axios.post('/User/RemoveGameFromAllUserLists', null,{ headers: { '__csrf': document.getElementsByName('__csrf')[0].value },
+                return axios.post('/User/RemoveGameFromAllUserLists', null,{ headers: { 'RequestVerificationToken': that.getCsrfToken() },
                                                                              params: { gameID: game.id } })
                     .then((res) => {
                         if (res.data.success) {    

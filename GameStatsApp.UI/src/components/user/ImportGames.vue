@@ -157,7 +157,7 @@
                         that.importingUserAccountIDs[userAccount.id] = { userListName: userAccount.userListName };
                     }
 
-                    axios.post('/User/ImportGames', null,{ headers: { '__csrf': document.getElementsByName('__csrf')[0].value },
+                    axios.post('/User/ImportGames', null,{ headers: { 'RequestVerificationToken': that.getCsrfToken() },
                                                            params: { userAccountID: userAccount?.id } }).then((res) => {
                         if (res.data.isAuthExpired) {
                             var redirectUrl = that.getRedirectUrl(accountTypeID);

@@ -38,10 +38,7 @@ namespace GameStatsApp
                      options.HtmlHelperOptions.ClientValidationEnabled = true;
                  }
              });
-            services.AddAntiforgery(options => { 
-                options.HeaderName = "__csrf";
-                options.FormFieldName = "__csrf"; 
-            });
+             services.AddAntiforgery();
 
             services.Configure<CookieTempDataProviderOptions>(options =>
             {
