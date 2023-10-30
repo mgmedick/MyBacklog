@@ -493,7 +493,41 @@ namespace GameStatsApp.Service
             }
 
             return data;
-        }  
+        }
+
+        public async Task<bool> ValidateGoogleRecaptcha(string token)
+        {
+            bool result = false;
+            var clientSecret = _config.GetSection("Auth").GetSection("Google").GetSection("RecaptchaSecret").Value;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var parameters = new Dictionary<string,string>{
+                    {"secret", clientSecret},
+                    {"response", token}
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://www.google.com/recaptcha/api/siteverify") { Content = new FormUrlEncodedContent(parameters) };
+
+                using (var response = await client.SendAsync(request))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        var data = JObject.Parse(dataString);
+                        
+                        if (data != null)
+                        {
+                            result = (bool)data.GetValue("success");
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }                
         #endregion
    }
 }

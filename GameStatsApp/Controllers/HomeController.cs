@@ -45,9 +45,10 @@ namespace GameStatsApp.Controllers
             indexVM.IsAuth = User.Identity.IsAuthenticated;
             indexVM.IndexDemoImagePath = _config.GetSection("SiteSettings").GetSection("IndexDemoImagePath").Value;
             indexVM.ImportDemoImagePath = _config.GetSection("SiteSettings").GetSection("ImportDemoImagePath").Value;
-            indexVM.SettingsDemoImagePath = _config.GetSection("SiteSettings").GetSection("SettingsDemoImagePath").Value;
+            indexVM.SettingsDemoImagePath = _config.GetSection("SiteSettings").GetSection("SettingsDemoImagePath").Value;    
             indexVM.IsDemo = _env.EnvironmentName == "Demo";
             indexVM.ReturnUrl = string.Format("{0}://{1}{2}", Request.Scheme, Request.Host, Request.PathBase).Replace("demo.", string.Empty);
+            indexVM.RecaptchaKey = _config.GetSection("Auth").GetSection("Google").GetSection("RecaptchaKey").Value; 
 
             if (indexVM.IsAuth)
             {
@@ -127,18 +128,27 @@ namespace GameStatsApp.Controllers
         }
 
         [HttpPost]
-        public JsonResult LoginDemo()
+        public async Task<JsonResult> LoginDemo(string token)
         {
             var success = false;
             List<string> errorMessages = null;
 
             try
             {
-                var userID = _userService.CreateDemoUser();
-                var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
-                LoginUser(userVW);
-                success = true;
-                TempData.Add("ShowWelcome", true);                 
+                var result = await _authService.ValidateGoogleRecaptcha(token);
+
+                if (result)
+                {
+                    var userID = _userService.CreateDemoUser();
+                    var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
+                    LoginUser(userVW);
+                    success = true;
+                    TempData.Add("ShowWelcome", true);  
+                }
+                else
+                {
+                    errorMessages = new List<string>() { "Error logging demo user in." };
+                }      
             }
             catch (Exception ex)
             {

@@ -22,6 +22,7 @@ namespace GameStatsApp.Model.ViewModels
         public string ReturnUrl { get; set; }
         public bool ShowWelcome { get; set; }
         public bool ShowImport { get; set; }
+        public string RecaptchaKey { get; set; }
     }
 }
 

@@ -8,11 +8,15 @@
                 </div>
             </div>
             <div v-if="indexvm.isDemo" class="mx-auto" style="max-width: 400px;">
-                <div class="row g-2">
-                    <button type="button" class="btn btn-primary" @click="onDemoClick">Start Demo</button>
-                    <a :href="indexvm.returnUrl" class="btn btn-primary">Back to mybacklog.io</a>
-                </div>
-            </div>
+                <form @submit.prevent="submitForm">
+                    <div id="divrecaptcha" class="d-flex justify-content-center"></div>
+                    <br>
+                    <div class="row g-2">
+                        <button type="submit" class="btn btn-primary d-flex justify-content-center align-items-center" :disabled="!recaptchaToken">Start Demo</button>
+                        <a :href="indexvm.returnUrl" class="btn btn-primary">Back to mybacklog.io</a>
+                    </div>
+                </form>
+            </div>            
             <div v-else id="carouselExampleDark" class="carousel carousel-dark"> 
                 <div class="carousel-indicators">
                     <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
@@ -66,7 +70,7 @@
                         <welcome :username="indexvm.username" :isdemo="indexvm.isDemo"></welcome>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -81,6 +85,7 @@
 <script>
     import axios from 'axios';
     import { Modal } from 'bootstrap';
+    import { errorToast } from '../../js/common.js';
 
     export default {
         name: "Index",
@@ -99,10 +104,11 @@
             return {
                 indexImagePath: '',
                 importImagePath: '',
-                settingsImagePath: ''
+                settingsImagePath: '',
+                recaptchaToken: ''
             };
         },
-        watch: {},
+        watch: {},           
         created: function () {
         },
         mounted: function () {
@@ -110,18 +116,27 @@
             
             window.addEventListener('resize', this.onResize);
 
+            this.createGoogleRecaptchaScript().then(function() {
+                grecaptcha.ready(function() {
+                    grecaptcha.render('divrecaptcha', {
+                        'sitekey' : that.indexvm.recaptchaKey,
+                        'callback' : that.onRecaptchaCallback
+                    });          
+                });      
+            });
             this.setDemoImages();
             
             if (that.indexvm.showWelcome) {
                 new Modal(that.$refs.welcomemodal).show();
             }  
         },        
-        methods: {
-            onDemoClick() {
+        methods: {  
+            submitForm() {
                 var that = this;
-
+              
                 new Modal(this.$refs.loadingmodal).show();
-                axios.post('/Home/LoginDemo')
+                
+                axios.post('/Home/LoginDemo', null, { params: { token: this.recaptchaToken } })
                     .then((res) => {
                         if (res.data.success) {
                             location.href = '/';
@@ -132,8 +147,11 @@
                         }
                         Modal.getInstance(that.$refs.loadingmodal).hide();                                           
                     })
-                    .catch(err => { console.error(err); return Promise.reject(err); });
-            },  
+                    .catch(err => { console.error(err); return Promise.reject(err); });                
+            },      
+            onRecaptchaCallback: function(response) {
+                this.recaptchaToken = response;
+            },            
             onResize: function() {
                 var that = this;
                 if (that.width != document.documentElement.clientWidth || that.height != document.documentElement.clientHeight) {     
@@ -165,7 +183,22 @@
                 this.indexImagePath = this.indexvm.indexDemoImagePath.replace("{0}", imageSize); 
                 this.importImagePath = this.indexvm.importDemoImagePath.replace("{0}", imageSize); 
                 this.settingsImagePath = this.indexvm.settingsDemoImagePath.replace("{0}", imageSize); 
-            }
+            },
+            createGoogleRecaptchaScript() {
+                var that = this;
+
+                return new Promise((resolve, reject) => {
+                    let scriptHTML = document.createElement('script');
+                    scriptHTML.type = 'text/javascript';
+                    scriptHTML.async = true;
+                    scriptHTML.defer = true;
+                    scriptHTML.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
+                    document.getElementsByTagName('head')[0].appendChild(scriptHTML);
+                    scriptHTML.onload = function () {
+                        resolve();
+                    }
+                });
+            },              
         },
     };
 </script>

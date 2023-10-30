@@ -21,5 +21,6 @@ namespace GameStatsApp.Interfaces.Services
         Task<TokenResponse> ReAuthenticateMicrosoft(string refreshToken);
         Task<List<string>> GetMicrosoftUserGameNames(string userHash, string xstsToken, ulong userXuid, DateTime? importLastRunDate = null);
         Task<SocialTokenResponse> ValidateSocialToken(string accessToken, int socialAccountTypeID);
+        Task<bool> ValidateGoogleRecaptcha(string token);
     }
 }

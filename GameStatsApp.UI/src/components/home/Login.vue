@@ -27,7 +27,7 @@
                     </div>
                 </div>   
                 <div class="row g-2 justify-content-center mx-auto">
-                    <button id="btnLogin" type="submit" class="btn btn-primary" :disabled="loading">Log In</button>
+                    <button id="btnLogin" type="submit" class="btn btn-primary">Log In</button>
                     <div class="text-center"><small class="fw-bold">OR</small></div>
                     <div class="fb-login-button" data-width="100%" data-size="large" data-button-type="continue_with" data-layout="rounded" data-auto-logout-link="false" data-use-continue-as="true" data-scope="public_profile,email" onlogin="checkFBLoginState();"></div>
                     <div ref="googleLoginBtn" class="p-0"></div>
@@ -105,6 +105,7 @@
 
                 var that = this;
                 var formData = getFormData(this.form);
+                new Modal(this.$refs.loadingmodal).show();
 
                 axios.post('/Home/Login', formData)
                     .then((res) => {
@@ -115,6 +116,8 @@
                                 errorToast(errorMsg);                           
                             }); 
                         }
+
+                        Modal.getInstance(that.$refs.loadingmodal).hide();                                           
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },
@@ -137,11 +140,11 @@
                 }
             },            
             async handleGoogleCredentialResponse(response) {
+                new Modal(this.$refs.loadingmodal).show();
                 this.loginOrSignUpWithSocial(response.credential, 1);
             },
             async loginOrSignUpWithSocial(accessToken, socialAccountTypeID) {
                 var that = this;
-                new Modal(this.$refs.loadingmodal).show();
 
                 axios.post('/Home/LoginOrSignUpWithSocial', null,{ params: { accessToken: accessToken, socialAccountTypeID: socialAccountTypeID } })
                     .then((res) => {
@@ -152,6 +155,7 @@
                                 errorToast(errorMsg);                           
                             });                          
                         }
+
                         Modal.getInstance(that.$refs.loadingmodal).hide();                                           
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });

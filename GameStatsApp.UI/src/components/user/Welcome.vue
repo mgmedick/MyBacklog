@@ -6,7 +6,7 @@
                 <div class="card text-white bg-warning">
                     <div class="card-header">Warning</div>
                     <div class="card-body">
-                        <p class="card-text">You are in <span class="fw-bold">demo</span> mode, any user data will not be preserved outside this session. If you like what you see sign-up to create a permanent user.</p>
+                        <p class="card-text">You are in <span class="fw-bold">demo</span> mode, any user data will not be preserved outside this session.</p>
                     </div>
                 </div>  
             </div>        
