@@ -24,17 +24,19 @@
                             </div>
                         </div>
                     </div>
-                    <div v-else-if="showSuccess">
+                    <div v-else-if="!showSuccess">
                         <div class="p-3 alert alert-light">
                             <div class="mx-auto">
-                                <div><span>To Activate your account click the activation link in the email we just sent you.</span></div>
+                                <div><span>To Create your account click the activation link in the email we just sent you.</span></div>
+                                <br />
+                                <div>Please allow up to 5 minutes for the email to arrive.</div>
                                 <br />
                                 <div>
-                                    <span>If your email has not arrived try these steps:</span>
+                                    <span>If your email has still not arrived try these steps:</span>
                                     <ul class="pl-4">
-                                        <li>Wait 30 mins</li>
                                         <li>Check your spam folder</li>
                                         <li>Try Sign Up again</li>
+                                        <li>Use Sign In with Google/Facebook</li>
                                     </ul>
                                 </div>
                             </div>

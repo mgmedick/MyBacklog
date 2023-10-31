@@ -65,7 +65,7 @@ namespace GameStatsApp
             //     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             // });
 
-            var connString = _config.GetSection("ConnectionStrings").GetSection("DBConnectionString").Value;
+            var connString = _env.EnvironmentName == "Demo" ? _config.GetSection("ConnectionStrings").GetSection("DemoDBConnectionString").Value : _config.GetSection("ConnectionStrings").GetSection("DBConnectionString").Value;
             NPocoBootstrapper.Configure(connString);
         }
 
