@@ -115,16 +115,18 @@
             var that = this;
             
             window.addEventListener('resize', this.onResize);
-
-            this.createGoogleRecaptchaScript().then(function() {
-                grecaptcha.ready(function() {
-                    grecaptcha.render('divrecaptcha', {
-                        'sitekey' : that.indexvm.recaptchaKey,
-                        'callback' : that.onRecaptchaCallback
-                    });          
-                });      
-            });
             this.setDemoImages();
+
+            if(this.indexvm.isDemo) {
+                this.createGoogleRecaptchaScript().then(function() {
+                    grecaptcha.ready(function() {
+                        grecaptcha.render('divrecaptcha', {
+                            'sitekey' : that.indexvm.recaptchaKey,
+                            'callback' : that.onRecaptchaCallback
+                        });          
+                    });      
+                });  
+            }          
             
             if (that.indexvm.showWelcome) {
                 new Modal(that.$refs.welcomemodal).show();

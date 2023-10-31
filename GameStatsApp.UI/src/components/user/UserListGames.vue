@@ -1,14 +1,14 @@
 ﻿<template>
     <div class="games-container">
-        <div class="container m-0 p-0">
+        <div class="container-fluid m-0 p-0">
             <div class="d-flex align-items-end mb-3">
                 <div class="me-2">
                     <div class="btn btn-secondary p-2" tabindex="-1" role="button" @click="onImportClick">
-                        <font-awesome-layers v-if="isImporting" class="fa-2xl" style="width: 35px; z-index: 0;">
-                            <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-5" style="color: #adb5bd;"/>
+                        <font-awesome-layers v-if="isImporting" class="fa-xl" style="width: 26px; z-index: 0;">
+                            <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-4" style="color: #adb5bd;"/>
                             <font-awesome-icon icon="fa-solid fa-cloud" style="z-index: -1;"/>
                         </font-awesome-layers>
-                        <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" size="2xl"/>   
+                        <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" size="xl"/>   
                     </div>      
                 </div>              
                 <div class="d-flex ms-auto">   
@@ -30,7 +30,7 @@
             </div>            
             <div v-if="loading">
                 <div class="row g-3">
-                    <div class="col-lg-2 col-md-3 col-6">
+                    <div class="col-xl-auto col-md-3 col-6">
                         <div class="position-relative add-game-container" role="button">
                             <div class="position-absolute top-0 bottom-0 start-0 end-0">
                                 <div class="d-flex" style="width: 100%; height: 100%;">
@@ -52,7 +52,7 @@
                     </div>
                 </div>   
                 <div v-else class="row g-3">        
-                    <div class="col-lg-2 col-md-3 col-6">
+                    <div class="col-xl-auto col-md-3 col-6">
                         <div class="position-relative add-game-container" role="button" @click="onSearchGamesClick">
                             <div class="position-absolute top-0 bottom-0 start-0 end-0">
                                 <div class="d-flex" style="width: 100%; height: 100%;">
@@ -62,7 +62,7 @@
                             <img :src="emptycoverimagepath" class="img-fluid rounded" alt="Responsive image">
                         </div>
                     </div>
-                    <div v-for="(game, gameIndex) in games" class="col-lg-2 col-md-3 col-6" :key="game.id">
+                    <div v-for="(game, gameIndex) in games" class="col-xl-auto col-md-3 col-6" :key="game.id">
                         <div class="position-relative game-image-container rounded d-flex" style="overflow: hidden; background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
                             <div v-if="game.coverImagePath?.indexOf('nocover.png') > -1" class="position-absolute text-center bottom-0 start-0 end-0 px-1" style="line-height: 20px; top: 10px; z-index: 1;">
                                 <small class="position-relative text-dark">{{ game.name }}</small>
@@ -406,7 +406,7 @@
             addNewGameToUserList(userListID, gameID) {
                 var that = this;
 
-                return axios.post('/User/addNewGameToUserList', null,{ headers: { 'RequestVerificationToken': $root.csrftoken },
+                return axios.post('/User/addNewGameToUserList', null,{ headers: { 'RequestVerificationToken': that.getCsrfToken() },
                                                                        params: { userListID: userListID, gameID: gameID } })
                     .then((res) => {
                         if (res.data.success) {                            
@@ -506,6 +506,13 @@
                 if (defaultheight > 0) {
                     document.querySelectorAll('.game-image-container').forEach(item => {
                         item.style.height = defaultheight + 'px';
+                    });
+                }
+
+                var defaultwidth = document.querySelector('.add-game-container .img-fluid')?.clientWidth;
+                if (defaultwidth > 0) {
+                    document.querySelectorAll('.game-image-container').forEach(item => {
+                        item.style.width = defaultwidth + 'px';
                     });
                 }
             }                                                                                          
