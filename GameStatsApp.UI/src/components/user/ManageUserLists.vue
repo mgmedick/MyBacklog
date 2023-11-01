@@ -32,8 +32,8 @@
                                     <font-awesome-icon v-if="userListIndex > 0" icon="fa-solid fa-angle-up" @click="onMoveUpClick(userListIndex)"/>                                
                                     <font-awesome-icon v-if="userListIndex < userLists.length - 1" icon="fa-solid fa-angle-down" @click="onMoveDownClick(userListIndex)"/>                                
                                 </div>
-                                <font-awesome-icon icon="fa-solid fa-square-pen" size="lg" class="me-2" :class="{ 'fa-disabled' : userList.defaultListID }" @click="onEditListClick($event, userList)"/>
-                                <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" :class="{ 'fa-disabled' : userList.defaultListID }" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onShowDeleteListClick($event, userList)"/>                                
+                                <font-awesome-icon icon="fa-solid fa-square-pen" size="lg" class="me-2" :class="{ 'fa-disabled' : userList.defaultListID || userList.accountTypeID }" @click="onEditListClick($event, userList)"/>
+                                <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" :class="{ 'fa-disabled' : userList.defaultListID || userList.accountTypeID }" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onShowDeleteListClick($event, userList)"/>                                
                             </div>
                         </td>                        
                     </tr>                                      

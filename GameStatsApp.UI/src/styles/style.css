@@ -9,6 +9,11 @@
     background-color: rgba(0,0,0,0.075);
 }
 
+.game-image-container {
+    max-width: 207px;
+    max-height: 276px;
+}
+
 .game-image-container.active {
     outline: 5px solid rgba(69,130,236,1) !important;
 }
