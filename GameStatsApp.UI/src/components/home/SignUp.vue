@@ -24,7 +24,7 @@
                             </div>
                         </div>
                     </div>
-                    <div v-else-if="!showSuccess">
+                    <div v-else-if="showSuccess">
                         <div class="p-3 alert alert-light">
                             <div class="mx-auto">
                                 <div><span>To Create your account click the activation link in the email we just sent you.</span></div>
