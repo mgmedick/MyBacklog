@@ -25,6 +25,7 @@ namespace GameStatsApp.Interfaces.Services
         void AddGameToUserList(int userID, int userListID, int gameID);
         void RemoveGameFromUserList(int userID, int userListID, int gameID);
         void RemoveGameFromAllUserLists(int userID, int gameID);
+        void RemoveAllGamesFromUserList(int userID, int userListID);
         bool EmailExists(string email);
         bool PasswordMatches(string password, string email);
         bool UsernameExists(string username, bool activeFilter);

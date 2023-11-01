@@ -157,6 +157,29 @@ namespace GameStatsApp.Controllers
             return Json(new { success = success, errorMessages = errorMessages });
         }
         
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult RemoveAllGamesFromUserList(int userListID)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                _userService.RemoveAllGamesFromUserList(userID, userListID);
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "RemoveAllGamesFromUserList");
+                success = false;
+                errorMessages = new List<string>() { "Error removing games from list" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
+        }
+
         [HttpGet]
         public JsonResult ImportGames()
         {

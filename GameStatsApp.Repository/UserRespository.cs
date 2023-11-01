@@ -218,7 +218,15 @@ namespace GameStatsApp.Repository
             {
                 db.DeleteWhere<UserListGame>("UserListID = @0 AND GameID = @1", userListID, gameID);
             }
-        }                                       
+        }     
+
+        public void DeleteAllUserListGames(int userListID)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                db.DeleteWhere<UserListGame>("UserListID = @0", userListID);
+            }
+        }                                              
 
         public IEnumerable<SearchResult> SearchUsers(string searchText)
         {

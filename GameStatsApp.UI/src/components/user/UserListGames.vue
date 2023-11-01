@@ -12,7 +12,7 @@
                     </div>      
                 </div>              
                 <div class="d-flex ms-auto">   
-                    <div class="btn-group me-2" role="group">
+                    <div class="btn-group me-1" role="group">
                         <button type="button" class="btn btn-secondary p-2" @click="onOrderByDescClick"><font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-arrow-up-wide-short" size="xl"/><font-awesome-icon v-else icon="fa-solid fa-arrow-down-wide-short" size="xl"/></button>
                         <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split p-2" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="visually-hidden">Toggle Dropdown</span>
@@ -26,6 +26,7 @@
                         <button type="button" class="btn btn-secondary p-2" @click="onShowFilterTextClick"><font-awesome-icon icon="fa-solid fa-filter" size="xl"/></button> 
                         <input v-if="showFilterText" v-model="filterText" type="search" class="form-control" placeholder="Filter games">
                     </div>
+                    <button v-if="userlistid != 0" type="button" class="btn btn-secondary p-2 ms-1" @click="onClearListClick"><font-awesome-icon icon="fa-solid fa-eraser" size="xl"/></button> 
                 </div>
             </div>            
             <div v-if="loading">
@@ -109,7 +110,7 @@
                     </div>                      
                 </div>
             </div>
-        </div>         
+        </div>               
         <div ref="removemodal" class="modal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -139,7 +140,24 @@
                     </div>
                 </div>
             </div>
-        </div>                
+        </div> 
+        <div ref="clearmodal" class="modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Clear List</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Remove all games from <strong>{{ userlists.find(i => i.id == userlistid)?.name }}</strong> list?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" @click="onRemoveAllGamesClick($event, game)">Continue</button>
+                    </div>
+                </div>
+            </div>
+        </div>                           
     </div>
 </template>
 <script>
@@ -298,7 +316,15 @@
             },
             onRemoveGameClick(e, game) {
                 this.removeGameFromAllUserLists(game);
-            },            
+            },
+            onClearListClick() {
+                new Modal(this.$refs.clearmodal).show();
+            },
+            onRemoveAllGamesClick() {
+                var that = this;
+                var userList = that.userlists.find(i => i.id == that.userlistid);
+                that.removeAllGamesFromUserList(userList);
+            },        
             onUserListClick(e, userList, game) {
                 var el = e.target;
                 if (!el.closest('.gamelist-icons').classList.contains('d-none')) {
@@ -499,6 +525,26 @@
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });                
             },
+            removeAllGamesFromUserList(userList) {
+                var that = this;
+
+                return axios.post('/User/RemoveAllGamesFromUserList', null,{ headers: { 'RequestVerificationToken': that.getCsrfToken() },
+                                                                             params: { userListID: userList.id } })
+                    .then((res) => {
+                        if (res.data.success) {    
+                            that.games = [];            
+                            that.allgames = [];
+                                                               
+                            successToast("Removed all games from <strong>" + userList.name + "</strong> list");
+                        } else {
+                            res.data.errorMessages.forEach(errorMsg => {
+                                errorToast(errorMsg);                           
+                            });                           
+                        }   
+                        Modal.getInstance(that.$refs.clearmodal).hide();                                           
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });                
+            },            
             resizeColumns() {
                 var that = this;
 

@@ -418,6 +418,18 @@ namespace GameStatsApp.Service
             }
         }
 
+        public void RemoveAllGamesFromUserList(int userID, int userListID)
+        {         
+            var userlistid = _userRepo.GetUserLists(i => i.UserID == userID && i.ID == userListID)
+                                        .Select(i => i.ID)
+                                        .FirstOrDefault();
+
+            if (userlistid > 0)
+            {
+                _userRepo.DeleteAllUserListGames(userlistid);
+            }
+        }        
+
         public IEnumerable<UserAccountViewModel> GetUserAccounts(int userID)
         {
             var userAccountVMs = _userRepo.GetUserAccountViews(i => i.UserID == userID).Select(i => new UserAccountViewModel(i)).ToList();
