@@ -4,7 +4,7 @@ A site to create your own lists and add, remove and import games from them.
 
 ## Getting stated:
 
-1. Install node.js and npm [Downloading and installing Node.js and npm] ([https://nodejs.org/en/download](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)).
+1. Install node.js and npm [Downloading and installing Node.js and npm]([https://nodejs.org/en/download](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)).
 2. Clone the repo using your preferred method.
    - Visual Studio Code should work out of the box.
    - Run "npm intall" under GameStatsApp/GameStatsApp.UI to install packages.
