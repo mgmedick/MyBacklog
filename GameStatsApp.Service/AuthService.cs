@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using GameStatsApp.Interfaces.Repositories;
@@ -18,6 +19,8 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 using Google.Apis.Auth;
+using GameStatsApp.Common.Extensions;
+using System.Security.Cryptography;
 
 namespace GameStatsApp.Service
 {
@@ -139,6 +142,228 @@ namespace GameStatsApp.Service
 
             return results;
         }           
+        #endregion
+
+        #region NSOAuth
+        public Tuple<string, string> GetNSOAuthUrl()
+        {
+            var baseUrl = "https://accounts.nintendo.com/connect/1.0.0/authorize";
+            
+            byte[] bytes = new byte[36];
+            new Random().NextBytes(bytes);
+            var state = WebEncoders.Base64UrlEncode(bytes);
+
+            byte[] bytes2 = new byte[32];
+            new Random().NextBytes(bytes2);
+            var codeVerifier = WebEncoders.Base64UrlEncode(bytes2);
+            var codeChallenge = WebEncoders.Base64UrlEncode(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(codeVerifier)));
+
+            var parameters = new Dictionary<string,string>{
+                {"state", state},
+                {"redirect_uri", "npf71b963c1b7b6d119://auth"},
+                {"client_id", "71b963c1b7b6d119"},                
+                {"scope", "openid user user.birthday user.mii user.screenName"},
+                {"response_type", "session_token_code"},
+                {"session_token_code_challenge", codeChallenge},
+                {"session_token_code_challenge_method", "S256"},
+                {"theme", "login_form"}
+            };
+
+            var authUrl = QueryHelpers.AddQueryString(baseUrl, parameters);
+
+            return new Tuple<string, string>(authUrl, codeVerifier);
+        }
+
+        public async Task<List<string>> GetNSOUserGameNames(string redirectUrl, string codeVerifier)
+        {
+            var results = new List<string>();
+            var url = new Uri(redirectUrl.Replace("auth#", "auth?"));
+            var items = QueryHelpers.ParseQuery(url.Query);
+            var tokenCode = (string)items["session_token_code"];
+            var sessionToken = await GetNSOSessionToken(tokenCode, codeVerifier);
+            var response = await GetNSOApiToken(sessionToken);
+            var userInfo = await GetNSOUserInfo((string)response.GetValue("access_token"));
+            var response2 = await GetNSOFParam((string)response.GetValue("id_token"), 1, (string)userInfo.GetValue("id"));
+            var response4 = await GetNSOApiLogin((string)response.GetValue("id_token"), (string)response2.GetValue("f"), (long)response2.GetValue("timestamp"), (string)response2.GetValue("request_id"), (string)userInfo.GetValue("country"), (string)userInfo.GetValue("birthday"), (string)userInfo.GetValue("language"));
+
+            return results;
+        }     
+
+        public async Task<string> GetNSOSessionToken(string tokenCode, string codeVerifier)
+        {
+            var result = string.Empty;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("OnlineLounge/2.7.1 NASDKAPI Android");
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue("en-US"));
+                client.DefaultRequestHeaders.Add("Host", "accounts.nintendo.com");
+                client.DefaultRequestHeaders.Add("Connection", "Keep-Alive");
+                client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+
+                var parameters = new Dictionary<string, string> {
+                    {"client_id", "71b963c1b7b6d119"},
+                    {"session_token_code", tokenCode},
+                    {"session_token_code_verifier", codeVerifier}
+                };
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://accounts.nintendo.com/connect/1.0.0/api/session_token") { Content = new FormUrlEncodedContent(parameters) };
+
+                using (var response = await client.SendAsync(request))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        var data = JObject.Parse(dataString);
+
+                        if (data != null)
+                        {
+                            result = (string)data.GetValue("session_token");
+                        }                        
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<JObject> GetNSOApiToken(string sessionToken)
+        {
+            JObject data = null;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("OnlineLounge/2.7.1 NASDKAPI Android");
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue("en-US"));
+                client.DefaultRequestHeaders.Add("Host", "accounts.nintendo.com");
+                client.DefaultRequestHeaders.Add("Connection", "Keep-Alive");
+                client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://accounts.nintendo.com/connect/1.0.0/api/token");
+
+                var parameters = new Dictionary<string, object> {
+                    {"client_id", "71b963c1b7b6d119"},
+                    {"session_token", sessionToken},
+                    {"grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer-session-token"}
+                };
+                request.Content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8, "application/json");
+
+                using (var response = await client.SendAsync(request))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        data = JObject.Parse(dataString);                      
+                    }                    
+                }
+            }
+
+            return data;
+        }       
+
+        public async Task<JObject> GetNSOUserInfo(string apiToken)
+        {
+            JObject data = null;
+
+            using (HttpClient client = new HttpClient(new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate }))
+            {
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("OnlineLounge/2.7.1 NASDKAPI Android");
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
+                client.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue("en-US"));
+                client.DefaultRequestHeaders.Add("Host", "api.accounts.nintendo.com");
+                client.DefaultRequestHeaders.Add("Connection", "Keep-Alive");
+                client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+
+                var requestUrl = "https://api.accounts.nintendo.com/2.0.0/users/me";
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+
+                using (var response = await client.SendAsync(request))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        data = JObject.Parse(dataString);      
+                    }
+                }
+            }
+
+            return data;
+        }       
+
+        public async Task<JObject> GetNSOFParam(string idToken, int step, string userID)
+        {
+            JObject data = null;
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("mybacklog.io/1.0");
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://api.imink.app/f");
+
+                var parameters = new Dictionary<string, object> {
+                    {"token", idToken},
+                    {"hash_method", step},
+                    {"na_id", userID}
+                };
+                request.Content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8, "application/json");
+
+                using (var response = await client.SendAsync(request))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        data = JObject.Parse(dataString);                      
+                    }                    
+                }
+            }
+
+            return data;
+        }  
+
+        public async Task<JObject> GetNSOApiLogin(string idToken, string fParam, long timestamp, string requestID, string userCountry, string userBirthday, string userLanguage)
+        {
+            JObject data = null;
+
+            using (HttpClient client = new HttpClient(new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip }))
+            {
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("com.nintendo.znca/2.7.1 (Android/7.1.2)");
+                client.DefaultRequestHeaders.Add("Host", "api-lp1.znc.srv.nintendo.net");
+                client.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue("en-US"));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer");
+                client.DefaultRequestHeaders.Add("X-ProductVersion", "2.7.1");
+                client.DefaultRequestHeaders.Add("Connection", "Keep-Alive");
+                client.DefaultRequestHeaders.Add("X-Platform", "Android");
+
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://api-lp1.znc.srv.nintendo.net/v3/Account/Login");
+
+                var parameters = new Dictionary<string, object> {
+                    {"f", fParam},
+                    {"naIdToken", idToken},
+                    {"timestamp", timestamp},
+                    {"requestId", requestID},
+                    {"naCountry", userCountry},
+                    {"naBirthday", userBirthday},
+                    {"language", userLanguage}
+                };
+
+                request.Content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8, "application/json");
+
+                using (var response = await client.SendAsync(request))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        data = JObject.Parse(dataString);                      
+                    }                    
+                }
+            }
+
+            return data;
+        }                                
         #endregion
 
         #region MicrosoftAuth
@@ -421,9 +646,8 @@ namespace GameStatsApp.Service
 
                 using (var response = await client.SendAsync(request))
                 {
-                    // if (response.IsSuccessStatusCode)
-                    // {
-                        var blah = response.IsSuccessStatusCode;
+                    if (response.IsSuccessStatusCode)
+                    {
                         var dataString = await response.Content.ReadAsStringAsync();
                         var data = JObject.Parse(dataString);
                         var items = (JArray)data.GetValue("titles");
@@ -434,7 +658,7 @@ namespace GameStatsApp.Service
                         {
                             await GetMicrosoftUserInventory(userHash, xstsToken, userXuid, results, continuationToken);
                         }
-                    // }
+                    }
                 }
             }
 

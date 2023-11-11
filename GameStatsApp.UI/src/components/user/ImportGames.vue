@@ -11,66 +11,46 @@
             <div class="d-flex mb-1">
                 <font-awesome-icon icon="fa-solid fa-triangle-exclamation" size="lg" class="text-warning me-2"/>
                 <div class="align-self-end text-center text-xs text-muted">
-                    <span>Your Steam Profile must be <a href="https://help.steampowered.com/en/faqs/view/588C-C67D-0251-C276">Public</a> to import Steam games</span>
+                    <span>Your Profile must be <a href="https://help.steampowered.com/en/faqs/view/588C-C67D-0251-C276">Public</a> to import Steam games</span>
                 </div>
             </div>             
-            <div class="btn-group me-1 useraccount-btn-group" role="group">
+            <div class="btn-group me-1" role="group">
                 <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center" @click="onImportGamesClick($event, 1)" :disabled="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.id]">
-                    <font-awesome-icon icon="fa-brands fa-steam" size="2xl"/>
+                    <font-awesome-icon icon="fa-brands fa-steam" size="xl"/>
                     <div class="mx-auto">
-                        <div class="align-self-start fs-5">
-                            <span class="mx-auto useraccount-btn-text">{{ (importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.id] ? 'Importing ' : 'Import ') + 'Steam games' }}</span>
-                        </div>
-                        <div v-if="importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.relativeImportLastRunDateString" class="align-self-end">
-                            <small>{{ 'Imported ' + importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.relativeImportLastRunDateString }}</small>
+                        <span>{{ (importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.id] ? 'Importing ' : 'Import ') + 'Steam games' }}</span>
+                        <div v-if="importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.relativeImportLastRunDateString" class="text-xs">
+                            <span>{{ 'Imported ' + importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.relativeImportLastRunDateString }}</span>
                         </div>
                     </div>
                     <font-awesome-icon v-if="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.id]" icon="fa-solid fa-spinner" spin size="xl"/>
                 </button>
-                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split p-2" data-bs-toggle="dropdown" aria-expanded="false" style="max-width: 50px;" :disabled="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.id]">
+                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" style="max-width: 50px;" :disabled="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.id]">
                     <span class="visually-hidden">Toggle Dropdown</span>
                 </button>                    
                 <ul class="dropdown-menu">
-                    <li><a :href="importGamesVM.steamAuthUrl" class="dropdown-item" data-value="0">Reauthenticate</a></li>
+                    <li><a :href="importGamesVM.steamAuthUrl" class="dropdown-item" data-value="0">Re-authenticate</a></li>
                 </ul>                   
             </div>  
-            <div class="btn-group me-1 useraccount-btn-group" role="group">           
+            <div class="btn-group me-1" role="group">
                 <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center" @click="onImportGamesClick($event, 2)" :disabled="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.id]">
-                    <font-awesome-icon icon="fa-brands fa-xbox" size="2xl"/>
+                    <font-awesome-icon icon="fa-brands fa-xbox" size="xl"/>
                     <div class="mx-auto">
-                        <div class="align-self-start fs-5">
-                            <span class="mx-auto useraccount-btn-text">{{ (importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.id] ? 'Importing ' : 'Import ') + 'Xbox games' }}</span>
-                        </div>
-                        <div v-if="importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.relativeImportLastRunDateString" class="align-self-end">
-                            <small>{{ 'Imported ' + importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.relativeImportLastRunDateString }}</small>
+                        <span>{{ (importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.id] ? 'Importing ' : 'Import ') + 'Xbox games' }}</span>
+                        <div v-if="importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.relativeImportLastRunDateString" class="text-xs">
+                            <span>{{ 'Imported ' + importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.relativeImportLastRunDateString }}</span>
                         </div>
                     </div>
                     <font-awesome-icon v-if="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.id]" icon="fa-solid fa-spinner" spin size="xl"/>
                 </button>
-                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split p-2" data-bs-toggle="dropdown" aria-expanded="false" style="max-width: 50px;" :disabled="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.id]">
+                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" style="max-width: 50px;" :disabled="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.id]">
                     <span class="visually-hidden">Toggle Dropdown</span>
                 </button>                    
                 <ul class="dropdown-menu">
-                    <li><a :href="importGamesVM.microsoftAuthUrl" class="dropdown-item" data-value="0">Reauthenticate</a></li>
-                </ul> 
-            </div>
-        </div>
-        <div ref="steamimportwarnmodal" class="modal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Import Games</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <span>Your Steam Profile and Game Details privacy settings must be set to public for the import to find any games</span>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="onImportGamesClick($event, 1)">Continue</button>
-                    </div>                      
-                </div>
-            </div>
-        </div>          
+                    <li><a :href="importGamesVM.microsoftAuthUrl" class="dropdown-item" data-value="0">Re-authenticate</a></li>
+                </ul>                   
+            </div>  
+        </div>       
     </div>
 </template>
 <script>
@@ -145,9 +125,9 @@
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },               
-            onImportGamesClick(e, accountTypeID) {
-                this.importGames(accountTypeID)
-            },            
+            onImportGamesClick(e, accountTypeID) {                
+                this.importGames(accountTypeID);
+            },      
             importGames(accountTypeID) {
                 var that = this;
                 var userAccount = that.importGamesVM.userAccounts.find(i => i.accountTypeID == accountTypeID);
@@ -187,7 +167,7 @@
                         break;
                     case 2:
                         result = this.importGamesVM.microsoftAuthUrl;
-                        break;
+                        break;                     
                 }
 
                 return result;

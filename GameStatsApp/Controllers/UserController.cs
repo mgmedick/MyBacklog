@@ -184,8 +184,11 @@ namespace GameStatsApp.Controllers
         public JsonResult ImportGames()
         {
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var microsoftRedirectUrl = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectUri").Value;
-            var steamRedirectUrl = _config.GetSection("Auth").GetSection("Steam").GetSection("RedirectUri").Value;
+            var baseUrl = string.Format("{0}://{1}{2}", Request.Scheme, Request.Host, Request.PathBase);
+            var microsoftRedirectPath = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectPath").Value;         
+            var microsoftRedirectUrl = string.Format("{0}{1}", baseUrl, microsoftRedirectPath);
+            var steamRedirectPath = _config.GetSection("Auth").GetSection("Steam").GetSection("RedirectPath").Value;
+            var steamRedirectUrl = string.Format("{0}{1}", baseUrl, steamRedirectPath);
 
             var importGamesVM = new ImportGamesViewModel() {
                 UserAccounts = _userService.GetUserAccounts(userID).ToList(),
@@ -254,7 +257,10 @@ namespace GameStatsApp.Controllers
 
             try
             {
-                var redirectUri = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectUri").Value;
+                var baseUrl = string.Format("{0}://{1}{2}", Request.Scheme, Request.Host, Request.PathBase);
+                var microsoftRedirectPath = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectPath").Value;   
+                var redirectUri = string.Format("{0}{1}", baseUrl, microsoftRedirectPath);
+                            
                 var code = Request.Query["code"].ToString();
                 if (!string.IsNullOrWhiteSpace(code))
                 {

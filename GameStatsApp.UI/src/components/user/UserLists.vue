@@ -10,7 +10,7 @@
                                     <font-awesome-icon icon="fa-solid fa-layer-group" size="lg" class="me-3"/>
                                 </div>
                                 <div class="col">
-                                    <span>All Games</span>
+                                    <span>All</span>
                                 </div>
                             </div>
                         </a>
@@ -34,16 +34,16 @@
         </div>
         <div class="show-md row g-2 justify-content-center">
             <div class="btn-group">
-                <button class="btn btn-lg dropdown-toggle btn-primary d-flex align-items-center" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                    <font-awesome-icon v-if="selectedItemID == 0" icon="fa-solid fa-layer-group" size="lg"/>
-                    <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.defaultListID" :icon="getDefaultIconClass(userlists.find(i => i.id == selectedItemID)?.defaultListID)" size="lg"/>
-                    <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.accountTypeID" :icon="getAccountIconClass(userlists.find(i => i.id == selectedItemID)?.accountTypeID)" size="lg"/>
-                    <font-awesome-icon v-else icon="fa-solid fa-list" size="lg"/>
-                    <span class="mx-auto">{{ selectedItemID == 0 ? 'All Games' : userlists.find(i => i.id == selectedItemID)?.name }}</span>
+                <button class="btn dropdown-toggle btn-primary d-flex align-items-center" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                    <font-awesome-icon v-if="selectedItemID == 0" icon="fa-solid fa-layer-group" size="xl"/>
+                    <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.defaultListID" :icon="getDefaultIconClass(userlists.find(i => i.id == selectedItemID)?.defaultListID)" size="xl"/>
+                    <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.accountTypeID" :icon="getAccountIconClass(userlists.find(i => i.id == selectedItemID)?.accountTypeID)" size="xl"/>
+                    <font-awesome-icon v-else icon="fa-solid fa-list" size="xl"/>
+                    <span class="mx-auto fs-6">{{ selectedItemID == 0 ? 'All' : userlists.find(i => i.id == selectedItemID)?.name }}</span>
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="width: 100%;">
                     <li>
-                        <a @click="onUserListClick(0)" class="dropdown-item" :class="{ 'active' : selectedItemID == 0 }" href="#/" data-toggle="pill">All Games</a>
+                        <a @click="onUserListClick(0)" class="dropdown-item" :class="{ 'active' : selectedItemID == 0 }" href="#/" data-toggle="pill">All</a>
                     </li>   
                     <li v-for="(userList, userListIndex) in userlists" :key="userList.id">
                         <a @click="onUserListClick(userList.id)" class="dropdown-item" :class="{ 'active' : selectedItemID == userList.id }" href="#/" data-toggle="pill">{{ userList.name }}</a>

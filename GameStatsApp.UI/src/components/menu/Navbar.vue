@@ -18,7 +18,7 @@
                 <div class="d-flex">
                     <div v-if="isauth" class="ms-auto">
                         <div class="btn-group">
-                            <button class="btn dropdown-toggle btn-secondary" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                            <button class="btn dropdown-toggle btn-secondary p-2" type="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
                                 <font-awesome-icon icon="fa-solid fa-user" size="xl" />
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
