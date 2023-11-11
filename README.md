@@ -7,7 +7,7 @@ A site to create your own lists and add, remove and import games from them.
 1. Install node.js and npm [Downloading and installing Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
 2. Clone the repo using your preferred method.
    - Visual Studio Code should work out of the box.
-   - Run "npm intall" under GameStatsApp/GameStatsApp.UI to install packages.
+   - Run "npm install" under GameStatsApp/GameStatsApp.UI to install packages.
    - Run "npm run build" to build clientside code.
 2. There is no hosted test database so you’ll have to set one up locally (steps 3-8).
 3. Make sure you have MySQL v8.0.35 or later version installed, instructions below.
