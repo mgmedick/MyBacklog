@@ -28,8 +28,8 @@ A site to create your own lists and add, remove and import games from them.
        - Password: E1gj#5Jkeb
     - Unfortunately you won't be able to register any new users while debugging because appsettings.json doesn't include email server credentials.
        - Additionally login with google/facebook won't work due to missing credentials.
-    - Lastly the import feature won't work due to missing credentials.
-    - If you need the additional credentials for testing login/import just email/message me and I can send you non-redacted appsettings.json.
+       - Lastly the import feature won't work due to missing credentials.
+    - If you need the additional credentials for testing signup/login/import just email/message me and I can send you non-redacted appsettings.json.
 
 ## Stack:
 
