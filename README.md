@@ -20,9 +20,9 @@ A site to create your own lists and add, remove and import games from them.
    - lower_case_table_names = 1
    - optimizer_switch=block_nested_loop=off
    - group_concat_max_len = 1000000
-8. Follow step 2 of these instructions [how to import/export databases in mysql](https://www.digitalocean.com/community/tutorials/how-to-import-and-export-databases-in-mysql-or-mariadb) and import the [gamestatsapp_test_dump.sql](https://github.com/mgmedick/GameStatsAppDatabaseScripts/blob/main/gamestatsapp_test_dump.sql) MySQL dump file.
-9. Edit the connection string in the "appsettings.json" file with your MySQL credentials, user (usually "root") and password.
-10. Start debugging, email/message me if you have any questions.
+8. Follow step 2 of these instructions [how to import/export databases in mysql](https://www.digitalocean.com/community/tutorials/how-to-import-and-export-databases-in-mysql-or-mariadb) and import the [gamestatsapptest.sql](https://github.com/mgmedick/GameStatsAppDatabaseScripts/blob/main/gamestatsapptest.sql) MySQL dump file.
+10. Edit the connection string in the "appsettings.json" file with your MySQL credentials, user (usually "root") and password.
+11. Start debugging, email/message me if you have any questions.
     - Use login credentials below for user already created in "gamestatsapp_test" database.
        - Username: testuser@gmail.com
        - Password: E1gj#5Jkeb
