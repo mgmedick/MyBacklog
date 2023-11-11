@@ -12,6 +12,7 @@
 .game-image-container {
     max-width: 207px;
     max-height: 276px;
+    height: 100%;
 }
 
 .game-image-container.active {
