@@ -79,19 +79,22 @@
                         .then(res => {
                             var results = res.data;
 
-                            if (Object.keys(results).length > 0) {
+                            if (results.length > 0) {
                                 Object.keys(importingUserAccountIDs).forEach(userAccountID => {
-                                    if (results.hasOwnProperty(userAccountID)) {
-                                        if (results[userAccountID].item1) {
-                                            successToast("Imported <strong>" + results[userAccountID].item2 + "</strong> new games into <strong>" + importingUserAccountIDs[userAccountID].userListName + "</strong>");
+                                    var result = results.find(i => i.userAccountID == userAccountID);
+                                    if (result) {
+                                        if (result.success) {
+                                            successToast("Imported <strong>" + result.count + "</strong> new games into <strong>" + importingUserAccountIDs[userAccountID].userListName + "<strong>");
                                         } else {
-                                            errorToast("Error importing into <strong>" + importingUserAccountIDs[userAccountID].userListName  + "</strong>");
+                                            result.errorMessages.forEach(errorMsg => {
+                                                errorToast(errorMsg);                                         
+                                            });
                                         }
-
+                                        
                                         delete importingUserAccountIDs[userAccountID];
-                                    }
+                                    }        
                                 });
-                                
+
                                 sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(importingUserAccountIDs));
                                 window.dispatchEvent(new CustomEvent('importingUserAccountIDsUpdate'));
                             }

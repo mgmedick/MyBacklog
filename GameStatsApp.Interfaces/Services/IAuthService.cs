@@ -14,6 +14,7 @@ namespace GameStatsApp.Interfaces.Services
     public interface IAuthService
     {
         string GetSteamAuthUrl(string redirectUri);
+        Task<bool> CheckSteamUserCommunityVisibility(string steamID);
         Task<List<string>> GetSteamUserGameNames(string steamID);
         Task<TokenResponse> AuthenticateSteam(Dictionary<string, string> results);
         string GetMicrosoftAuthUrl(string redirectUri);

@@ -464,14 +464,22 @@ namespace GameStatsApp.Service
             return userAccountVW;
         }
         
-        public async Task<int> ImportGames(int userID, UserAccountView userAccountVW)
+        public async Task<Tuple<int,List<string>>> ImportGames(int userID, UserAccountView userAccountVW)
         {
+            var errorMessages = new List<string>();
             var gameNames = new List<string>();
 
-            switch(userAccountVW.AccountTypeID)
+            switch (userAccountVW.AccountTypeID)
             {
                 case (int)AccountType.Steam:
-                    gameNames = await _authService.GetSteamUserGameNames(userAccountVW.AccountUserID);
+                    if (await _authService.CheckSteamUserCommunityVisibility(userAccountVW.AccountUserID))
+                    {
+                        gameNames = await _authService.GetSteamUserGameNames(userAccountVW.AccountUserID);
+                    }
+                    else
+                    {   
+                        errorMessages.Add("Error importing, Steam Profile must be Public");
+                    }
                     break;           
                 case (int)AccountType.Xbox:
                     gameNames = await _authService.GetMicrosoftUserGameNames(userAccountVW.AccountUserHash, userAccountVW.Token, Convert.ToUInt64(userAccountVW.AccountUserID));
@@ -503,10 +511,13 @@ namespace GameStatsApp.Service
                 _userRepo.SaveUserListGames(userListGames);
             }
 
-            userAccountVW.ImportLastRunDate = DateTime.UtcNow;
-            _userRepo.SaveUserAccount(userAccountVW.ConvertToUserAccount()); 
+            if (!errorMessages.Any())
+            {
+                userAccountVW.ImportLastRunDate = DateTime.UtcNow;
+                _userRepo.SaveUserAccount(userAccountVW.ConvertToUserAccount()); 
+            }
 
-            return userListGames.Count();
+            return new Tuple<int,List<string>>(userListGames.Count(), errorMessages);
         }
         
         //jqvalidate

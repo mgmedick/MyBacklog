@@ -8,13 +8,13 @@
             </div>
         </div>
         <div v-else class="row g-2 justify-content-center mb-3">  
-            <div class="d-flex mb-1">
+            <div class="d-flex mb-1 align-items-center">
                 <font-awesome-icon icon="fa-solid fa-triangle-exclamation" size="lg" class="text-warning me-2"/>
-                <div class="align-self-end text-center text-xs text-muted">
-                    <span>Your Profile must be <a href="https://help.steampowered.com/en/faqs/view/588C-C67D-0251-C276">Public</a> to import Steam games</span>
+                <div class="align-self-end text-xs text-muted">
+                    <span>Your Profile must be <a href="#/" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Steam Import" data-bs-content="Your <strong>Steam Profile</strong> and <strong>Game Details</strong> under your <a href='https://help.steampowered.com/en/faqs/view/588C-C67D-0251-C276' target='_blank'>Privacy Settings</a> must be <strong>Public</strong> in order to import Steam games. No other section needs to be <strong>Public</strong>.<br/><br/>If you have privacy concerns you can set <strong>Game Details</strong> to <strong>Public</strong> before importing and set it back afterwards.">Public</a> to import Steam games</span>
                 </div>
             </div>             
-            <div class="btn-group me-1" role="group">
+            <div class="btn-group mt-0" role="group">
                 <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center" @click="onImportGamesClick($event, 1)" :disabled="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.id]">
                     <font-awesome-icon icon="fa-brands fa-steam" size="xl"/>
                     <div class="mx-auto">
@@ -25,14 +25,14 @@
                     </div>
                     <font-awesome-icon v-if="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.id]" icon="fa-solid fa-spinner" spin size="xl"/>
                 </button>
-                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" style="max-width: 50px;" :disabled="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.id]">
+                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split p-2" data-bs-toggle="dropdown" aria-expanded="false" style="max-width: 30px;" :disabled="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 1)?.id]">
                     <span class="visually-hidden">Toggle Dropdown</span>
                 </button>                    
                 <ul class="dropdown-menu">
                     <li><a :href="importGamesVM.steamAuthUrl" class="dropdown-item" data-value="0">Re-authenticate</a></li>
                 </ul>                   
             </div>  
-            <div class="btn-group me-1" role="group">
+            <div class="btn-group" role="group">
                 <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center" @click="onImportGamesClick($event, 2)" :disabled="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.id]">
                     <font-awesome-icon icon="fa-brands fa-xbox" size="xl"/>
                     <div class="mx-auto">
@@ -43,7 +43,7 @@
                     </div>
                     <font-awesome-icon v-if="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.id]" icon="fa-solid fa-spinner" spin size="xl"/>
                 </button>
-                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" style="max-width: 50px;" :disabled="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.id]">
+                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split p-2" data-bs-toggle="dropdown" aria-expanded="false" style="max-width: 30px;" :disabled="importingUserAccountIDs[importGamesVM.userAccounts.find(i => i.accountTypeID == 2)?.id]">
                     <span class="visually-hidden">Toggle Dropdown</span>
                 </button>                    
                 <ul class="dropdown-menu">
@@ -55,7 +55,7 @@
 </template>
 <script>
     import { successToast, errorToast } from '../../js/common.js';
-    import { Tooltip } from 'bootstrap'; 
+    import { Tooltip, Popover } from 'bootstrap'; 
     import axios from 'axios';
     
     export default {
@@ -102,6 +102,10 @@
                             new Tooltip(el);
                         });
 
+                        document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el => {
+                            new Popover(el, { html: true });
+                        });
+
                         if (that.importGamesVM.authSuccess != null) {
                             if (that.importGamesVM.authSuccess) {
                                 that.importGames(that.importGamesVM.authAccountTypeID);
@@ -146,7 +150,9 @@
                             if (res.data.success) {
                                 successToast("Imported <strong>" + res.data.count + "</strong> new games into <strong>" + userAccount.userListName + "</strong>");
                             } else {
-                                errorToast("Error importing into <strong>" + userAccount.userListName + "</strong>");                                               
+                                res.data.errorMessages.forEach(errorMsg => {
+                                    errorToast(errorMsg);                                         
+                                });                                             
                             }
                         }                                                                                                                           
                         delete that.importingUserAccountIDs[userAccount.id];

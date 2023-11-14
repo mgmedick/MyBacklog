@@ -3,7 +3,7 @@
         <div class="container-fluid m-0 p-0">
             <div class="d-flex align-items-end mb-3">
                 <div class="me-2">
-                    <div class="btn btn-secondary p-2" tabindex="-1" role="button" @click="onImportClick">
+                    <div class="btn btn-secondary p-2 d-flex" tabindex="-1" role="button" @click="onImportClick">
                         <font-awesome-layers v-if="isImporting" class="fa-xl" style="width: 26px; z-index: 0;">
                             <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-4" style="color: #adb5bd;"/>
                             <font-awesome-icon icon="fa-solid fa-cloud" style="z-index: -1;"/>

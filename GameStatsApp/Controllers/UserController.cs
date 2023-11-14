@@ -19,6 +19,7 @@ using Google.Apis.Auth;
 using Microsoft.AspNetCore.Http.Extensions;
 using Newtonsoft.Json;
 using System.Threading;
+using GameStatsApp.Model.JSON;
 
 namespace GameStatsApp.Controllers
 {
@@ -224,20 +225,25 @@ namespace GameStatsApp.Controllers
 
                 if (!isAuthExpired)
                 {
-                    var importingUserAccounts = HttpContext.Session.Get<Dictionary<int,Tuple<bool?, int>>>("ImportingUserAccounts") ?? new Dictionary<int,Tuple<bool?, int>>();  
-                    if (!importingUserAccounts.ContainsKey(userAccountID))
+                    var importingUserAccounts = HttpContext.Session.Get<List<ImportingUserAccount>>("ImportingUserAccounts") ?? new List<ImportingUserAccount>();  
+                    if (!importingUserAccounts.Any(i=> i.UserAccountID == userAccountID))
                     {
-                        importingUserAccounts.Add(userAccountID, new Tuple<bool?, int>((bool?)null, 0));
+                        importingUserAccounts.Add(new ImportingUserAccount() { UserAccountID = userAccountID });
                     }
-                    HttpContext.Session.Set<Dictionary<int, Tuple<bool?, int>>>("ImportingUserAccounts", importingUserAccounts);
+                    HttpContext.Session.Set<List<ImportingUserAccount>>("ImportingUserAccounts", importingUserAccounts);
 
-                    count = await _userService.ImportGames(userID, userAccountVW);                 
-                    success = true;
+                    var result = await _userService.ImportGames(userID, userAccountVW);
+                    count = result.Item1;
+                    errorMessages = result.Item2;
+                    success = !errorMessages.Any();
 
-                    if (importingUserAccounts.ContainsKey(userAccountID))
+                    var importingUserAccount = importingUserAccounts.FirstOrDefault(i=> i.UserAccountID == userAccountID);
+                    if (importingUserAccount != null)
                     {
-                        importingUserAccounts[userAccountID] = new Tuple<bool?, int>(success, count);
-                        HttpContext.Session.Set<Dictionary<int, Tuple<bool?, int>>>("ImportingUserAccounts", importingUserAccounts);
+                        importingUserAccount.Success = success;
+                        importingUserAccount.Count = count;
+                        importingUserAccount.ErrorMessages = errorMessages;
+                        HttpContext.Session.Set<List<ImportingUserAccount>>("ImportingUserAccounts", importingUserAccounts);
                     }
                 }
             }
@@ -323,14 +329,14 @@ namespace GameStatsApp.Controllers
         [HttpGet]
         public ActionResult GetCompletedImportGames()
         {
-            var importingUserAccounts = HttpContext.Session.Get<Dictionary<int, Tuple<bool?, int>>>("ImportingUserAccounts") ?? new Dictionary<int, Tuple<bool?, int>>();             
-            var results = importingUserAccounts.Where(x => x.Value.Item1.HasValue).ToDictionary(x => x.Key, x => x.Value);
+            var importingUserAccounts = HttpContext.Session.Get<List<ImportingUserAccount>>("ImportingUserAccounts") ?? new List<ImportingUserAccount>();  
+            var results = importingUserAccounts.Where(x => x.Success.HasValue).ToList();
             
             if (results.Any())
             {
-                importingUserAccounts = importingUserAccounts.Where(x => !results.ContainsKey(x.Key)).ToDictionary(x => x.Key, x => x.Value);
-                HttpContext.Session.Set<Dictionary<int, Tuple<bool?, int>>>("ImportingUserAccounts", importingUserAccounts);  
-            }          
+                importingUserAccounts = importingUserAccounts.Where(x => !results.Any(i => i.UserAccountID == x.UserAccountID)).ToList();
+                HttpContext.Session.Set<List<ImportingUserAccount>>("ImportingUserAccounts", importingUserAccounts);                   
+            }   
 
             return Json(results);
         }                

@@ -94,6 +94,44 @@ namespace GameStatsApp.Service
             return result;
         }    
 
+        public async Task<bool> CheckSteamUserCommunityVisibility(string steamID)
+        {
+            bool result = false;
+
+            using (HttpClient client = new HttpClient())
+            {
+                var requestUrl = string.Format("http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/");
+
+                var clientID = _config.GetSection("Auth").GetSection("Steam").GetSection("ClientID").Value;
+                var parameters = new Dictionary<string, string> {
+                    {"key", clientID },
+                    {"steamids", steamID },
+                    {"format", "json" },
+                };
+                requestUrl = QueryHelpers.AddQueryString(requestUrl, parameters);
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+
+                using (var response = await client.SendAsync(request))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        var data = JObject.Parse(dataString);
+
+                        if (data != null)
+                        {
+                            var items = (JArray)((JObject)data.GetValue("response")).GetValue("players");
+                            if (items.Any()) {
+                                result = (string)((JObject)items.FirstOrDefault()).GetValue("communityvisibilitystate") == "3";
+                            }                                                       
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
         public async Task<List<string>> GetSteamUserGameNames(string steamID)
         {
             var results = new List<string>();
