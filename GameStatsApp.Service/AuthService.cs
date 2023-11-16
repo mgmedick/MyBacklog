@@ -597,8 +597,8 @@ namespace GameStatsApp.Service
         {
             var results = new List<string>();
             var items = await GetMicrosoftUserTitleHistory(userHash, xstsToken, userXuid);
-            results = items.Where(obj => ((string)obj["titleType"]) == "Game" && (!importLastRunDate.HasValue || ((DateTime)obj["lastUnlock"]) >= importLastRunDate))
-                            .OrderBy(obj => (DateTime)obj["lastUnlock"])
+            results = items.Where(obj => ((string)obj["type"]) == "Game")
+                            .OrderBy(obj => (DateTime)((JObject)obj["titleHistory"]).GetValue("lastTimePlayed"))
                             .ThenBy(obj => (string)obj["name"])
                             .Select(obj => (string)obj["name"]).ToList();
 
@@ -608,8 +608,53 @@ namespace GameStatsApp.Service
                                       
             return results;
         }
-        
+
         private async Task<JArray> GetMicrosoftUserTitleHistory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null)
+        {
+            if (results == null)
+            {
+                results = new JArray();
+            }
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("XBL3.0", string.Format("x={0};{1}", userHash, xstsToken));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("X-Xbl-Contract-Version", "2");
+                client.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue("en-US"));
+
+                var requestUrl = string.Format("https://titlehub.xboxlive.com/users/xuid({0})/titles/titlehistory/decoration/scid,image,detail", userXuid);
+                if (!string.IsNullOrWhiteSpace(continuationToken))
+                {
+                    var parameters = new Dictionary<string, string> {
+                        {"continuationToken", continuationToken }
+                    };
+                    requestUrl = QueryHelpers.AddQueryString(requestUrl, parameters);
+                }
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+
+                using (var response = await client.SendAsync(request))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var dataString = await response.Content.ReadAsStringAsync();
+                        var data = JObject.Parse(dataString);
+                        var items = (JArray)data.GetValue("titles");
+                        results.Merge(items);
+
+                        continuationToken = (string)data["pagingInfo"]?["continuationToken"];
+                        if (!string.IsNullOrWhiteSpace(continuationToken))
+                        {
+                            await GetMicrosoftUserTitleHistory(userHash, xstsToken, userXuid, results, continuationToken);
+                        }
+                    }
+                }
+            }
+
+            return results;
+        }  
+
+        private async Task<JArray> GetMicrosoftUserAchievementHistory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null)
         {
             if (results == null)
             {
@@ -671,15 +716,18 @@ namespace GameStatsApp.Service
                 client.DefaultRequestHeaders.Add("X-Xbl-Contract-Version", "3");
                 client.DefaultRequestHeaders.Add("X-Xbl-Device-Type", "iPhone");
                 client.DefaultRequestHeaders.Add("X-Xbl-IsAutomated-Client", "true");
-
+                
                 var requestUrl = "https://inventory.xboxlive.com/users/me/inventory";
+                var parameters = new Dictionary<string, string> {
+                    {"expandSatisfyingEntitlements", "true"},             
+                    {"availability", "All"}
+                };                        
                 if (!string.IsNullOrWhiteSpace(continuationToken))
                 {
-                    var parameters = new Dictionary<string, string> {
-                        {"continuationToken", continuationToken }
-                    };
-                    requestUrl = QueryHelpers.AddQueryString(requestUrl, parameters);
-                }
+                    parameters.Add("continuationToken", continuationToken);
+                }        
+                requestUrl = QueryHelpers.AddQueryString(requestUrl, parameters);
+
                 var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
 
                 using (var response = await client.SendAsync(request))

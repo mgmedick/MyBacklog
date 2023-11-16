@@ -492,7 +492,7 @@ namespace GameStatsApp.Service
             while (batchCount < gameNames.Count())
             {
                 var gameNamesBatch = gameNames.Skip(batchCount).Take(maxBatchCount).ToList();
-                var gameIDsBatch = _gameRepo.GetGames(i => gameNamesBatch.Contains(i.Name))
+                var gameIDsBatch = _gameRepo.GetGames(i => gameNamesBatch.Any(x => x.IsEquivalent(i.Name)))
                                             .GroupBy(i => i.Name)
                                             .Select(i => i.First())
                                             .Select(i => i.ID)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,21 +9,6 @@ namespace GameStatsApp.Common.Extensions
 {
     public static class StringExtensions
     {
-        public static string[] SplitString(this string param, string delimiter, int? count = null)
-        {
-            string[] result = null;
-
-            if (count.HasValue)
-            {
-                result = param.Split(new string[] { delimiter }, count.Value, StringSplitOptions.None);
-            }
-            else
-            {
-                result = param.Split(new string[] { delimiter }, StringSplitOptions.None);
-            }
-            return param.Split(new string[] { delimiter }, StringSplitOptions.None);
-        }
-
         public static string HashString(this string pass)
         {
             string result = BCrypt.Net.BCrypt.HashPassword(pass);
@@ -100,6 +86,73 @@ namespace GameStatsApp.Common.Extensions
             string Pass = new String(sorted);
 
             return Pass;
-        }        
+        }
+
+        public static bool IsEquivalent(this string input, string comparison)
+        {
+            var santizedInput = input.Sanatize().ReplaceRomanWithInt().ReplaceMultiSpaceWithSingle().Trim();
+            var santizedComparison = input.Sanatize().ReplaceRomanWithInt().ReplaceMultiSpaceWithSingle().Trim();
+
+            return santizedInput == santizedComparison;
+        }
+
+        public static string Sanatize(this string input)
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append(input.Normalize(NormalizationForm.FormKD).Where(i => i <= 128).ToArray());
+
+            return stringBuilder.ToString();
+        }
+
+        public static string ReplaceMultiSpaceWithSingle(this string input)
+        {
+            return Regex.Replace(input.Sanatize().ReplaceRomanWithInt(), @"\s+", " ");
+        }
+
+        public static string ReplaceRomanWithInt(this string input)
+        {
+            var items = Regex.Matches(input, @"M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})")
+                            .Cast<Match>()
+                            .Where(x => !string.IsNullOrWhiteSpace(x.Value))
+                            .Select(x => x.Value)
+                            .Distinct()
+                            .ToArray();
+            var lookup = items.Select(i => new Tuple<string,string>(i, i.ConvertRomanToInt().ToString())).ToArray();
+                
+            foreach (var item in lookup)
+            {
+                input = input.Replace(item.Item1, item.Item2);
+            }
+                
+            return input;
+        }
+            
+        public static int ConvertRomanToInt(this string roman)
+        {
+            var RomanMap = new Dictionary<char, int>() {
+                {'I', 1},
+                {'V', 5},
+                {'X', 10},
+                {'L', 50},
+                {'C', 100},
+                {'D', 500},
+                {'M', 1000}
+            };	
+                
+            roman = roman.ToUpper();
+            var number = 0;
+            var previousChar = roman[0];
+            foreach(char currentChar in roman)
+            {
+                number += RomanMap[currentChar];
+                if(RomanMap[previousChar] < RomanMap[currentChar])
+                {
+                    number -= RomanMap[previousChar] * 2;
+                }
+                previousChar = currentChar;
+            }
+                
+            return number;
+        }                   
     }
 }

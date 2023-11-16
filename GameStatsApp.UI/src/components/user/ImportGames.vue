@@ -11,7 +11,7 @@
             <div class="d-flex mb-1 align-items-center">
                 <font-awesome-icon icon="fa-solid fa-triangle-exclamation" size="lg" class="text-warning me-2"/>
                 <div class="align-self-end text-xs text-muted">
-                    <span>Your Profile must be <a href="#/" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Steam Import" data-bs-content="Your <strong>Steam Profile</strong> and <strong>Game Details</strong> under your <a href='https://help.steampowered.com/en/faqs/view/588C-C67D-0251-C276' target='_blank'>Privacy Settings</a> must be <strong>Public</strong> in order to import Steam games. No other section needs to be <strong>Public</strong>.<br/><br/>If you have privacy concerns you can set <strong>Game Details</strong> to <strong>Public</strong> before importing and set it back afterwards.">Public</a> to import Steam games</span>
+                    <span>Your Profile must be <a href="#/" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Steam Import" data-bs-content="Your <strong>Steam Profile</strong> and <strong>Game Details</strong> section under your <a href='https://help.steampowered.com/en/faqs/view/588C-C67D-0251-C276' target='_blank'>Steam Privacy Settings</a> must be Public in order to import Steam games. No other section needs to be Public.<br/><br/>If you have privacy concerns you can set <strong>Game Details</strong> to Public before importing and set it back to Private/Friends Only afterwards.">Public</a> to import Steam games</span>
                 </div>
             </div>             
             <div class="btn-group mt-0" role="group">
