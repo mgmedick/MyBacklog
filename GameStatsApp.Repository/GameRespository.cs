@@ -15,11 +15,11 @@ namespace GameStatsApp.Repository
 {
     public class GameRespository : BaseRepository, IGameRepository
     {
-        public IEnumerable<Game> GetGames(Expression<Func<Game, bool>>  predicate)
+        public IEnumerable<Game> GetGames(Expression<Func<Game, bool>>  predicate = null)
         {
             using (IDatabase db = DBFactory.GetDatabase())
             {
-                return db.Query<Game>().Where(predicate).ToList();
+                return db.Query<Game>().Where(predicate ?? (x => true)).ToList();
             }
         }
 
@@ -31,7 +31,7 @@ namespace GameStatsApp.Repository
 
                 return results;
             }
-        }                       
+        }                           
     }
 }
 

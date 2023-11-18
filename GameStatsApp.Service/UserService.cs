@@ -486,21 +486,19 @@ namespace GameStatsApp.Service
                     break;
             }
 
-            var gameIDs = new List<int>();
-            var maxBatchCount = 500;
-            var batchCount = 0;
-            while (batchCount < gameNames.Count())
-            {
-                var gameNamesBatch = gameNames.Skip(batchCount).Take(maxBatchCount).ToList();
-                var gameIDsBatch = _gameRepo.GetGames(i => gameNamesBatch.Any(x => x.IsEquivalent(i.Name)))
-                                            .GroupBy(i => i.Name)
-                                            .Select(i => i.First())
-                                            .Select(i => i.ID)
-                                            .ToList();
-                gameIDs.AddRange(gameIDsBatch);
-                batchCount += maxBatchCount;
-            }
+            var standardizeGameNames = gameNames.Select(i => new Tuple<string, string>(i, i.Standardize())).ToList();
+            var games = _gameRepo.GetGames().Select(i => new IDNamePair {ID = i.ID, Name = i.Name.Standardize()}).ToList();
+            var foundGames = (from g in games
+                              from ge in standardizeGameNames
+                              where g.Name.Equals(ge.Item2, StringComparison.OrdinalIgnoreCase) || g.Name.EndsWith(ge.Item2)
+                              orderby g.ID
+                              select new Tuple<int,string,string,string>(g.ID, g.Name, ge.Item1, ge.Item2))
+                            .GroupBy(i => i.Item4)
+                            .Select(i => i.First())
+                            .ToList();       
+            var missedGames = standardizeGameNames.Where(i => !foundGames.Any(x => x.Item4 == i.Item2)).ToList();
 
+            var gameIDs = foundGames.Select(i => i.Item1).Distinct().ToList();
             var existingGameIDs = _userRepo.GetUserListGameViews(i=>i.UserListID == userAccountVW.UserListID).Select(i => i.ID).ToList();
             var userListGames = gameIDs.Where(i => !existingGameIDs.Contains(i))
                                            .Select(i => new UserListGame() { UserListID = userAccountVW.UserListID, GameID = i })

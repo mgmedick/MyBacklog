@@ -689,7 +689,7 @@ namespace GameStatsApp.Service
                         continuationToken = (string)data["pagingInfo"]["continuationToken"];
                         if (!string.IsNullOrWhiteSpace(continuationToken))
                         {
-                            await GetMicrosoftUserTitleHistory(userHash, xstsToken, userXuid, results, continuationToken);
+                            await GetMicrosoftUserAchievementHistory(userHash, xstsToken, userXuid, results, continuationToken);
                         }
                     }
                 }

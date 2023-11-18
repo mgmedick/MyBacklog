@@ -88,47 +88,50 @@ namespace GameStatsApp.Common.Extensions
             return Pass;
         }
 
-        public static bool IsEquivalent(this string input, string comparison)
+        public static string Standardize(this string input)
         {
-            var santizedInput = input.Sanatize().ReplaceRomanWithInt().ReplaceMultiSpaceWithSingle().Trim();
-            var santizedComparison = input.Sanatize().ReplaceRomanWithInt().ReplaceMultiSpaceWithSingle().Trim();
-
-            return santizedInput == santizedComparison;
+            return input.Sanatize().ReplaceRomanWithInt().ReplaceMultiSpaceWithSingle().Trim();
         }
 
         public static string Sanatize(this string input)
         {
             var stringBuilder = new StringBuilder();
-            stringBuilder.Append(input.Normalize(NormalizationForm.FormKD).Where(i => i <= 128).ToArray());
+            stringBuilder.Append(input.Normalize(NormalizationForm.FormD).Where(i => i <= 128).ToArray());
 
             return stringBuilder.ToString();
         }
 
         public static string ReplaceMultiSpaceWithSingle(this string input)
         {
-            return Regex.Replace(input.Sanatize().ReplaceRomanWithInt(), @"\s+", " ");
+            return Regex.Replace(input, @"\s+", " ");
         }
 
         public static string ReplaceRomanWithInt(this string input)
         {
-            var items = Regex.Matches(input, @"M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})")
-                            .Cast<Match>()
-                            .Where(x => !string.IsNullOrWhiteSpace(x.Value))
-                            .Select(x => x.Value)
-                            .Distinct()
-                            .ToArray();
-            var lookup = items.Select(i => new Tuple<string,string>(i, i.ConvertRomanToInt().ToString())).ToArray();
-                
-            foreach (var item in lookup)
+            var matches = Regex.Matches(input, @"(?<=\W)(M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3}))(?!\w)", RegexOptions.IgnoreCase);
+            
+            if (matches.Any()) 
             {
-                input = input.Replace(item.Item1, item.Item2);
+                var items = matches.Cast<Match>()
+                                .Where(x => !string.IsNullOrWhiteSpace(x.Value))
+                                .Select(x => x.Value)
+                                .Distinct()
+                                .ToList();
+                var lookup = items.Select(i => new Tuple<string,string>(i, i.ConvertRomanToInt().ToString())).ToList();
+                    
+                foreach (var item in lookup)
+                {
+                    input = input.Replace(item.Item1, item.Item2);
+                }                
             }
-                
+
             return input;
         }
             
         public static int ConvertRomanToInt(this string roman)
         {
+            roman = roman.ToUpper();
+
             var RomanMap = new Dictionary<char, int>() {
                 {'I', 1},
                 {'V', 5},
@@ -137,9 +140,8 @@ namespace GameStatsApp.Common.Extensions
                 {'C', 100},
                 {'D', 500},
                 {'M', 1000}
-            };	
-                
-            roman = roman.ToUpper();
+            };
+
             var number = 0;
             var previousChar = roman[0];
             foreach(char currentChar in roman)
@@ -153,6 +155,6 @@ namespace GameStatsApp.Common.Extensions
             }
                 
             return number;
-        }                   
+        }                           
     }
 }

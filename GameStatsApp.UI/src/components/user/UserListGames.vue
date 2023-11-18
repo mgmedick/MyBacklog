@@ -149,7 +149,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p>Remove all games from <strong>{{ userlists.find(i => i.id == userlistid)?.name }}</strong> list?</p>
+                        <p>Remove <strong>all games</strong> from <strong>{{ userlists.find(i => i.id == userlistid)?.name }}</strong> list?</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -535,7 +535,7 @@
                             that.games = [];            
                             that.allgames = [];
                                                                
-                            successToast("Removed all games from <strong>" + userList.name + "</strong> list");
+                            successToast("Removed <strong>all games</strong> from <strong>" + userList.name + "</strong> list");
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {
                                 errorToast(errorMsg);                           
