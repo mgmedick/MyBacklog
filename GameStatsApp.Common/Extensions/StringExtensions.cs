@@ -101,6 +101,14 @@ namespace GameStatsApp.Common.Extensions
             return Regex.Replace(input, @"\s+", " ");
         }
 
+        public static string Replace(this string input, string[] separators, string newVal)
+        {
+            string[] temp;
+
+            temp = input.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+            return string.Join(newVal, temp);
+        }        
+
         public static string ReplaceRomanWithInt(this string input)
         {
             var matches = Regex.Matches(input, @"(?<=\W)(M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3}))(?!\w)", RegexOptions.IgnoreCase);

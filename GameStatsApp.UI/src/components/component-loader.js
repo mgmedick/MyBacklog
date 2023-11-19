@@ -18,14 +18,16 @@ import login from './home/Login.vue';
 import resetPassword from './home/ResetPassword.vue';
 import changePassword from './home/ChangePassword.vue';
 import changeUsername from './home/ChangeUsername.vue';
+import welcome from './home/Welcome.vue';
 
-import welcome from './user/Welcome.vue';
-import importGames from './user/ImportGames.vue';
+import importGames from './game/ImportGames.vue';
+
 import userSettings from './user/UserSettings.vue';
-import userLists from './user/UserLists.vue';
-import manageUserLists from './user/ManageUserLists.vue';
-import editUserList from './user/EditUserList.vue';
-import userListGames from './user/UserListGames.vue';
+
+import userLists from './userlist/UserLists.vue';
+import manageUserLists from './userlist/ManageUserLists.vue';
+import editUserList from './userlist/EditUserList.vue';
+import userListGames from './userlist/UserListGames.vue';
 
 
 export default {
@@ -51,13 +53,15 @@ export default {
         app.component("signup", signUp);
         app.component("activate", activate);
 
-        app.component("welcome", welcome);
+        app.component("import-games", importGames);
+
         app.component('user-settings', userSettings); 
+
+        app.component("welcome", welcome);
         app.component("manage-user-lists", manageUserLists);
         app.component("edit-user-list", editUserList);        
         app.component('user-lists', userLists); 
         app.component('user-list-games', userListGames);
-        app.component("import-games", importGames);
         app.config.globalProperties.getCsrfToken = () => { 
             return document.getElementsByName("__RequestVerificationToken")[0].value; 
         }

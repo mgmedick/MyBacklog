@@ -20,14 +20,16 @@ namespace GameStatsApp.Controllers
     public class HomeController : Controller
     {
         private readonly IUserService _userService = null;
+        private readonly IUserListService _userListService = null;
         private readonly IAuthService _authService = null;
         private readonly IConfiguration _config = null;
         private readonly IWebHostEnvironment _env = null;
         private readonly ILogger _logger = null;
 
-        public HomeController(IUserService userService, IAuthService authService, IConfiguration config, IWebHostEnvironment env, ILogger logger)
+        public HomeController(IUserService userService, IUserListService userListService, IAuthService authService, IConfiguration config, IWebHostEnvironment env, ILogger logger)
         {
             _userService = userService;
+            _userListService = userListService;
             _authService = authService;
             _config = config;
             _env = env;
@@ -50,7 +52,7 @@ namespace GameStatsApp.Controllers
                 var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));            
                 indexVM.UserID = userID;
                 indexVM.Username = User.FindFirstValue(ClaimTypes.Name);
-                indexVM.UserLists = _userService.GetUserLists(userID).Where(i => i.Active).ToList();
+                indexVM.UserLists = _userListService.GetUserLists(userID).Where(i => i.Active).ToList();
                 indexVM.EmptyCoverImagePath = _config.GetSection("SiteSettings").GetSection("EmptyCoverImagePath").Value;
 
                 if (TempData["ShowImport"] != null) {

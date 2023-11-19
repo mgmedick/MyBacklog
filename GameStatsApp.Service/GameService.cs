@@ -18,12 +18,14 @@ namespace GameStatsApp.Service
         private readonly IGameRepository _gameRepo = null;
         private readonly IAuthService _authService = null;
         private readonly IUserRepository _userRepo = null;
+        private readonly IUserListRepository _userListRepo = null;
 
-        public GameService(IGameRepository gameRepo, IAuthService authService, IUserRepository userRepo)
+        public GameService(IGameRepository gameRepo, IAuthService authService, IUserRepository userRepo, IUserListRepository userListRepo)
         {
             _gameRepo = gameRepo;
             _authService = authService;
             _userRepo = userRepo;
+            _userListRepo = userListRepo;
         }
 
         public IEnumerable<SearchResult> SearchGames(string searchText)
@@ -38,7 +40,6 @@ namespace GameStatsApp.Service
             
             return results;
         }
-
 
         public async Task<int> ImportGames(int userID, UserAccountView userAccountVW)
         {
@@ -69,14 +70,14 @@ namespace GameStatsApp.Service
                                            .ToList();
 
             var gameIDs = foundGames.Select(i => i.ID).Distinct().ToList();
-            var existingGameIDs = _userRepo.GetUserListGameViews(i=>i.UserListID == userAccountVW.UserListID).Select(i => i.ID).ToList();
+            var existingGameIDs = _userListRepo.GetUserListGameViews(i=>i.UserListID == userAccountVW.UserListID).Select(i => i.ID).ToList();
             var userListGames = gameIDs.Where(i => !existingGameIDs.Contains(i))
                                            .Select(i => new UserListGame() { UserListID = userAccountVW.UserListID, GameID = i })
                                            .ToList();
 
             if (userListGames.Any())
             {
-                _userRepo.SaveUserListGames(userListGames);
+                _userListRepo.SaveUserListGames(userListGames);
             }
 
             userAccountVW.ImportLastRunDate = DateTime.UtcNow;
@@ -89,11 +90,12 @@ namespace GameStatsApp.Service
         {
             var results = new List<GameImportResult>();
             var items = await _authService.GetSteamUserInventory(steamID);
-            results = items.Select((obj, index) => new GameImportResult() { Name = (string)obj["name"],
+            results = items.Reverse()
+                           .Select((obj, index) => new GameImportResult() { Name = (string)obj["name"],
                                                                     SantizedName = GetSanatizedGameName((string)obj["name"]),
                                                                     SortOrder = index
-                                                                  }).ToList();
-
+                                                                  })
+                            .ToList();
 
             results = results.GroupBy(g => new { g.Name })
                 .Select(i => i.First())
@@ -107,10 +109,12 @@ namespace GameStatsApp.Service
             var results = new List<GameImportResult>();
             var items = await _authService.GetMicrosoftUserTitleHistory(userHash, xstsToken, userXuid);
             results = items.Where(obj => ((string)obj["type"]) == "Game")
-                            .Select((obj, index) => new GameImportResult() { Name = (string)obj["name"],
+                           .Reverse()
+                           .Select((obj, index) => new GameImportResult() { Name = (string)obj["name"],
                                                                     SantizedName = GetSanatizedGameName((string)obj["name"]),
                                                                     SortOrder = index                                                                    
-                                                                  }).ToList();
+                                                                  })
+                            .ToList();
 
             results = results.GroupBy(g => new { g.Name })
                 .Select(i => i.First())
@@ -126,6 +130,9 @@ namespace GameStatsApp.Service
             santizedGameName = Regex.Replace(santizedGameName, "^COD", "Call of Duty");
             santizedGameName = Regex.Replace(santizedGameName, "^GTA", "Grand Theft Auto");
             
+            var valuesToTrim = new string[] { "_" };
+            santizedGameName = santizedGameName.Replace(valuesToTrim, " ");
+
             return santizedGameName;
         }
     }

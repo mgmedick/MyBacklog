@@ -18,20 +18,18 @@ namespace GameStatsApp.Service
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepo = null;
+        private readonly IUserListRepository _userListRepo = null;
         private readonly IEmailService _emailService = null;
         private readonly IAuthService _authService = null;
-        private readonly IGameRepository _gameRepo = null;
-        private readonly IGameService _gameService = null;
         private readonly IHttpContextAccessor _context = null;
         private readonly IConfiguration _config = null;
 
-        public UserService(IUserRepository userRepo, IEmailService emailService, IAuthService authService, IGameRepository gameRepo, IGameService gameService, IHttpContextAccessor context, IConfiguration config)
+        public UserService(IUserRepository userRepo, IUserListRepository userListRepo, IEmailService emailService, IAuthService authService, IHttpContextAccessor context, IConfiguration config)
         {
             _userRepo = userRepo;
+            _userListRepo = userListRepo;
             _emailService = emailService;
             _authService = authService;
-            _gameRepo = gameRepo;
-            _gameService = gameService;
             _context = context;
             _config = config;
         }
@@ -156,13 +154,13 @@ namespace GameStatsApp.Service
 
             _userRepo.SaveUserSetting(userSetting);      
  
-            var userLists = _userRepo.GetDefaultLists().Select(i => new UserList() { UserID = user.ID,
+            var userLists = _userListRepo.GetDefaultLists().Select(i => new UserList() { UserID = user.ID,
                                                                    Name = i.Name, 
                                                                    DefaultListID = i.ID,
                                                                    Active = true,
                                                                    CreatedDate = DateTime.UtcNow }).ToList();
 
-            _userRepo.SaveUserLists(userLists);    
+            _userListRepo.SaveUserLists(userLists);    
 
             return user.ID;  
         }
@@ -269,164 +267,10 @@ namespace GameStatsApp.Service
             if (userList != null)
             {
                 userList.UserAccountID = userAccount.ID;
-                _userRepo.SaveUserList(userList);
+                _userListRepo.SaveUserList(userList);
             }
         }
-
-        public IEnumerable<UserListViewModel> GetUserLists (int userID)
-        { 
-            var userLists = _userRepo.GetUserListViews(i => i.UserID == userID)
-                                    .Select(i => new UserListViewModel(i))
-                                    .OrderBy(i => i.SortOrder ?? i.ID)
-                                    .ToList();
-
-            return userLists;
-        }     
-
-        public void SaveUserList(int userID, UserListViewModel userListVM)
-        {
-            var userList = new UserList();
-            var userLists = _userRepo.GetUserLists(i=> i.UserID == userID).ToList();
-
-            if (userListVM.ID == 0)
-            {            
-                userList = new UserList() { UserID = userID, 
-                                            Name = userListVM.Name,
-                                            Active = userListVM.Active,
-                                            SortOrder = userLists.Count() + 1,
-                                            CreatedDate = DateTime.UtcNow }; 
-            }
-            else
-            {
-                userList = userLists.FirstOrDefault(i=> i.ID == userListVM.ID);
-                userList.Name = userListVM.Name;
-                userList.Active = userListVM.Active;
-                userList.SortOrder = userListVM.SortOrder;
-                userList.ModifiedDate = DateTime.UtcNow;
-            }
-
-            if (userList.UserID == userID)
-            {
-                _userRepo.SaveUserList(userList);
-            }
-        }    
-
-        public void DeleteUserList(int userID, int userListID)
-        {
-            var userList = _userRepo.GetUserLists(i => i.ID == userListID).FirstOrDefault();
-
-            if (userList != null)
-            {
-                userList.Deleted = true;
-                userList.ModifiedDate = DateTime.UtcNow;
-
-                if (userList.UserID == userID)
-                {
-                    _userRepo.SaveUserList(userList);
-                }
-            }
-        }      
-
-        public void UpdateUserListSortOrders(int userID, List<int> userListIDs)
-        {
-            var usersListIndexes = userListIDs.Select((i, index) => new { ID = i, index = index });
-            var userLists = _userRepo.GetUserLists(i => userListIDs.Contains(i.ID))                                    
-                                     .ToList();
-            userLists = (from c in userLists
-                        join uc in usersListIndexes
-                        on c.ID equals uc.ID
-                        orderby uc.index
-                        select c).ToList();
-
-            var count = 0;
-            foreach(var userList in userLists)
-            {
-                userList.SortOrder = count + 1;
-                count++;
-            }
-
-            if (userLists.Count(i => i.UserID == userID) == userLists.Count())
-            {
-                _userRepo.SaveUserLists(userLists);
-            }          
-        }      
-
-        public void UpdateUserListActive(int userID, int userListID, bool active)
-        {
-            var userList = _userRepo.GetUserLists(i => i.ID == userListID).FirstOrDefault();
-
-            if (userList != null)
-            {
-                userList.Active = active;
-                userList.ModifiedDate = DateTime.UtcNow;
-
-                if (userList.UserID == userID)
-                {
-                    _userRepo.SaveUserList(userList);
-                }                    
-            }        
-        }                  
-
-        public IEnumerable<UserListGameViewModel> GetUserListGames (int userID, int userListID)
-        { 
-            var gameVMs = _userRepo.GetUserListGames(userID, userListID).Select(i => new UserListGameViewModel(i)).ToList();
-
-            return gameVMs;
-        }
-
-        public UserListGameViewModel AddNewGameToUserList(int userID, int userListID, int gameID)
-        {         
-            AddGameToUserList(userID, userListID, gameID);
-
-            return _userRepo.GetUserListGameViews(i => i.UserListID == userListID && i.ID == gameID).Select(i => new UserListGameViewModel(i)).FirstOrDefault();
-        }  
-
-        public void AddGameToUserList(int userID, int userListID, int gameID)
-        {         
-            var gameIDs = _userRepo.GetUserListGameViews(i => i.UserListID == userListID).Select(i => i.ID).ToList();
-
-            if (!gameIDs.Contains(gameID))
-            {
-                var userListGame = new UserListGame() { UserListID = userListID, GameID = gameID };
-                _userRepo.SaveUserListGame(userListGame);
-            }
-        }        
-
-        public void RemoveGameFromUserList(int userID, int userListID, int gameID)
-        {         
-            var gameIDs = _userRepo.GetUserListGameViews(i => i.UserListID == userListID).Select(i => i.ID).ToList();
-
-            if (gameIDs.Contains(gameID))
-            {
-                _userRepo.DeleteUserListGame(userListID, gameID);
-            }
-        }
-
-        public void RemoveGameFromAllUserLists(int userID, int gameID)
-        {         
-            var userListIDs = _userRepo.GetUserListGameViews(i => i.UserID == userID && i.ID == gameID)
-                                        .Select(i => i.UserListID)
-                                        .Distinct()
-                                        .ToList();
-
-            foreach(var userListID in userListIDs)
-            {
-                _userRepo.DeleteUserListGame(userListID, gameID);
-            }
-        }
-
-        public void RemoveAllGamesFromUserList(int userID, int userListID)
-        {         
-            var userlistid = _userRepo.GetUserLists(i => i.UserID == userID && i.ID == userListID)
-                                        .Select(i => i.ID)
-                                        .FirstOrDefault();
-
-            if (userlistid > 0)
-            {
-                _userRepo.DeleteAllUserListGames(userlistid);
-            }
-        }        
-
+        
         public IEnumerable<UserAccountViewModel> GetUserAccounts(int userID)
         {
             var userAccountVMs = _userRepo.GetUserAccountViews(i => i.UserID == userID).Select(i => new UserAccountViewModel(i)).ToList();
@@ -495,13 +339,6 @@ namespace GameStatsApp.Service
             var result = _userRepo.GetUsers(i => i.Email == email && (i.Active || i.Active == activeFilter)).Any();
 
             return result;
-        }  
-
-        public bool UserListNameExists(int userID, int userListID, string userListName)
-        {
-            var result = _userRepo.GetUserLists(i => i.UserID == userID && i.Name == userListName && i.ID != userListID).Any();
-
-            return result;
-        }                     
+        }                   
     }
 }

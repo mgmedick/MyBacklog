@@ -45,7 +45,7 @@ namespace GameStatsApp.Controllers
         public JsonResult ImportGames()
         {
             var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var baseUrl = string.Format("{0}://{1}{2}", Request.Scheme, Request.Host, Request.PathBase);
+            var baseUrl = string.Format("https://{0}{1}", Request.Host, Request.PathBase);
             var microsoftRedirectPath = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectPath").Value;         
             var microsoftRedirectUrl = string.Format("{0}{1}", baseUrl, microsoftRedirectPath);
             var steamRedirectPath = _config.GetSection("Auth").GetSection("Steam").GetSection("RedirectPath").Value;

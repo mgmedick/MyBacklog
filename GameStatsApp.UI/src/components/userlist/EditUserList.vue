@@ -65,7 +65,7 @@
                 var formData = getFormData(this.form);
                 var config = { headers: { 'RequestVerificationToken': that.getCsrfToken() } };
 
-                return await axios.post('/User/ManageUserLists', formData, config).then((res) => {
+                return await axios.post('/UserList/ManageUserLists', formData, config).then((res) => {
                     that.$emit('saved', res.data.success);
                     if (res.data.success) {
                         successToast("Saved <strong>" + that.form.name + "</strong> list");                           
@@ -82,7 +82,7 @@
                     return true; 
                 };            
 
-                return await axios.get('/User/UserListNameNotExists', { params: { userListID: this.form.id, userListName: value } })
+                return await axios.get('/UserList/UserListNameNotExists', { params: { userListID: this.form.id, userListName: value } })
                     .then(res => {
                         return Promise.resolve(res.data);
                     })

@@ -114,7 +114,7 @@
                 var that = this;
                 this.loading = true;
 
-                axios.get('/User/ManageUserLists')
+                axios.get('/UserList/ManageUserLists')
                     .then(res => {
                         that.userLists = res.data;
 
@@ -141,7 +141,7 @@
             },                                      
             onDeleteListClick(e, userList) {
                 var that = this;
-                return axios.post('/User/DeleteUserList', null,{ headers: { 'RequestVerificationToken': that.getCsrfToken() },
+                return axios.post('/UserList/DeleteUserList', null,{ headers: { 'RequestVerificationToken': that.getCsrfToken() },
                                                                  params: { userListID: userList.id } })
                     .then((res) => {
                         Modal.getInstance(that.$refs.deletelistmodal).hide();
@@ -160,7 +160,7 @@
             },
             onUpdateActive(e, userList) {
                 var that = this;
-                return axios.post('/User/UpdateUserListActive', null,{ headers: { 'RequestVerificationToken': that.getCsrfToken() },
+                return axios.post('/UserList/UpdateUserListActive', null,{ headers: { 'RequestVerificationToken': that.getCsrfToken() },
                                                                        params: { userListID: userList.id, active: userList.active } })
                     .then((res) => {
                         if (res.data.success) {
@@ -204,7 +204,7 @@
                 var formData = getFormData({ userListIDs: userListIDs });
                 var config = { headers: { 'RequestVerificationToken': that.getCsrfToken() } };
 
-                return axios.post('/User/UpdateUserListSortOrders', formData, config)
+                return axios.post('/UserList/UpdateUserListSortOrders', formData, config)
                     .then((res) => {
                         if (res.data.success) {
                             successToast("Updated user lists");                           
