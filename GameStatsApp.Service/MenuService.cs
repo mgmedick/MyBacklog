@@ -1,9 +1,6 @@
 ﻿using GameStatsApp.Interfaces.Repositories;
 using GameStatsApp.Interfaces.Services;
 using GameStatsApp.Model;
-using GameStatsApp.Model.Data;
-using GameStatsApp.Model.ViewModels;
-//using GameStatsApp.Interfaces.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 

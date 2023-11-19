@@ -120,7 +120,7 @@
                 var that = this;
                 this.loading = true;
 
-                return axios.get('/User/ImportGames')
+                return axios.get('/Game/ImportGames')
                     .then(res => {
                         that.importGamesVM = res.data;
                         that.loading = false;
@@ -141,7 +141,7 @@
                         that.importingUserAccountIDs[userAccount.id] = { userListName: userAccount.userListName };
                     }
 
-                    axios.post('/User/ImportGames', null,{ headers: { 'RequestVerificationToken': that.getCsrfToken() },
+                    axios.post('/Game/ImportGames', null,{ headers: { 'RequestVerificationToken': that.getCsrfToken() },
                                                            params: { userAccountID: userAccount?.id } }).then((res) => {
                         if (res.data.isAuthExpired) {
                             var redirectUrl = that.getRedirectUrl(accountTypeID);

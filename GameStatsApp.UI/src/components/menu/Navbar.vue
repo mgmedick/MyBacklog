@@ -75,7 +75,7 @@
             
             if (Object.keys(importingUserAccountIDs).length > 0) {
                 var intervalID = setInterval(function() {
-                    axios.get('/User/GetCompletedImportGames')
+                    axios.get('/Game/GetCompletedImportGames')
                         .then(res => {
                             var results = res.data;
 

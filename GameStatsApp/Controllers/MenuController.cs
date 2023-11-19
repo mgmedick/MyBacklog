@@ -1,9 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
 using GameStatsApp.Interfaces.Services;
-using GameStatsApp.Model;
-using GameStatsApp.Model.ViewModels;
-using System.Collections.Generic;
 
 namespace GameStatsApp.Controllers
 {

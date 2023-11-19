@@ -8,15 +8,10 @@ using GameStatsApp.Model.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using System.Linq.Expressions;
 using GameStatsApp.Common.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
-using System.Security.Claims;
-using Newtonsoft.Json;
 
 namespace GameStatsApp.Service
 {
@@ -26,15 +21,17 @@ namespace GameStatsApp.Service
         private readonly IEmailService _emailService = null;
         private readonly IAuthService _authService = null;
         private readonly IGameRepository _gameRepo = null;
+        private readonly IGameService _gameService = null;
         private readonly IHttpContextAccessor _context = null;
         private readonly IConfiguration _config = null;
 
-        public UserService(IUserRepository userRepo, IEmailService emailService, IAuthService authService, IGameRepository gameRepo, IHttpContextAccessor context, IConfiguration config)
+        public UserService(IUserRepository userRepo, IEmailService emailService, IAuthService authService, IGameRepository gameRepo, IGameService gameService, IHttpContextAccessor context, IConfiguration config)
         {
             _userRepo = userRepo;
             _emailService = emailService;
             _authService = authService;
             _gameRepo = gameRepo;
+            _gameService = gameService;
             _context = context;
             _config = config;
         }
@@ -462,60 +459,6 @@ namespace GameStatsApp.Service
             }
 
             return userAccountVW;
-        }
-        
-        public async Task<Tuple<int,List<string>>> ImportGames(int userID, UserAccountView userAccountVW)
-        {
-            var errorMessages = new List<string>();
-            var gameNames = new List<string>();
-
-            switch (userAccountVW.AccountTypeID)
-            {
-                case (int)AccountType.Steam:
-                    if (await _authService.CheckSteamUserCommunityVisibility(userAccountVW.AccountUserID))
-                    {
-                        gameNames = await _authService.GetSteamUserGameNames(userAccountVW.AccountUserID);
-                    }
-                    else
-                    {   
-                        errorMessages.Add("Error importing, Steam Profile must be Public");
-                    }
-                    break;           
-                case (int)AccountType.Xbox:
-                    gameNames = await _authService.GetMicrosoftUserGameNames(userAccountVW.AccountUserHash, userAccountVW.Token, Convert.ToUInt64(userAccountVW.AccountUserID));
-                    break;
-            }
-
-            var standardizeGameNames = gameNames.Select(i => new Tuple<string, string>(i, i.Standardize())).ToList();
-            var games = _gameRepo.GetGames().Select(i => new IDNamePair {ID = i.ID, Name = i.Name.Standardize()}).ToList();
-            var foundGames = (from g in games
-                              from ge in standardizeGameNames
-                              where g.Name.Equals(ge.Item2, StringComparison.OrdinalIgnoreCase) || g.Name.EndsWith(ge.Item2)
-                              orderby g.ID
-                              select new Tuple<int,string,string,string>(g.ID, g.Name, ge.Item1, ge.Item2))
-                            .GroupBy(i => i.Item4)
-                            .Select(i => i.First())
-                            .ToList();       
-            var missedGames = standardizeGameNames.Where(i => !foundGames.Any(x => x.Item4 == i.Item2)).ToList();
-
-            var gameIDs = foundGames.Select(i => i.Item1).Distinct().ToList();
-            var existingGameIDs = _userRepo.GetUserListGameViews(i=>i.UserListID == userAccountVW.UserListID).Select(i => i.ID).ToList();
-            var userListGames = gameIDs.Where(i => !existingGameIDs.Contains(i))
-                                           .Select(i => new UserListGame() { UserListID = userAccountVW.UserListID, GameID = i })
-                                           .ToList();
-
-            if (userListGames.Any())
-            {
-                _userRepo.SaveUserListGames(userListGames);
-            }
-
-            if (!errorMessages.Any())
-            {
-                userAccountVW.ImportLastRunDate = DateTime.UtcNow;
-                _userRepo.SaveUserAccount(userAccountVW.ConvertToUserAccount()); 
-            }
-
-            return new Tuple<int,List<string>>(userListGames.Count(), errorMessages);
         }
         
         //jqvalidate

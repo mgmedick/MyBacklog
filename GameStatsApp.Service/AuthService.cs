@@ -131,23 +131,8 @@ namespace GameStatsApp.Service
 
             return result;
         }
-
-        public async Task<List<string>> GetSteamUserGameNames(string steamID)
-        {
-            var results = new List<string>();
-            var items = await GetSteamUserInventory(steamID);
-            results = items.OrderBy(obj => DateTimeOffset.FromUnixTimeSeconds((long)(obj["rtime_last_played"] ?? 0)).UtcDateTime)
-                            .ThenBy(obj => (string)obj["name"])
-                            .Select(obj => (string)obj["name"]).ToList();
-
-            results = results.GroupBy(g => new { g })
-                .Select(i => i.First())
-                .ToList();
-                                          
-            return results;
-        }       
-
-        private async Task<JArray> GetSteamUserInventory(string steamID)
+        
+        public async Task<JArray> GetSteamUserInventory(string steamID)
         {
             var results = new JArray();
 
@@ -593,23 +578,7 @@ namespace GameStatsApp.Service
             return data;
         }
 
-        public async Task<List<string>> GetMicrosoftUserGameNames(string userHash, string xstsToken, ulong userXuid, DateTime? importLastRunDate)
-        {
-            var results = new List<string>();
-            var items = await GetMicrosoftUserTitleHistory(userHash, xstsToken, userXuid);
-            results = items.Where(obj => ((string)obj["type"]) == "Game")
-                            .OrderBy(obj => (DateTime)((JObject)obj["titleHistory"]).GetValue("lastTimePlayed"))
-                            .ThenBy(obj => (string)obj["name"])
-                            .Select(obj => (string)obj["name"]).ToList();
-
-            results = results.GroupBy(g => new { g })
-                .Select(i => i.First())
-                .ToList();
-                                      
-            return results;
-        }
-
-        private async Task<JArray> GetMicrosoftUserTitleHistory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null)
+        public async Task<JArray> GetMicrosoftUserTitleHistory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null)
         {
             if (results == null)
             {

@@ -88,11 +88,6 @@ namespace GameStatsApp.Common.Extensions
             return Pass;
         }
 
-        public static string Standardize(this string input)
-        {
-            return input.Sanatize().ReplaceRomanWithInt().ReplaceMultiSpaceWithSingle().Trim();
-        }
-
         public static string Sanatize(this string input)
         {
             var stringBuilder = new StringBuilder();

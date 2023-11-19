@@ -15,12 +15,12 @@ namespace GameStatsApp.Interfaces.Services
     {
         string GetSteamAuthUrl(string redirectUri);
         Task<bool> CheckSteamUserCommunityVisibility(string steamID);
-        Task<List<string>> GetSteamUserGameNames(string steamID);
+        Task<JArray> GetSteamUserInventory(string steamID);
         Task<TokenResponse> AuthenticateSteam(Dictionary<string, string> results);
         string GetMicrosoftAuthUrl(string redirectUri);
         Task<TokenResponse> AuthenticateMicrosoft(string code, string redirectUri);
         Task<TokenResponse> ReAuthenticateMicrosoft(string refreshToken);
-        Task<List<string>> GetMicrosoftUserGameNames(string userHash, string xstsToken, ulong userXuid, DateTime? importLastRunDate = null);
+        Task<JArray> GetMicrosoftUserTitleHistory(string userHash, string xstsToken, ulong userXuid, JArray results = null, string continuationToken = null);
         Task<SocialTokenResponse> ValidateSocialToken(string accessToken, int socialAccountTypeID);
         Task<bool> ValidateGoogleRecaptcha(string token);
     }

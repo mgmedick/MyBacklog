@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using GameStatsApp.Interfaces.Services;
-using GameStatsApp.Model;
 using GameStatsApp.Model.Data;
 using GameStatsApp.Model.ViewModels;
 using GameStatsApp.Common.Extensions;
@@ -14,10 +13,6 @@ using System.Threading.Tasks;
 using System.Linq;
 using Serilog;
 using Microsoft.AspNetCore.Authorization;
-using Google.Apis.Auth;
-using Microsoft.AspNetCore.Http.Extensions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Microsoft.AspNetCore.Hosting;
 
 namespace GameStatsApp.Controllers

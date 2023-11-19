@@ -41,6 +41,5 @@ namespace GameStatsApp.Interfaces.Services
         void SaveUserAccount(int userID, int accountTypeID, TokenResponse tokenResponse);
         IEnumerable<UserAccountViewModel> GetUserAccounts(int userID);   
         Task<UserAccountView> GetRefreshedUserAccount(int userID, int userAccountID);
-        Task<Tuple<int,List<string>>> ImportGames(int userID, UserAccountView userAccount);
     }
 }

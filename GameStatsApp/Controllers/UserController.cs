@@ -4,22 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using GameStatsApp.Interfaces.Services;
 using GameStatsApp.Interfaces.Repositories;
 using GameStatsApp.Model;
-using GameStatsApp.Model.Data;
 using GameStatsApp.Model.ViewModels;
 using GameStatsApp.Common.Extensions;
 using System.Security.Claims;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Threading.Tasks;
 using System.Linq;
 using Serilog;
 using Microsoft.AspNetCore.Authorization;
-using Google.Apis.Auth;
-using Microsoft.AspNetCore.Http.Extensions;
-using Newtonsoft.Json;
-using System.Threading;
-using GameStatsApp.Model.JSON;
 
 namespace GameStatsApp.Controllers
 {
@@ -29,7 +21,7 @@ namespace GameStatsApp.Controllers
         private readonly IUserService _userService = null;
         private readonly IAuthService _authService = null;
         private readonly IUserRepository _userRepo = null;
-         private readonly IConfiguration _config = null;       
+        private readonly IConfiguration _config = null;       
         private readonly ILogger _logger = null;
 
         public UserController(IUserService userService, IAuthService authService, IUserRepository userRepo, IConfiguration config, ILogger logger)
@@ -180,83 +172,7 @@ namespace GameStatsApp.Controllers
 
             return Json(new { success = success, errorMessages = errorMessages });
         }
-
-        [HttpGet]
-        public JsonResult ImportGames()
-        {
-            var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var baseUrl = string.Format("{0}://{1}{2}", Request.Scheme, Request.Host, Request.PathBase);
-            var microsoftRedirectPath = _config.GetSection("Auth").GetSection("Microsoft").GetSection("RedirectPath").Value;         
-            var microsoftRedirectUrl = string.Format("{0}{1}", baseUrl, microsoftRedirectPath);
-            var steamRedirectPath = _config.GetSection("Auth").GetSection("Steam").GetSection("RedirectPath").Value;
-            var steamRedirectUrl = string.Format("{0}{1}", baseUrl, steamRedirectPath);
-
-            var importGamesVM = new ImportGamesViewModel() {
-                UserAccounts = _userService.GetUserAccounts(userID).ToList(),
-                MicrosoftAuthUrl = _authService.GetMicrosoftAuthUrl(microsoftRedirectUrl),
-                SteamAuthUrl = _authService.GetSteamAuthUrl(steamRedirectUrl)
-            };
-
-            if (HttpContext.Session.Keys.Contains("AuthSuccess"))
-            {
-                importGamesVM.AuthSuccess = HttpContext.Session.Get<bool>("AuthSuccess");
-                importGamesVM.AuthAccountTypeID = HttpContext.Session.Get<int>("AuthAccountTypeID");
-                HttpContext.Session.Remove("AuthSuccess");
-                HttpContext.Session.Remove("AuthAccountTypeID");
-            }
-
-            return Json(importGamesVM);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ImportGames(int userAccountID)
-        {
-            var success = false;
-            List<string> errorMessages = null;
-            var isAuthExpired = false;
-            var count = 0;
-
-            try
-            {
-                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-                var userAccountVW = await _userService.GetRefreshedUserAccount(userID, userAccountID);
-                isAuthExpired = userAccountVW.ExpireDate.HasValue && userAccountVW.ExpireDate < DateTime.UtcNow;
-
-                if (!isAuthExpired)
-                {
-                    var importingUserAccounts = HttpContext.Session.Get<List<ImportingUserAccount>>("ImportingUserAccounts") ?? new List<ImportingUserAccount>();  
-                    if (!importingUserAccounts.Any(i=> i.UserAccountID == userAccountID))
-                    {
-                        importingUserAccounts.Add(new ImportingUserAccount() { UserAccountID = userAccountID });
-                    }
-                    HttpContext.Session.Set<List<ImportingUserAccount>>("ImportingUserAccounts", importingUserAccounts);
-
-                    var result = await _userService.ImportGames(userID, userAccountVW);
-                    count = result.Item1;
-                    errorMessages = result.Item2;
-                    success = !errorMessages.Any();
-
-                    var importingUserAccount = importingUserAccounts.FirstOrDefault(i=> i.UserAccountID == userAccountID);
-                    if (importingUserAccount != null)
-                    {
-                        importingUserAccount.Success = success;
-                        importingUserAccount.Count = count;
-                        importingUserAccount.ErrorMessages = errorMessages;
-                        HttpContext.Session.Set<List<ImportingUserAccount>>("ImportingUserAccounts", importingUserAccounts);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "ImportGames");
-                success = false;
-                errorMessages = new List<string>() { "Error importing games" };
-            }
-
-            return Json(new { success = success, errorMessages = errorMessages, isAuthExpired = isAuthExpired, count = count });
-        }      
-
+      
         public async Task<ActionResult> MicrosoftAuthCallback()
         {
             var success = false;
@@ -324,23 +240,8 @@ namespace GameStatsApp.Controllers
             TempData.Add("ShowImport", true);
 
             return RedirectToAction("Index", "Home");
-        }        
-
-        [HttpGet]
-        public ActionResult GetCompletedImportGames()
-        {
-            var importingUserAccounts = HttpContext.Session.Get<List<ImportingUserAccount>>("ImportingUserAccounts") ?? new List<ImportingUserAccount>();  
-            var results = importingUserAccounts.Where(x => x.Success.HasValue).ToList();
-            
-            if (results.Any())
-            {
-                importingUserAccounts = importingUserAccounts.Where(x => !results.Any(i => i.UserAccountID == x.UserAccountID)).ToList();
-                HttpContext.Session.Set<List<ImportingUserAccount>>("ImportingUserAccounts", importingUserAccounts);                   
-            }   
-
-            return Json(results);
-        }                
-
+        }
+        
         [HttpGet]
         public JsonResult ManageUserLists()
         {
