@@ -447,7 +447,6 @@
                             if (that.games.filter(i => i.id == result.id).length == 0) {
                                 that.games.push(result);
                                 that.allgames.push({...result});
-                                that.sortGames();
                             }
 
                             Modal.getInstance(that.$refs.searchmodal).hide();
