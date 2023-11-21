@@ -11,6 +11,5 @@ namespace GameStatsApp.Interfaces.Services
     {
         IEnumerable<SearchResult> SearchGames(string searchText);
         Task<int> ImportGames(int userID, UserAccountView userAccountVW);
-        string GetSanatizedGameName(string gameName);
     }
 }

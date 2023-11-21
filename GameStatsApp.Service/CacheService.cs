@@ -11,29 +11,38 @@ using System.Threading.Tasks;
 using GameStatsApp.Model.Data;
 using GameStatsApp.Model;
 using System.Linq.Expressions;
+using GameStatsApp.Common.Extensions;
 
 namespace GameStatsApp.Service
 {
     public class CacheService : ICacheService
     {
         public IMemoryCache _cache { get; set; }
-        public IUserRepository _userRepo { get; set; }
-        public CacheService(IMemoryCache cache, IUserRepository userRepo)
+        public IGameRepository _gameRepo { get; set; }
+
+        public CacheService(IMemoryCache cache, IGameRepository gameRepo)
         {
             _cache = cache;
-            _userRepo = userRepo;
+            _gameRepo = gameRepo;
         }
 
-        public IEnumerable<User> GetUsers()
+        public IEnumerable<Game> GetGames()
         {
-            IEnumerable<User> users = null;
-            if (!_cache.TryGetValue<IEnumerable<User>>("users", out users))
+            IEnumerable<Game> games = null;
+            if (!_cache.TryGetValue<IEnumerable<Game>>("games", out games))
             {
-                users = _userRepo.GetUsers();
-                _cache.Set("users", users);
+                games = _gameRepo.GetGames();
+                foreach(var game in games)
+                {
+                    game.SantizedName = game.Name.SanatizeGameName();
+                    game.SantizedNameNoSpace = game.SantizedName.Replace(" ", string.Empty);
+                }
+
+                var expireDate = DateTime.UtcNow.Date.AddDays(1).AddHours(2).AddMinutes(30) - DateTime.UtcNow;
+                _cache.Set("games", games, expireDate);
             }
 
-            return users;
+            return games;
         }
     }
 }

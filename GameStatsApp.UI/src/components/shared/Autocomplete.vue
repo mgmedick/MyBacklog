@@ -71,7 +71,7 @@
                 this.$emit('update:modelValue', val); 
 
                 this.$nextTick(function() {
-                    if (val && val != oldVal) {
+                    if (val) {
                         if (val.length >= that.minlength) {
                             if (that.isasync) {
                                 clearTimeout(that.throttleTimer);
@@ -82,6 +82,8 @@
                                 that.filterResults();                            
                             }
                         }
+                    } else {
+                        that.results = [];
                     }
                 });
             }     

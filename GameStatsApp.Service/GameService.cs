@@ -19,13 +19,15 @@ namespace GameStatsApp.Service
         private readonly IAuthService _authService = null;
         private readonly IUserRepository _userRepo = null;
         private readonly IUserListRepository _userListRepo = null;
+        private readonly ICacheService _cacheService = null;
 
-        public GameService(IGameRepository gameRepo, IAuthService authService, IUserRepository userRepo, IUserListRepository userListRepo)
+        public GameService(IGameRepository gameRepo, IAuthService authService, IUserRepository userRepo, IUserListRepository userListRepo, ICacheService cacheService)
         {
             _gameRepo = gameRepo;
             _authService = authService;
             _userRepo = userRepo;
             _userListRepo = userListRepo;
+            _cacheService = cacheService; 
         }
 
         public IEnumerable<SearchResult> SearchGames(string searchText)
@@ -34,8 +36,14 @@ namespace GameStatsApp.Service
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
-                searchText = searchText.Trim();
-                results = _gameRepo.SearchGames(searchText).ToList();
+                searchText = searchText.SanatizeGameName();                                                           
+                results = _cacheService.GetGames()
+                                       .Where(i => i.SantizedName.Contains(searchText, StringComparison.OrdinalIgnoreCase) || i.SantizedNameNoSpace.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                                       .OrderByDescending(i => i.ReleaseDate)
+                                       .ThenBy(i => i.Name)
+                                       .Select(i => new SearchResult() { Value = i.ID.ToString(), Label = i.Name, LabelSecondary = i.ReleaseDate?.Year.ToString(), ImagePath = i.CoverImageUrl })
+                                       .Take(20)
+                                       .ToList();
             }
             
             return results;
@@ -55,10 +63,10 @@ namespace GameStatsApp.Service
                     break;
             }
 
-            var games = _gameRepo.GetGames().Select(i => new IDNamePair() { ID = i.ID, Name = GetSanatizedGameName(i.Name) }).ToList();
+            var games = _cacheService.GetGames().ToList();
             var foundGames = (from g in games
                               from gr in importedGames
-                              where g.Name.Equals(gr.SantizedName, StringComparison.OrdinalIgnoreCase) || g.Name.EndsWith(gr.SantizedName)
+                              where g.SantizedName.Equals(gr.SantizedName, StringComparison.OrdinalIgnoreCase)
                               orderby g.ID
                               select new { g.ID, gr.Name, gr.SantizedName, gr.SortOrder })
                             .GroupBy(i => i.SantizedName)
@@ -92,7 +100,7 @@ namespace GameStatsApp.Service
             var items = await _authService.GetSteamUserInventory(steamID);
             results = items.Reverse()
                            .Select((obj, index) => new GameImportResult() { Name = (string)obj["name"],
-                                                                    SantizedName = GetSanatizedGameName((string)obj["name"]),
+                                                                    SantizedName = ((string)obj["name"]).SanatizeGameName(),
                                                                     SortOrder = index
                                                                   })
                             .ToList();
@@ -111,7 +119,7 @@ namespace GameStatsApp.Service
             results = items.Where(obj => ((string)obj["type"]) == "Game")
                            .Reverse()
                            .Select((obj, index) => new GameImportResult() { Name = (string)obj["name"],
-                                                                    SantizedName = GetSanatizedGameName((string)obj["name"]),
+                                                                    SantizedName = ((string)obj["name"]).SanatizeGameName(),
                                                                     SortOrder = index                                                                    
                                                                   })
                             .ToList();
@@ -121,19 +129,6 @@ namespace GameStatsApp.Service
                 .ToList();
                                       
             return results;
-        }                    
-
-        public string GetSanatizedGameName(string gameName)
-        {
-            var santizedGameName = gameName.Sanatize().ReplaceRomanWithInt().ReplaceMultiSpaceWithSingle().Trim();
-            
-            santizedGameName = Regex.Replace(santizedGameName, "^COD", "Call of Duty");
-            santizedGameName = Regex.Replace(santizedGameName, "^GTA", "Grand Theft Auto");
-            
-            var valuesToTrim = new string[] { "_" };
-            santizedGameName = santizedGameName.Replace(valuesToTrim, " ");
-
-            return santizedGameName;
-        }
+        }                   
     }
 }

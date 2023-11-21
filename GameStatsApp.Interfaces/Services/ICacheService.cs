@@ -9,6 +9,6 @@ namespace GameStatsApp.Interfaces.Services
 {
     public interface ICacheService
     {
-        IEnumerable<User> GetUsers();
+        IEnumerable<Game> GetGames();
     }
 }

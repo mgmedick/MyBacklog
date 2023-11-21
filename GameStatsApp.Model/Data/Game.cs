@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace GameStatsApp.Model.Data
 {
@@ -13,5 +11,7 @@ namespace GameStatsApp.Model.Data
         public string CoverImagePath { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? ModifiedDate { get; set; }
+        public string SantizedName { get; set; }
+        public string SantizedNameNoSpace { get; set; } 
     }   
 } 
