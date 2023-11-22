@@ -14,6 +14,7 @@ using System.Linq;
 using Serilog;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using System.Web;
 
 namespace GameStatsApp.Controllers
 {
@@ -22,15 +23,19 @@ namespace GameStatsApp.Controllers
         private readonly IUserService _userService = null;
         private readonly IUserListService _userListService = null;
         private readonly IAuthService _authService = null;
+        private readonly ISettingService _settingService = null; 
+        private readonly ICacheService _cacheService = null; 
         private readonly IConfiguration _config = null;
         private readonly IWebHostEnvironment _env = null;
         private readonly ILogger _logger = null;
 
-        public HomeController(IUserService userService, IUserListService userListService, IAuthService authService, IConfiguration config, IWebHostEnvironment env, ILogger logger)
+        public HomeController(IUserService userService, IUserListService userListService, IAuthService authService, ISettingService settingService, ICacheService cacheService, IConfiguration config, IWebHostEnvironment env, ILogger logger)
         {
             _userService = userService;
             _userListService = userListService;
             _authService = authService;
+            _settingService = settingService;
+            _cacheService = cacheService;
             _config = config;
             _env = env;
             _logger = logger;                       
@@ -70,6 +75,39 @@ namespace GameStatsApp.Controllers
         public ViewResult Error()
         {
             return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public JsonResult RefreshCache()
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {       
+                var token = HttpContext.Request.Form["token"];
+                if (!string.IsNullOrWhiteSpace(token))
+                {
+                    token = HttpUtility.UrlDecode(token);
+                    var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value; 
+                    var gameLastImportDateUtcString = _settingService.GetSetting("GameLastImportDate")?.Dte?.ToString();
+                    
+                    if (gameLastImportDateUtcString.GetHMACSHA256Hash(hashKey) == token)
+                    {
+                        _cacheService.RefreshCache();
+                        success = true;
+                    }              
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "RefreshCache");
+                success = false;
+                errorMessages = new List<string>() { "Error refreshing cache" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
         }
 
         [HttpGet]

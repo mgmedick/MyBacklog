@@ -26,10 +26,15 @@ namespace GameStatsApp.Service
             _gameRepo = gameRepo;
         }
 
-        public IEnumerable<Game> GetGames()
+        public void RefreshCache()
+        {
+            GetGames(true);
+        }
+
+        public IEnumerable<Game> GetGames(bool refresh = false)
         {
             IEnumerable<Game> games = null;
-            if (!_cache.TryGetValue<IEnumerable<Game>>("games", out games))
+            if (!_cache.TryGetValue<IEnumerable<Game>>("games", out games) || refresh)
             {
                 games = _gameRepo.GetGames();
                 foreach(var game in games)
@@ -38,10 +43,9 @@ namespace GameStatsApp.Service
                     game.SantizedNameNoSpace = game.SantizedName.Replace(" ", string.Empty);
                 }
 
-                var expireDate = DateTime.UtcNow.Date.AddDays(1).AddHours(2).AddMinutes(30) - DateTime.UtcNow;
-                _cache.Set("games", games, expireDate);
+                _cache.Set("games", games);
             }
-
+            
             return games;
         }
     }

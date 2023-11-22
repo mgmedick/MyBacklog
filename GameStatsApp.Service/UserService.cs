@@ -58,7 +58,8 @@ namespace GameStatsApp.Service
             var expireDate = new DateTime(expirationTime);
             var emailExists = _userRepo.GetUsers(i => i.Email == email).Any();
             var isValid = (hash == token) && expireDate > DateTime.UtcNow && !emailExists;
-            var activateUserVM = new ActivateViewModel() { Email = email, IsValid = isValid };
+            var emailToken = email.GetHMACSHA256Hash(hashKey);
+            var activateUserVM = new ActivateViewModel() { Email = email, EmailToken = emailToken, IsValid = isValid };
 
             return activateUserVM;
         }
