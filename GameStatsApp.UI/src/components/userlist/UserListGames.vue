@@ -38,7 +38,9 @@
                                     <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px;"/>                    
                                 </div>
                             </div>                  
-                            <img :src="emptycoverimagepath" class="img-fluid rounded" alt="Responsive image">
+                            <svg :width="imgWidth" :height="imgHeight" class="img-fluid">
+                                <rect :width="imgWidth" :height="imgHeight" style="fill: #f8f9fb;" />
+                            </svg>                              
                         </div>
                     </div>
                 </div>   
@@ -60,7 +62,9 @@
                                     <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px;"/>                    
                                 </div>
                             </div>                  
-                            <img :src="emptycoverimagepath" class="img-fluid rounded" alt="Responsive image">
+                            <svg :width="imgWidth" :height="imgHeight" class="img-fluid">
+                                <rect :width="imgWidth" :height="imgHeight" style="fill: #f8f9fb;" />
+                            </svg>                        
                         </div>
                     </div>
                     <div v-for="(game, gameIndex) in games" class="col-xl-auto col-md-3 col-6" :key="game.id">
@@ -137,7 +141,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <autocomplete ref="searchautocomplete" v-model="searchText" @search="onSearch" @selected="onSearchSelected" :options="searchResults" :isasync="true" :isimgresults="true" :loading="searchLoading" :placeholder="'Search games'"/>    
+                        <autocomplete ref="searchautocomplete" v-model="searchText" @search="onSearch" @selected="onSearchSelected" :options="searchResults" :isasync="true" :isimgresults="true" :loading="searchLoading" :placeholder="'Search games'" />    
                     </div>
                 </div>
             </div>
@@ -171,7 +175,6 @@
         props: {
             userlistid: Number,
             userlists: Array,
-            emptycoverimagepath: String,
             showimport: Boolean
         },
         data: function () {
@@ -189,7 +192,9 @@
                 orderByID: sessionStorage.getItem('orderByID') ?? 0,
                 isImporting: Object.keys(JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {}).length > 0,
                 width: document.documentElement.clientWidth,
-                height: document.documentElement.clientHeight
+                height: document.documentElement.clientHeight,
+                imgWidth: 207,
+                imgHeight: 276
             };
         },  
         computed: {     
@@ -210,14 +215,7 @@
         },
         mounted: function() {
             var that = this;
-            window.addEventListener('importingUserAccountIDsUpdate', (event) => {
-                that.isImporting = Object.keys(JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {}).length > 0;
-                
-                if (!that.isImporting) {
-                    that.loadData();
-                }
-            });
-
+            
             that.$refs.importmodal.addEventListener('show.bs.modal', event => {
                 that.$refs.importgames.init();
             }); 
@@ -226,12 +224,17 @@
                 that.$refs.searchautocomplete.clear();
             });            
 
+            window.addEventListener('importingUserAccountIDsUpdate', that.onImportingUserAccountIDsUpdate);
             window.addEventListener('resize', that.onResize);
             
             if (that.showimport) {
                 new Modal(that.$refs.importmodal).show();
             }
         },  
+        destroyed() {
+            window.removeEventListener('importingUserAccountIDsUpdate', this.onImportingUserAccountIDsUpdate);
+            window.removeEventListener('resize', this.onResize);     
+        },           
         updated: function() {
             var that = this;
             
@@ -381,6 +384,14 @@
                 this.showFilterText = !this.showFilterText;
                 if(!this.showFilterText) {
                     this.filterText = '';
+                }
+            },
+            onImportingUserAccountIDsUpdate: function() {
+                var that = this;
+                that.isImporting = Object.keys(JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {}).length > 0;
+                
+                if (!that.isImporting) {
+                    that.loadData();
                 }
             },
             onResize: function() {

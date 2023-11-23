@@ -58,7 +58,6 @@ namespace GameStatsApp.Controllers
                 indexVM.UserID = userID;
                 indexVM.Username = User.FindFirstValue(ClaimTypes.Name);
                 indexVM.UserLists = _userListService.GetUserLists(userID).Where(i => i.Active).ToList();
-                indexVM.EmptyCoverImagePath = _config.GetSection("SiteSettings").GetSection("EmptyCoverImagePath").Value;
 
                 if (TempData["ShowImport"] != null) {
                     indexVM.ShowImport = true;

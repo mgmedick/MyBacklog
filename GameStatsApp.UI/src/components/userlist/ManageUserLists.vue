@@ -109,6 +109,9 @@
 
             document.addEventListener('click', that.handleClickOutside);            
         },
+        destroyed() {
+            document.removeEventListener('click', this.handleClickOutside)
+        },            
         methods: {   
             loadData: function () {
                 var that = this;

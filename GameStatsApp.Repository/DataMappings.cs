@@ -20,11 +20,12 @@ namespace GameStatsApp.Repository
             For<UserListView>().TableName("vw_UserList");
             For<UserListGame>().PrimaryKey("ID").TableName("tbl_UserList_Game");
             For<UserListGameView>().TableName("vw_UserListGame");
-            For<Game>().PrimaryKey("ID").TableName("tbl_Game").Columns(i =>
+            For<GameView>().TableName("vw_Game").Columns(i =>
             {
                 i.Column(g => g.SantizedName).Ignore();
                 i.Column(g => g.SantizedNameNoSpace).Ignore();
-            });
+            });            
+            For<Game>().PrimaryKey("ID").TableName("tbl_Game");
             For<Setting>().PrimaryKey("ID").TableName("tbl_Setting");
         }
     }

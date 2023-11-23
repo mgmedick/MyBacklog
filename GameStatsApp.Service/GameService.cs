@@ -37,11 +37,11 @@ namespace GameStatsApp.Service
             if (!string.IsNullOrWhiteSpace(searchText))
             {
                 searchText = searchText.SanatizeGameName();                                                           
-                results = _cacheService.GetGames()
+                results = _cacheService.GetGameViews()
                                        .Where(i => i.SantizedName.Contains(searchText, StringComparison.OrdinalIgnoreCase) || i.SantizedNameNoSpace.Contains(searchText, StringComparison.OrdinalIgnoreCase))
                                        .OrderByDescending(i => i.ReleaseDate)
                                        .ThenBy(i => i.Name)
-                                       .Select(i => new SearchResult() { Value = i.ID.ToString(), Label = i.Name, LabelSecondary = i.ReleaseDate?.Year.ToString(), ImagePath = i.CoverImageUrl })
+                                       .Select(i => new SearchResult() { Value = i.ID.ToString(), Label = i.Name, LabelSecondary = i.ReleaseDate?.Year.ToString(), ImagePath = i.CoverImagePath })
                                        .Take(20)
                                        .ToList();
             }
@@ -63,7 +63,7 @@ namespace GameStatsApp.Service
                     break;
             }
 
-            var games = _cacheService.GetGames().ToList();
+            var games = _cacheService.GetGameViews().ToList();
             var foundGames = (from g in games
                               from gr in importedGames
                               where g.SantizedName.Equals(gr.SantizedName, StringComparison.OrdinalIgnoreCase)

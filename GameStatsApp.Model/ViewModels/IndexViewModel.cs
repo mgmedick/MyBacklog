@@ -17,7 +17,6 @@ namespace GameStatsApp.Model.ViewModels
         public int UserID { get; set; }
         public string Username { get; set; }        
         public List<UserListViewModel> UserLists { get; set; }
-        public string EmptyCoverImagePath { get; set; }
         public bool IsDemo { get; set; }
         public string ReturnUrl { get; set; }
         public bool ShowWelcome { get; set; }

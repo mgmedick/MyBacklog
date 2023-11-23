@@ -23,6 +23,14 @@ namespace GameStatsApp.Repository
             }
         }
 
+        public IEnumerable<GameView> GetGameViews(Expression<Func<GameView, bool>>  predicate = null)
+        {
+            using (IDatabase db = DBFactory.GetDatabase())
+            {
+                return db.Query<GameView>().Where(predicate ?? (x => true)).ToList();
+            }
+        }        
+
         public IEnumerable<SearchResult> SearchGames(string searchText)
         {
             using (IDatabase db = DBFactory.GetDatabase())

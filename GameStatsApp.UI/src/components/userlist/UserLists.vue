@@ -51,7 +51,7 @@
                 </ul>
             </div>                
         </div>
-        <user-list-games ref="userlistgames" :userlists="userlists" :userlistid="selectedItemID" :emptycoverimagepath="emptycoverimagepath" :showimport="showimport"></user-list-games>           
+        <user-list-games ref="userlistgames" :userlists="userlists" :userlistid="selectedItemID" :showimport="showimport"></user-list-games>           
     </div>
 </template>
 <script>
@@ -59,7 +59,6 @@
         name: "UserLists",
         props: {
             userlists: Array,
-            emptycoverimagepath: String,
             showimport: Boolean
         },
         data: function () {

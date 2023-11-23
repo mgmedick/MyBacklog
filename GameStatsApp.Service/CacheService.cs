@@ -28,15 +28,15 @@ namespace GameStatsApp.Service
 
         public void RefreshCache()
         {
-            GetGames(true);
+            GetGameViews(true);
         }
 
-        public IEnumerable<Game> GetGames(bool refresh = false)
+        public IEnumerable<GameView> GetGameViews(bool refresh = false)
         {
-            IEnumerable<Game> games = null;
-            if (!_cache.TryGetValue<IEnumerable<Game>>("games", out games) || refresh)
+            IEnumerable<GameView> games = null;
+            if (!_cache.TryGetValue<IEnumerable<GameView>>("games", out games) || refresh)
             {
-                games = _gameRepo.GetGames();
+                games = _gameRepo.GetGameViews();
                 foreach(var game in games)
                 {
                     game.SantizedName = game.Name.SanatizeGameName();

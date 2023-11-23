@@ -89,10 +89,11 @@
         mounted: function () {
             var that = this;
             
-            window.addEventListener('importingUserAccountIDsUpdate', (event) => {
-                that.importingUserAccountIDs = JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {};
-            });
-        },        
+            window.addEventListener('importingUserAccountIDsUpdate', that.onImportingUserAccountIDsUpdate);
+        },
+        destroyed() {
+            window.removeEventListener('importingUserAccountIDsUpdate', this.onImportingUserAccountIDsUpdate);
+        },                  
         methods: {
             init: function() {
                 var that = this;
@@ -128,7 +129,11 @@
                         return res;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            },               
+            },
+            onImportingUserAccountIDsUpdate: function() {
+                var that = this;
+                that.importingUserAccountIDs = JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {};
+            },                           
             onImportGamesClick(e, accountTypeID) {                
                 this.importGames(accountTypeID);
             },      

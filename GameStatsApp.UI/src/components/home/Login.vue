@@ -96,8 +96,11 @@
                 };
             });            
 
-            window.addEventListener('resize', this.resizeButtons); 
-        },          
+            window.addEventListener('resize', this.onResize); 
+        },  
+        destroyed() {
+            window.removeEventListener('resize', this.onResize);     
+        },                     
         methods: {
             async submitForm() {
                 const isValid = await this.v$.$validate()
@@ -160,7 +163,7 @@
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
             },        
-            resizeButtons() {
+            onResize() {
                 var that = this;
                 if (that.width != document.documentElement.clientWidth) {  
                     that.width = document.documentElement.clientWidth;         

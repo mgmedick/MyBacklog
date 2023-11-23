@@ -57,7 +57,7 @@
             </div>
         </div>  
         <div v-else>
-            <user-lists :userlists="indexvm.userLists" :emptycoverimagepath="indexvm.emptyCoverImagePath" :showimport="indexvm.showImport"></user-lists>
+            <user-lists :userlists="indexvm.userLists" :showimport="indexvm.showImport"></user-lists>
         </div>   
         <div ref="welcomemodal" class="modal modal-lg" tabindex="-1">
             <div class="modal-dialog">
@@ -114,7 +114,6 @@
         mounted: function () {
             var that = this;
             
-            window.addEventListener('resize', this.onResize);
             this.setDemoImages();
 
             if(this.indexvm.isDemo) {
@@ -131,7 +130,12 @@
             if (that.indexvm.showWelcome) {
                 new Modal(that.$refs.welcomemodal).show();
             }  
-        },        
+
+            window.addEventListener('resize', this.onResize);
+        },  
+        destroyed() {
+            window.removeEventListener('resize', this.onResize);     
+        },                  
         methods: {  
             submitForm() {
                 var that = this;
