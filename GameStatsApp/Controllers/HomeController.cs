@@ -85,7 +85,7 @@ namespace GameStatsApp.Controllers
 
             try
             {       
-                var token = HttpContext.Request.Form["token"];
+                var token = (string)HttpContext.Request.Form["token"];
                 if (!string.IsNullOrWhiteSpace(token))
                 {
                     token = HttpUtility.UrlDecode(token);
