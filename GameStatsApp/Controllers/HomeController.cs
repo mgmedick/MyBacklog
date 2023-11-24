@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlTypes;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using GameStatsApp.Interfaces.Services;
@@ -90,7 +91,7 @@ namespace GameStatsApp.Controllers
                 {
                     token = HttpUtility.UrlDecode(token);
                     var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value; 
-                    var gameLastImportDateUtcString = _settingService.GetSetting("GameLastImportDate")?.Dte?.ToString();
+                    var gameLastImportDateUtcString = (_settingService.GetSetting("GameLastImportDate")?.Dte ?? (DateTime)SqlDateTime.MinValue).ToString();
                     
                     if (gameLastImportDateUtcString.GetHMACSHA256Hash(hashKey) == token)
                     {
