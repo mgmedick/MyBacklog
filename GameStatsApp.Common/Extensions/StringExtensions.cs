@@ -95,7 +95,7 @@ namespace GameStatsApp.Common.Extensions
             santizedGameName = Regex.Replace(santizedGameName, "^COD", "Call of Duty");
             santizedGameName = Regex.Replace(santizedGameName, "^GTA", "Grand Theft Auto");
             
-            var valuesToTrim = new string[] { "_", "-" };
+            var valuesToTrim = new string[] { "_", "-", ":" };
             santizedGameName = santizedGameName.Replace(valuesToTrim, string.Empty);
 
             return santizedGameName;

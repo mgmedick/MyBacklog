@@ -123,12 +123,11 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p>Remove <strong>{{ game.name }}</strong> from list?</p>
+                        <p>Remove <strong>{{ game.name }}</strong> from <strong>{{ userlistid == 0 ? 'All Lists' : userlists.find(i => i.id == userlistid)?.name }}</strong>?</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" @click="onRemoveAllClick($event, game)">Remove from <strong>All Lists</strong></button>
-                        <button type="button" class="btn btn-primary" @click="onRemoveClick($event, game)">Remove</button>
+                        <button type="button" class="btn btn-primary" @click="onRemoveClick($event, game)">Continue</button>
                     </div>
                 </div>
             </div>
@@ -154,7 +153,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p>Remove <strong>all games</strong> from <strong>{{ userlists.find(i => i.id == userlistid)?.name }}</strong> list?</p>
+                        <p>Remove <strong>All Games</strong> from <strong>{{ userlists.find(i => i.id == userlistid)?.name }}</strong>?</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -319,13 +318,13 @@
                 }
             },      
             onRemoveClick(e, game) {
-                var el = e.target;
-                var userList = this.userlists.find(i => i.id == this.userlistid);
-                this.removeGameFromUserList(userList, game, el);
-            },
-            onRemoveAllClick(e, game) {
-                this.removeGameFromAllUserLists(game);
-            },                  
+                if (this.userlistid == 0) {
+                    this.removeGameFromAllUserLists(game);                    
+                } else {
+                    var userList = this.userlists.find(i => i.id == this.userlistid);
+                    this.removeGameFromUserList(userList, game);
+                }
+            },            
             onClearListClick() {
                 new Modal(this.$refs.clearmodal).show();
             },
@@ -499,8 +498,10 @@
             removeGameFromUserList(userList, game, el) {
                 var that = this;     
 
-                el.closest('.gamelist-item')?.classList.remove('active');
-                el.closest('.dropdown-menu')?.previousSibling.classList.remove('active');
+                if (el) {
+                    el.closest('.gamelist-item')?.classList.remove('active');
+                    el.closest('.dropdown-menu')?.previousSibling.classList.remove('active');
+                }
 
                 return axios.post('/UserList/RemoveGameFromUserList', null,{ headers: { 'RequestVerificationToken': that.getCsrfToken() },
                                                                          params: { userListID: userList.id, gameID: game.id } })
@@ -553,7 +554,7 @@
                             that.games = [];            
                             that.allgames = [];
                                                                
-                            successToast("Removed <strong>all games</strong> from <strong>" + userList.name + "</strong> list");
+                            successToast("Removed <strong>All Games</strong> from <strong>" + userList.name + "</strong>");
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {
                                 errorToast(errorMsg);                           
