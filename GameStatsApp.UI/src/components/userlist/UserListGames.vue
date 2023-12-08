@@ -26,7 +26,7 @@
                             <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" class="align-self-center" size="xl"/>  
                         </div>                            
                         <button v-if="userlistid != 0" type="button" class="btn btn-secondary p-2 me-1" @click="onClearListClick"><font-awesome-icon icon="fa-solid fa-eraser" size="xl"/></button>                              
-                        <button type="button" class="btn btn-info p-2" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Info" data-bs-content="">
+                        <button type="button" class="btn btn-info p-2" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Controls" data-bs-content="">
                             <font-awesome-icon icon="fa-solid fa-circle-info" size="xl"/>
                             <div class="d-none popover-content">
                                 <ul class='list-group list-group-flush'>

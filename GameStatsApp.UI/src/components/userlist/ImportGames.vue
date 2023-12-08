@@ -5,7 +5,7 @@
                 <span>Import games into <strong>{{ userlist?.name }}</strong>?</span>
             </div>
             <div class="align-self-end">
-                <button type="button" class="btn btn-info p-2" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Info" data-bs-content="">
+                <button type="button" class="btn btn-info p-2" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Instructions" data-bs-content="">
                     <font-awesome-icon icon="fa-solid fa-circle-info" size="xl"/>
                     <div class="d-none popover-content">
                         <div>
