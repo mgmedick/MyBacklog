@@ -271,7 +271,7 @@ namespace GameStatsApp.Service
                 _userListRepo.SaveUserList(userList);
             }
         }
-        
+
         public IEnumerable<UserAccountViewModel> GetUserAccounts(int userID)
         {
             var userAccountVMs = _userRepo.GetUserAccountViews(i => i.UserID == userID).Select(i => new UserAccountViewModel(i)).ToList();
@@ -279,17 +279,17 @@ namespace GameStatsApp.Service
             return userAccountVMs;
         }
 
-        public async Task<UserAccountView> GetRefreshedUserAccount(int userID, int userAccountID)
+        public async Task<UserAccountView> GetRefreshedUserAccount(int userID, int accountTypeID)
         {
             var authUrl = string.Empty;
             var redirectUrl = string.Empty;
-            var userAccountVW = _userRepo.GetUserAccountViews(i => i.ID == userAccountID).FirstOrDefault();
-            
-            if (userAccountVW.ExpireDate.HasValue && userAccountVW.ExpireDate < DateTime.UtcNow && !string.IsNullOrWhiteSpace(userAccountVW.RefreshToken))
+
+            var userAccountVW = _userRepo.GetUserAccountViews(i => i.UserID == userID && i.AccountTypeID == accountTypeID).FirstOrDefault();
+            if (userAccountVW != null && userAccountVW.ExpireDate < DateTime.UtcNow && !string.IsNullOrWhiteSpace(userAccountVW.RefreshToken))
             {
                 TokenResponse tokenResponse = null;
 
-                switch(userAccountVW.AccountTypeID)
+                switch (userAccountVW.AccountTypeID)
                 {
                     case (int)AccountType.Xbox:
                         tokenResponse = await _authService.ReAuthenticateMicrosoft(userAccountVW.RefreshToken);
@@ -299,7 +299,7 @@ namespace GameStatsApp.Service
                 if (tokenResponse != null)
                 {
                     SaveUserAccount(userID, userAccountVW.AccountTypeID, tokenResponse);
-                    userAccountVW = _userRepo.GetUserAccountViews(i => i.ID == userAccountID).FirstOrDefault();  
+                    userAccountVW = _userRepo.GetUserAccountViews(i => i.ID == userAccountVW.ID).FirstOrDefault();  
                 }
             }
 

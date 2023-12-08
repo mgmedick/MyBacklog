@@ -27,7 +27,6 @@ namespace GameStatsApp.Interfaces.Services
         bool EmailExists(string email, bool activeFilter);
         Task SendConfirmRegistrationEmail(string email, string username);            
         void SaveUserAccount(int userID, int accountTypeID, TokenResponse tokenResponse);
-        IEnumerable<UserAccountViewModel> GetUserAccounts(int userID);   
         Task<UserAccountView> GetRefreshedUserAccount(int userID, int userAccountID);
     }
 }

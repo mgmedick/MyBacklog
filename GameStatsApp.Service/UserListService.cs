@@ -18,9 +18,16 @@ namespace GameStatsApp.Service
     public class UserListService : IUserListService
     {
         private readonly IUserListRepository _userListRepo = null;
-        public UserListService(IUserListRepository userListRepo)
+        private readonly IGameService _gameService = null;
+        private readonly ICacheService _cacheService = null;
+        private readonly IUserRepository _userRepo = null;
+      
+        public UserListService(IUserListRepository userListRepo, IGameService gameService, ICacheService cacheService, IUserRepository userRepo)
         {
             _userListRepo = userListRepo;
+            _gameService = gameService;
+            _cacheService = cacheService;
+            _userRepo = userRepo;
         }
 
         public IEnumerable<UserListViewModel> GetUserLists (int userID)
@@ -31,8 +38,8 @@ namespace GameStatsApp.Service
                                     .ToList();
 
             return userLists;
-        }     
-
+        }
+        
         public void SaveUserList(int userID, UserListViewModel userListVM)
         {
             var userList = new UserList();
@@ -175,7 +182,52 @@ namespace GameStatsApp.Service
             {
                 _userListRepo.DeleteAllUserListGames(userlistid);
             }
-        }   
+        }
+      
+        public async Task<int> ImportGamesFromUserAccount(int userListID, UserAccountView userAccountVW)
+        {
+            var gameNames = new List<GameNameResult>();
+
+            switch (userAccountVW.AccountTypeID)
+            {
+                case (int)AccountType.Steam:
+                    gameNames = await _gameService.GetSteamUserGameNames(userAccountVW.AccountUserID);
+                    break;           
+                case (int)AccountType.Xbox:
+                    gameNames = await _gameService.GetMicrosoftUserGameNames(userAccountVW.AccountUserHash, userAccountVW.Token, Convert.ToUInt64(userAccountVW.AccountUserID));
+                    break;
+            }
+
+            var games = _cacheService.GetGameViews().ToList();
+            var foundGames = (from g in games
+                            from gr in gameNames
+                            where g.SantizedName.Equals(gr.SantizedName, StringComparison.OrdinalIgnoreCase)
+                            orderby g.ID
+                            select new { g.ID, gr.Name, gr.SantizedName, gr.SortOrder })
+                            .GroupBy(i => i.SantizedName)
+                            .Select(i => i.First())
+                            .OrderBy(i => i.SortOrder)
+                            .ToList();
+            var missedGames = gameNames.Where(i => !foundGames.Any(x => x.SantizedName == i.SantizedName))
+                                        .Select(i => i.Name)
+                                        .ToList();
+
+            var gameIDs = foundGames.Select(i => i.ID).Distinct().ToList();
+            var existingGameIDs = _userListRepo.GetUserListGameViews(i=>i.UserListID == userListID).Select(i => i.ID).ToList();
+            var userListGames = gameIDs.Where(i => !existingGameIDs.Contains(i))
+                                        .Select(i => new UserListGame() { UserListID = userListID, GameID = i })
+                                        .ToList();
+
+            if (userListGames.Any())
+            {
+                _userListRepo.SaveUserListGames(userListGames);
+            }
+
+            userAccountVW.ImportLastRunDate = DateTime.UtcNow;
+            _userRepo.SaveUserAccount(userAccountVW.ConvertToUserAccount());
+            
+            return userListGames.Count();
+        }          
 
         public bool UserListNameExists(int userID, int userListID, string userListName)
         {

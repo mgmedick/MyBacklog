@@ -14,7 +14,7 @@ namespace GameStatsApp.Model.ViewModels
         public string MicrosoftAuthUrl { get; set; }  
         public string SteamAuthUrl { get; set; }
         public bool? AuthSuccess { get; set; }
-        public int? AuthAccountTypeID { get; set; }        
+        public int? AuthImportTypeID { get; set; }        
     }
 }
 

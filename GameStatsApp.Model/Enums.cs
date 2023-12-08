@@ -32,15 +32,13 @@ namespace GameStatsApp.Model
     {
         Backlog = 1,
         Playing = 2,
-        Completed = 3,
-        Steam = 4,
-        Xbox = 5        
+        Completed = 3 
     }
 
-    public enum AuthCallbackSource
+    public enum ImportType
     {
-        ImportGames = 1,
-        Welcome = 2,
-        UserSettings = 3
-    }    
+        CSV = 1,
+        Steam = 2,
+        Xbox = 3
+    }  
 }

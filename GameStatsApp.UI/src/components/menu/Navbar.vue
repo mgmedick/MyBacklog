@@ -49,7 +49,7 @@
 </template>
 <script>
     import axios from 'axios'
-    import { successToast, errorToast, getCookie, listenCookieChange } from '../../js/common';
+    import { successToast, errorToast } from '../../js/common';
     
     export default {
         name: "Navbar",
@@ -70,37 +70,38 @@
         created: function () {
         },         
         mounted() {
-            var that = this;         
-            var importingUserAccountIDs = JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {};
+            var that = this;   
+            var importingTypeIDs = JSON.parse(sessionStorage.getItem('importingTypeIDs')) ?? [];
             
-            if (Object.keys(importingUserAccountIDs).length > 0) {
+            if (importingTypeIDs.length > 0) {
                 var intervalID = setInterval(function() {
-                    axios.get('/Game/GetCompletedImportGames')
+                    axios.get('/UserList/GetCompletedImportGameResults')
                         .then(res => {
                             var results = res.data;
 
                             if (results.length > 0) {
-                                Object.keys(importingUserAccountIDs).forEach(userAccountID => {
-                                    var result = results.find(i => i.userAccountID == userAccountID);
+                                importingTypeIDs.forEach(importTypeID => {
+                                    var result = results.find(i => i.importTypeID == importTypeID);
                                     if (result) {
                                         if (result.success) {
-                                            successToast("Imported <strong>" + result.count + "</strong> new games into <strong>" + importingUserAccountIDs[userAccountID].userListName + "<strong>");
+                                            successToast("Imported <strong>" + result.count + "</strong> games into <strong>" + result.userListName + "<strong>");
                                         } else {
                                             result.errorMessages.forEach(errorMsg => {
                                                 errorToast(errorMsg);                                         
                                             });
                                         }
                                         
-                                        delete importingUserAccountIDs[userAccountID];
+                                        importingTypeIDs = importingTypeIDs.filter(i => i != importTypeID);
                                     }        
                                 });
 
-                                sessionStorage.setItem('importingUserAccountIDs', JSON.stringify(importingUserAccountIDs));
-                                window.dispatchEvent(new CustomEvent('importingUserAccountIDsUpdate'));
+                                sessionStorage.setItem('importingTypeIDs', JSON.stringify(importingTypeIDs));
+                                window.dispatchEvent(new CustomEvent('importingTypeIDsUpdate'));
                             }
                         })
                         .catch(err => { console.error(err); return Promise.reject(err); });
                 }, 10000);
+                
             }
         },        
         methods: {                    

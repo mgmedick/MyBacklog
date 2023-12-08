@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace GameStatsApp.Model.JSON
 {
-    public class GameImportResult
+    public class GameNameResult
     {
         public string Name { get; set; }
         public string SantizedName { get; set; }

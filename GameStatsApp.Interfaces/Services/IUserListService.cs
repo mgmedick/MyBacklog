@@ -21,7 +21,8 @@ namespace GameStatsApp.Interfaces.Services
         void DeleteUserList(int userID, int userListID);
         void UpdateUserListSortOrders(int userID, List<int> userListIDs);
         void UpdateUserListActive(int userID, int userListID, bool active);
-        IEnumerable<UserListGameViewModel> GetUserListGames (int userID, int userListID);               
+        IEnumerable<UserListGameViewModel> GetUserListGames (int userID, int userListID);     
+        Task<int> ImportGamesFromUserAccount(int userListID, UserAccountView userAccountVW);   
         bool UserListNameExists(int userID, int userListID, string userListName);
     }
 }

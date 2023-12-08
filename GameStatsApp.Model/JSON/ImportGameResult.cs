@@ -5,9 +5,10 @@ using Newtonsoft.Json;
 
 namespace GameStatsApp.Model.JSON
 {
-    public class ImportingUserAccount
+    public class ImportGameResult
     {
-        public int UserAccountID { get; set; }
+        public int ImportTypeID { get; set; }
+        public string UserListName { get; set; }
         public bool? Success { get; set; }
         public int Count { get; set; }
         public List<string> ErrorMessages { get; set; }

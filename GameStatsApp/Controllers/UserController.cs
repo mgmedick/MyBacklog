@@ -74,7 +74,7 @@ namespace GameStatsApp.Controllers
             }   
 
             HttpContext.Session.Set<bool>("AuthSuccess", success); 
-            HttpContext.Session.Set<int>("AuthAccountTypeID", (int)AccountType.Xbox); 
+            HttpContext.Session.Set<int>("AuthImportTypeID", (int)ImportType.Xbox); 
             TempData.Add("ShowImport", true);
 
             return RedirectToAction("Index", "Home");
@@ -108,7 +108,7 @@ namespace GameStatsApp.Controllers
             }   
 
             HttpContext.Session.Set<bool>("AuthSuccess", success); 
-            HttpContext.Session.Set<int>("AuthAccountTypeID", (int)AccountType.Steam); 
+            HttpContext.Session.Set<int>("AuthImportTypeID", (int)ImportType.Steam); 
             TempData.Add("ShowImport", true);
 
             return RedirectToAction("Index", "Home");

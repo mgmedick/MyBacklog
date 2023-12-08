@@ -2,15 +2,8 @@
     <div class="games-container">
         <div class="container-fluid m-0 p-0">
             <div class="d-flex align-items-end mb-3">
-                <div class="d-flex w-100">
-                    <div class="btn btn-secondary p-2 d-flex me-1" tabindex="-1" role="button" @click="onImportClick">
-                        <font-awesome-layers v-if="isImporting" class="fa-xl align-self-center" style="width: 26px; z-index: 0;">
-                            <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-4" style="color: #adb5bd;"/>
-                            <font-awesome-icon icon="fa-solid fa-cloud" style="z-index: -1;"/>
-                        </font-awesome-layers>
-                        <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" class="align-self-center" size="xl"/>   
-                    </div>      
-                    <div class="d-flex ms-auto">   
+                <div class="d-flex w-100">                       
+                    <div class="d-flex ms-auto">
                         <div class="btn-group me-1" role="group">
                             <button type="button" class="btn btn-secondary p-2" @click="onOrderByDescClick"><font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-arrow-up-wide-short" size="xl"/><font-awesome-icon v-else icon="fa-solid fa-arrow-down-wide-short" size="xl"/></button>
                             <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split p-2" data-bs-toggle="dropdown" aria-expanded="false">
@@ -21,11 +14,31 @@
                                 <li><a href="#/" @click="onOrderByOptionClick($event, 1)" class="dropdown-item" :class="{ 'active' : orderByID == 1 }">Name</a></li>
                             </ul>
                         </div>
-                        <div class="input-group">
+                        <div class="btn-group me-1">
                             <button type="button" class="btn btn-secondary p-2" @click="onShowFilterTextClick"><font-awesome-icon icon="fa-solid fa-filter" size="xl"/></button> 
                             <input v-if="showFilterText" v-model="filterText" type="search" class="form-control" placeholder="Filter games">
                         </div>
-                        <button v-if="userlistid != 0" type="button" class="btn btn-secondary p-2 ms-1" @click="onClearListClick"><font-awesome-icon icon="fa-solid fa-eraser" size="xl"/></button> 
+                        <div v-if="userlistid != 0" class="btn btn-secondary p-2 d-flex me-1" tabindex="-1" role="button" @click="onImportClick">
+                            <font-awesome-layers v-if="isImporting" class="fa-xl align-self-center" style="width: 26px; z-index: 0;">
+                                <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-4" style="color: #adb5bd;"/>
+                                <font-awesome-icon icon="fa-solid fa-cloud" style="z-index: -1;"/>
+                            </font-awesome-layers>
+                            <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" class="align-self-center" size="xl"/>  
+                        </div>                            
+                        <button v-if="userlistid != 0" type="button" class="btn btn-secondary p-2 me-1" @click="onClearListClick"><font-awesome-icon icon="fa-solid fa-eraser" size="xl"/></button>                              
+                        <button type="button" class="btn btn-info p-2" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Info" data-bs-content="">
+                            <font-awesome-icon icon="fa-solid fa-circle-info" size="xl"/>
+                            <div class="d-none popover-content">
+                                <ul class='list-group list-group-flush'>
+                                    <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-plus'/>&nbsp;&nbsp;Add games</li>
+                                    <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-inbox'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-play'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-check'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-ellipsis'/>&nbsp;&nbsp;Move games</li>
+                                    <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-arrow-down-wide-short'/>&nbsp;&nbsp;Sort games</li>                                    
+                                    <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-cloud-arrow-down'/>&nbsp;&nbsp;Import games</li>
+                                    <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-filter'/>&nbsp;&nbsp;Filter games</li>
+                                    <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-eraser'/>&nbsp;&nbsp;Clear games</li>
+                                </ul>
+                            </div>
+                        </button>                                                
                     </div>
                 </div>              
             </div>            
@@ -35,7 +48,12 @@
                         <div class="position-relative add-game-container" role="button">
                             <div class="position-absolute top-0 bottom-0 start-0 end-0">
                                 <div class="d-flex" style="width: 100%; height: 100%;">
-                                    <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px;"/>                    
+                                    <div class="mx-auto align-self-center" style="text-align:center;">
+                                        <font-awesome-icon icon="fa-solid fa-plus" size="2xl" style="font-size: 50px;"/>
+                                        <!-- <div class="mt-3">
+                                            <span>Add Game</span>
+                                        </div> -->
+                                    </div>
                                 </div>
                             </div>                  
                             <svg :width="imgWidth" :height="imgHeight" class="img-fluid">
@@ -59,7 +77,12 @@
                         <div class="position-relative add-game-container" role="button" @click="onSearchGamesClick">
                             <div class="position-absolute top-0 bottom-0 start-0 end-0">
                                 <div class="d-flex" style="width: 100%; height: 100%;">
-                                    <font-awesome-icon icon="fa-solid fa-plus" size="2xl" class="mx-auto align-self-center" style="font-size: 50px;"/>                    
+                                    <div class="mx-auto align-self-center" style="text-align:center;">
+                                        <font-awesome-icon icon="fa-solid fa-plus" size="2xl" style="font-size: 50px;"/>
+                                        <!-- <div class="mt-3">
+                                            <span>Add Game</span>
+                                        </div>  -->
+                                    </div>
                                 </div>
                             </div>                  
                             <svg :width="imgWidth" :height="imgHeight" class="img-fluid">
@@ -107,7 +130,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <import-games ref="importgames" @isimportingupdate="onIsImportingUpdate"></import-games>
+                        <import-games ref="importgames" :userlist="userlists.find(i => i.id == userlistid)" @isimportingupdate="onIsImportingUpdate"></import-games>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
@@ -166,7 +189,7 @@
 </template>
 <script>
     import axios from 'axios';
-    import { Modal } from 'bootstrap';
+    import { Modal, Popover } from 'bootstrap';
     import { successToast, errorToast } from '../../js/common.js';
 
     export default {
@@ -189,7 +212,7 @@
                 showFilterText: false,
                 orderByDesc: sessionStorage.getItem('orderByDesc') ? sessionStorage.getItem('orderByDesc') == 'true' : true,             
                 orderByID: sessionStorage.getItem('orderByID') ?? 0,
-                isImporting: Object.keys(JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {}).length > 0,
+                isImporting: (JSON.parse(sessionStorage.getItem('importingTypeIDs')) ?? []).length > 0,
                 width: document.documentElement.clientWidth,
                 height: document.documentElement.clientHeight,
                 imgWidth: 207,
@@ -215,6 +238,16 @@
         mounted: function() {
             var that = this;
             
+            document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el => {
+                new Popover(el, { 
+                    html: true,
+                    sanitize: false,
+                    content: function() {
+                        return document.querySelector('.popover-content').innerHTML;
+                    } 
+                });
+            });
+
             that.$refs.importmodal.addEventListener('show.bs.modal', event => {
                 that.$refs.importgames.init();
             }); 
@@ -223,7 +256,6 @@
                 that.$refs.searchautocomplete.clear();
             });            
 
-            window.addEventListener('importingUserAccountIDsUpdate', that.onImportingUserAccountIDsUpdate);
             window.addEventListener('resize', that.onResize);
             
             if (that.showimport) {
@@ -231,7 +263,6 @@
             }
         },  
         destroyed() {
-            window.removeEventListener('importingUserAccountIDsUpdate', this.onImportingUserAccountIDsUpdate);
             window.removeEventListener('resize', this.onResize);     
         },           
         updated: function() {
@@ -383,14 +414,6 @@
                 this.showFilterText = !this.showFilterText;
                 if(!this.showFilterText) {
                     this.filterText = '';
-                }
-            },
-            onImportingUserAccountIDsUpdate: function() {
-                var that = this;
-                that.isImporting = Object.keys(JSON.parse(sessionStorage.getItem('importingUserAccountIDs')) ?? {}).length > 0;
-                
-                if (!that.isImporting) {
-                    that.loadData();
                 }
             },
             onResize: function() {

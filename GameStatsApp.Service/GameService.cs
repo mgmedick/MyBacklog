@@ -15,18 +15,12 @@ namespace GameStatsApp.Service
 {
     public class GameService : IGameService
     {
-        private readonly IGameRepository _gameRepo = null;
-        private readonly IAuthService _authService = null;
-        private readonly IUserRepository _userRepo = null;
-        private readonly IUserListRepository _userListRepo = null;
+        private readonly IAuthService _authService = null; 
         private readonly ICacheService _cacheService = null;
 
-        public GameService(IGameRepository gameRepo, IAuthService authService, IUserRepository userRepo, IUserListRepository userListRepo, ICacheService cacheService)
+        public GameService(IAuthService authService, ICacheService cacheService)
         {
-            _gameRepo = gameRepo;
-            _authService = authService;
-            _userRepo = userRepo;
-            _userListRepo = userListRepo;
+            _authService = authService; 
             _cacheService = cacheService; 
         }
 
@@ -47,59 +41,14 @@ namespace GameStatsApp.Service
             }
             
             return results;
-        }
+        }                
 
-        public async Task<int> ImportGames(int userID, UserAccountView userAccountVW)
+        public async Task<List<GameNameResult>> GetSteamUserGameNames(string steamID)
         {
-            var importedGames = new List<GameImportResult>();
-
-            switch (userAccountVW.AccountTypeID)
-            {
-                case (int)AccountType.Steam:
-                    importedGames = await GetSteamUserGames(userAccountVW.AccountUserID);
-                    break;           
-                case (int)AccountType.Xbox:
-                    importedGames = await GetMicrosoftUserGames(userAccountVW.AccountUserHash, userAccountVW.Token, Convert.ToUInt64(userAccountVW.AccountUserID));
-                    break;
-            }
-
-            var games = _cacheService.GetGameViews().ToList();
-            var foundGames = (from g in games
-                              from gr in importedGames
-                              where g.SantizedName.Equals(gr.SantizedName, StringComparison.OrdinalIgnoreCase)
-                              orderby g.ID
-                              select new { g.ID, gr.Name, gr.SantizedName, gr.SortOrder })
-                            .GroupBy(i => i.SantizedName)
-                            .Select(i => i.First())
-                            .OrderBy(i => i.SortOrder)
-                            .ToList();
-            var missedGames = importedGames.Where(i => !foundGames.Any(x => x.SantizedName == i.SantizedName))
-                                           .Select(i => i.Name)
-                                           .ToList();
-
-            var gameIDs = foundGames.Select(i => i.ID).Distinct().ToList();
-            var existingGameIDs = _userListRepo.GetUserListGameViews(i=>i.UserListID == userAccountVW.UserListID).Select(i => i.ID).ToList();
-            var userListGames = gameIDs.Where(i => !existingGameIDs.Contains(i))
-                                           .Select(i => new UserListGame() { UserListID = userAccountVW.UserListID, GameID = i })
-                                           .ToList();
-
-            if (userListGames.Any())
-            {
-                _userListRepo.SaveUserListGames(userListGames);
-            }
-
-            userAccountVW.ImportLastRunDate = DateTime.UtcNow;
-            _userRepo.SaveUserAccount(userAccountVW.ConvertToUserAccount());
-            
-            return userListGames.Count();
-        } 
-
-        public async Task<List<GameImportResult>> GetSteamUserGames(string steamID)
-        {
-            var results = new List<GameImportResult>();
+            var results = new List<GameNameResult>();
             var items = await _authService.GetSteamUserInventory(steamID);
             results = items.Reverse()
-                           .Select((obj, index) => new GameImportResult() { Name = (string)obj["name"],
+                           .Select((obj, index) => new GameNameResult() { Name = (string)obj["name"],
                                                                     SantizedName = ((string)obj["name"]).SanatizeGameName(),
                                                                     SortOrder = index
                                                                   })
@@ -112,13 +61,13 @@ namespace GameStatsApp.Service
             return results;
         }
 
-        public async Task<List<GameImportResult>> GetMicrosoftUserGames(string userHash, string xstsToken, ulong userXuid)
+        public async Task<List<GameNameResult>> GetMicrosoftUserGameNames(string userHash, string xstsToken, ulong userXuid)
         {
-            var results = new List<GameImportResult>();
+            var results = new List<GameNameResult>();
             var items = await _authService.GetMicrosoftUserTitleHistory(userHash, xstsToken, userXuid);
             results = items.Where(obj => ((string)obj["type"]) == "Game")
                            .Reverse()
-                           .Select((obj, index) => new GameImportResult() { Name = (string)obj["name"],
+                           .Select((obj, index) => new GameNameResult() { Name = (string)obj["name"],
                                                                     SantizedName = ((string)obj["name"]).SanatizeGameName(),
                                                                     SortOrder = index                                                                    
                                                                   })
@@ -129,6 +78,6 @@ namespace GameStatsApp.Service
                 .ToList();
                                       
             return results;
-        }                   
+        }          
     }
 }
