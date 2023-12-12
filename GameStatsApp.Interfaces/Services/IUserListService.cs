@@ -6,6 +6,7 @@ using GameStatsApp.Model.JSON;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace GameStatsApp.Interfaces.Services
 {
@@ -22,6 +23,7 @@ namespace GameStatsApp.Interfaces.Services
         void UpdateUserListSortOrders(int userID, List<int> userListIDs);
         void UpdateUserListActive(int userID, int userListID, bool active);
         IEnumerable<UserListGameViewModel> GetUserListGames (int userID, int userListID);     
+        Task<int> ImportGamesFromFile(int userListID, IFormFile file);
         Task<int> ImportGamesFromUserAccount(int userListID, UserAccountView userAccountVW);   
         bool UserListNameExists(int userID, int userListID, string userListName);
     }

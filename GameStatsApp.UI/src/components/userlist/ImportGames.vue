@@ -1,26 +1,24 @@
 ﻿<template>
     <div id="divimportgames">
-        <div class="d-flex justify-content-center align-items-end mb-3">
+        <div class="d-flex justify-content-center align-items-end mb-3">           
             <div class="mx-auto">
-                <span>Import games into <strong>{{ userlist?.name }}</strong>?</span>
+                <span style="margin-left: 40px;">Import games into <strong>{{ userlist?.name }}</strong>?</span>
             </div>
-            <div class="align-self-end">
+            <div>
                 <button type="button" class="btn btn-info p-2" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Instructions" data-bs-content="">
                     <font-awesome-icon icon="fa-solid fa-circle-info" size="xl"/>
                     <div class="d-none popover-content">
                         <div>
                             <div class="mb-3">
                                 <div><strong>CSV</strong></div>
-                                <ul class="list-group list-group-flush no-gutters">
-                                    <li class="list-group-item p-1">Download the template</li>
-                                    <li class="list-group-item p-1">Fill in with your game names</li>
-                                    <li class="list-group-item p-1">Upload spreadsheet</li>
-                                </ul>
+                                <div class="mb-1">
+                                    Upload a CSV file where the first column contains your game names.
+                                </div>
                             </div>
                             <div>
                                 <div><strong>Steam & Xbox</strong></div>
                                 <div class="mb-1">
-                                    Login through the provider and your library will be imported.
+                                    Login through the provider and your library ill be imported automatically.
                                 </div>
                                 <div class="alert alert-light">
                                     <span class='text-info me-1'>Note:</span>The <i>Profile</i> and <i>Game Details</i> sections under your <a href='https://help.steampowered.com/en/faqs/view/588C-C67D-0251-C276' target='_blank'>Steam Privacy Settings</a> must be Public to import Steam games.
@@ -29,7 +27,7 @@
                         </div>
                     </div>
                 </button> 
-            </div>
+            </div>             
         </div>
         <div style="max-width:400px;" class="mx-auto">         
             <div v-if="loading">
@@ -39,28 +37,30 @@
                     </div>
                 </div>
             </div>
-            <div v-else>              
-                <div class="row g-2 justify-content-center mb-3">
+            <div v-else>
+                <!-- <div class="text-center">
+                    <label for="formFile" class="form-label"><small class="fw-bold">Import from File</small></label>
                     <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center" @click="onImportGamesFromCSVClick" :disabled="importingTypeIDs.indexOf(1) > -1">
+                        <input id="formFile" type="file" v-model.lazy="form.Password" class="form-control form-control-sm" >
+                        <button type="button" class="btn btn-primary btn-sm p-1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <font-awesome-icon icon="fa-solid fa-file-import" size="xl"/>
+                        </button> 
+                    </div>
+                </div>           
+                <div class="text-center"><small class="fw-bold">OR</small></div>                  -->
+                <div class="row g-2 justify-content-center mb-3">
+                    <div>
+                        <label class="btn btn-primary d-flex justify-content-center align-items-center" :disabled="importingTypeIDs.indexOf(1) > -1">
                             <font-awesome-icon icon="fa-solid fa-file-csv" size="xl"/>
-                            <div class="mx-auto">
-                                <span>CSV</span>
-                            </div>
+                            <div class="mx-auto"><span style="margin-right:30px;">Import from <strong>CSV File</strong></span></div><input ref="fileinput" type="file" @change="onFileChange" accept=".csv" class="form-control form-control-sm" hidden>
                             <font-awesome-icon v-if="importingTypeIDs.indexOf(1) > -1" icon="fa-solid fa-spinner" spin size="xl"/>
-                        </button>
-                        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split p-2" data-bs-toggle="dropdown" aria-expanded="false" style="max-width: 30px;" :disabled="importingTypeIDs.indexOf(1) > -1">
-                            <span class="visually-hidden">Toggle Dropdown</span>
-                        </button>                    
-                        <ul class="dropdown-menu">
-                            <li><a @click="onDownloadTemplateClick" href="#/" class="dropdown-item" data-value="0">Download template</a></li>
-                        </ul>                   
-                    </div>              
+                        </label>
+                    </div>
                     <div class="btn-group" role="group">
                         <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center" @click="onImportGamesFromUserAccountClick(2)" :disabled="importingTypeIDs.indexOf(2) > -1">
                             <font-awesome-icon icon="fa-brands fa-steam" size="xl"/>
                             <div class="mx-auto">
-                                <span>Steam</span>
+                                <span>Import from <strong>Steam</strong></span>
                             </div>
                             <font-awesome-icon v-if="importingTypeIDs.indexOf(2) > -1" icon="fa-solid fa-spinner" spin size="xl"/>
                         </button>
@@ -75,7 +75,7 @@
                         <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center" @click="onImportGamesFromUserAccountClick(3)" :disabled="importingTypeIDs.indexOf(3) > -1">
                             <font-awesome-icon icon="fa-brands fa-xbox" size="xl"/>
                             <div class="mx-auto">
-                                <span>Xbox</span>
+                                <span>Import from <strong>Xbox</strong></span>
                             </div>
                             <font-awesome-icon v-if="importingTypeIDs.indexOf(3) > -1" icon="fa-solid fa-spinner" spin size="xl"/>
                         </button>
@@ -92,7 +92,7 @@
     </div> 
 </template>
 <script>
-    import { successToast, errorToast } from '../../js/common.js';
+    import { getFormData, successToast, errorToast } from '../../js/common.js';
     import { Tooltip, Popover } from 'bootstrap'; 
     import axios from 'axios';
     
@@ -110,7 +110,7 @@
                     authSuccess: null,
                     authImportTypeID: null,
                     authAccountTypeID: null
-                },
+                },           
                 importingTypeIDs: JSON.parse(sessionStorage.getItem('importingTypeIDs')) ?? [],         
                 loading: false
             }
@@ -118,7 +118,9 @@
         watch: {
             importingTypeIDs: {
                 handler(val, oldVal) {
-                    sessionStorage.setItem('importingTypeIDs', JSON.stringify(val));
+                    if (val) {
+                        sessionStorage.setItem('importingTypeIDs', JSON.stringify(val));
+                    }
                     var isImporting = val.length > 0;
                     this.$emit('isimportingupdate', isImporting);
                 },
@@ -172,19 +174,44 @@
                         return res;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            },       
+            },           
+            onFileChange(e) {
+                var that = this;
+                var importTypeID = 1;
+                
+                if (this.$refs.fileinput.value) {
+                    if (that.importingTypeIDs.indexOf(importTypeID) == -1) {
+                        that.importingTypeIDs.push(importTypeID);
+                    }
+
+                    var form = { file: e.target.files[0], userListID: that.userlist.id };
+                    var formData = getFormData(form);
+                    var config = { headers: { 'RequestVerificationToken': that.getCsrfToken(), 'Content-Type': 'multipart/form-data' } };
+                    return axios.post('/UserList/ImportGamesFromCSV', formData, config)
+                        .then((res) => {
+                            if (res.data.success) {
+                                successToast("Imported <strong>" + res.data.count + "</strong> games into <strong>" + that.userlist.name + "</strong>");
+                            } else {
+                                res.data.errorMessages.forEach(errorMsg => {
+                                    errorToast(errorMsg);                           
+                                });
+                            }
+
+                            that.$refs.fileinput.value = '';
+                            that.importingTypeIDs = that.importingTypeIDs.filter(i => i != importTypeID);
+                            that.loadData();                         
+                        })
+                        .catch(err => { 
+                            console.error(err);
+                            that.importingTypeIDs = that.importingTypeIDs.filter(i => i != importTypeID);
+
+                            return Promise.reject(err);
+                        });
+                }
+            },                          
             onImportingTypeIDsUpdate: function() {
                 this.importingTypeIDs = JSON.parse(sessionStorage.getItem('importingTypeIDs')) ?? [];
-            },                  
-            onImportGamesFromCSVClick(e, importTypeID, accountTypeID) {   
-                var that = this;
-
-                if (that.importingTypeIDs.indexOf(importTypeID) == -1) {
-                    that.importingTypeIDs.push(importTypeID);
-                }
-
-                // that.importGamesFromAccount(importTypeID, accountTypeID);   
-            },                                      
+            },                                                       
             onImportGamesFromUserAccountClick(importTypeID) {
                 var that = this;
 
@@ -210,7 +237,12 @@
                         that.loadData(); 
                     }                                                                                                                           
                 })
-                .catch(err => { console.error(err); return Promise.reject(err); });
+                .catch(err => { 
+                    console.error(err);
+                    that.importingTypeIDs = that.importingTypeIDs.filter(i => i != importTypeID);
+
+                    return Promise.reject(err); 
+                });
             },
             getRedirectUrl(importTypeID) {
                 var result = '';

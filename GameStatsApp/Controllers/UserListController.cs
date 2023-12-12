@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Serilog;
 using Microsoft.AspNetCore.Authorization;
+using System.IO;
 
 namespace GameStatsApp.Controllers
 {
@@ -185,6 +186,47 @@ namespace GameStatsApp.Controllers
 
             return Json(importGamesVM);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<JsonResult> ImportGamesFromCSV(int userListID)
+        {
+            var success = false;
+            var count = 0;
+            var errorMessages = new List<string>();
+            var importTypeID = (int)ImportType.CSV;
+
+            try
+            {
+                var file = Request.Form.Files.FirstOrDefault();
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var userList = _userListService.GetUserLists(userID).FirstOrDefault(i => i.ID == userListID);
+                var extensions = _config.GetSection("SiteSettings").GetSection("AllowedUploadExtensions").Value.Split(",").ToList();
+
+                if (file != null && userList != null)
+                {
+                    if (extensions.Contains(Path.GetExtension(file.FileName), StringComparer.OrdinalIgnoreCase))
+                    {
+                        errorMessages.Add("Error importing, incorrect file extension");
+                    }
+                    else
+                    {
+                        AddImportGameResult(importTypeID, userList.Name);
+                        count = await _userListService.ImportGamesFromFile(userListID, file);
+                        success = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "ImportGamesFromCSV");
+                success = false;
+                errorMessages = new List<string>() { "Error importing games" };
+            }            
+            UpdateImportGameResult(importTypeID, success, count, errorMessages);
+
+            return Json(new { success, count, errorMessages });    
+        }       
 
         [HttpPost]
         [ValidateAntiForgeryToken]

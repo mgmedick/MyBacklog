@@ -2,7 +2,20 @@
     <div class="games-container">
         <div class="container-fluid m-0 p-0">
             <div class="d-flex align-items-end mb-3">
-                <div class="d-flex w-100">                       
+                <div class="d-flex w-100"> 
+                    <button type="button" class="btn btn-info p-2" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Controls" data-bs-content="">
+                        <font-awesome-icon icon="fa-solid fa-circle-info" size="xl"/>
+                        <div class="d-none popover-content">
+                            <ul class='list-group list-group-flush'>
+                                <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-plus'/>&nbsp;&nbsp;Add game</li>
+                                <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-inbox'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-play'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-check'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-ellipsis'/>&nbsp;&nbsp;Move games</li>
+                                <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-arrow-down-wide-short'/>&nbsp;&nbsp;Sort games</li>                                    
+                                <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-cloud-arrow-down'/>&nbsp;&nbsp;Import games</li>
+                                <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-filter'/>&nbsp;&nbsp;Filter games</li>
+                                <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-eraser'/>&nbsp;&nbsp;Clear games</li>
+                            </ul>
+                        </div>
+                    </button>                        
                     <div class="d-flex ms-auto">
                         <div class="btn-group me-1" role="group">
                             <button type="button" class="btn btn-secondary p-2" @click="onOrderByDescClick"><font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-arrow-up-wide-short" size="xl"/><font-awesome-icon v-else icon="fa-solid fa-arrow-down-wide-short" size="xl"/></button>
@@ -25,20 +38,7 @@
                             </font-awesome-layers>
                             <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" class="align-self-center" size="xl"/>  
                         </div>                            
-                        <button v-if="userlistid != 0" type="button" class="btn btn-secondary p-2 me-1" @click="onClearListClick"><font-awesome-icon icon="fa-solid fa-eraser" size="xl"/></button>                              
-                        <button type="button" class="btn btn-info p-2" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Controls" data-bs-content="">
-                            <font-awesome-icon icon="fa-solid fa-circle-info" size="xl"/>
-                            <div class="d-none popover-content">
-                                <ul class='list-group list-group-flush'>
-                                    <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-plus'/>&nbsp;&nbsp;Add games</li>
-                                    <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-inbox'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-play'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-check'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-ellipsis'/>&nbsp;&nbsp;Move games</li>
-                                    <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-arrow-down-wide-short'/>&nbsp;&nbsp;Sort games</li>                                    
-                                    <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-cloud-arrow-down'/>&nbsp;&nbsp;Import games</li>
-                                    <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-filter'/>&nbsp;&nbsp;Filter games</li>
-                                    <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-eraser'/>&nbsp;&nbsp;Clear games</li>
-                                </ul>
-                            </div>
-                        </button>                                                
+                        <button v-if="userlistid != 0" type="button" class="btn btn-secondary p-2 me-1" @click="onClearListClick"><font-awesome-icon icon="fa-solid fa-eraser" size="xl"/></button>                                                                            
                     </div>
                 </div>              
             </div>            
@@ -50,9 +50,9 @@
                                 <div class="d-flex" style="width: 100%; height: 100%;">
                                     <div class="mx-auto align-self-center" style="text-align:center;">
                                         <font-awesome-icon icon="fa-solid fa-plus" size="2xl" style="font-size: 50px;"/>
-                                        <!-- <div class="mt-3">
+                                        <div class="mt-2 text-xs">
                                             <span>Add Game</span>
-                                        </div> -->
+                                        </div>
                                     </div>
                                 </div>
                             </div>                  
@@ -79,9 +79,9 @@
                                 <div class="d-flex" style="width: 100%; height: 100%;">
                                     <div class="mx-auto align-self-center" style="text-align:center;">
                                         <font-awesome-icon icon="fa-solid fa-plus" size="2xl" style="font-size: 50px;"/>
-                                        <!-- <div class="mt-3">
+                                        <div class="mt-2 text-xs">
                                             <span>Add Game</span>
-                                        </div>  -->
+                                        </div> 
                                     </div>
                                 </div>
                             </div>                  

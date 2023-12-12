@@ -12,6 +12,7 @@ using System.Linq.Expressions;
 using GameStatsApp.Common.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace GameStatsApp.Service
 {
@@ -184,8 +185,36 @@ namespace GameStatsApp.Service
             }
         }
       
+        public async Task<int> ImportGamesFromFile(int userListID, IFormFile file)
+        {
+            var result = 0;
+            var gameNames = new List<GameNameResult>();
+
+            using (var stream = file.OpenReadStream())
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    var fileContents = await reader.ReadToEndAsync();
+                    gameNames = fileContents.Split(new[] { Environment.NewLine }, StringSplitOptions.None)
+                                            .Where(i => !string.IsNullOrWhiteSpace(i))
+                                            .Select((i, index) => new GameNameResult() { Name = i,
+                                                                                        SantizedName = i.SanatizeGameName(),
+                                                                                        SortOrder = index })
+                                            .ToList();
+                }                   
+            } 
+
+            if (gameNames.Any())
+            {
+                result = ImportGames(userListID, gameNames);
+            }
+
+            return result;
+        }
+
         public async Task<int> ImportGamesFromUserAccount(int userListID, UserAccountView userAccountVW)
         {
+            var result = 0;
             var gameNames = new List<GameNameResult>();
 
             switch (userAccountVW.AccountTypeID)
@@ -198,6 +227,19 @@ namespace GameStatsApp.Service
                     break;
             }
 
+            if (gameNames.Any())
+            {
+                result = ImportGames(userListID, gameNames);
+            }
+
+            userAccountVW.ImportLastRunDate = DateTime.UtcNow;
+            _userRepo.SaveUserAccount(userAccountVW.ConvertToUserAccount());
+
+            return result;
+        }      
+
+        public int ImportGames(int userListID, List<GameNameResult> gameNames)
+        {
             var games = _cacheService.GetGameViews().ToList();
             var foundGames = (from g in games
                             from gr in gameNames
@@ -223,11 +265,8 @@ namespace GameStatsApp.Service
                 _userListRepo.SaveUserListGames(userListGames);
             }
 
-            userAccountVW.ImportLastRunDate = DateTime.UtcNow;
-            _userRepo.SaveUserAccount(userAccountVW.ConvertToUserAccount());
-            
-            return userListGames.Count();
-        }          
+            return userListGames.Count();            
+        }    
 
         public bool UserListNameExists(int userID, int userListID, string userListName)
         {
