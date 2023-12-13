@@ -189,12 +189,12 @@ namespace GameStatsApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<JsonResult> ImportGamesFromCSV(int userListID)
+        public async Task<JsonResult> ImportGamesFromFile(int userListID)
         {
             var success = false;
             var count = 0;
             var errorMessages = new List<string>();
-            var importTypeID = (int)ImportType.CSV;
+            var importTypeID = (int)ImportType.File;
 
             try
             {
@@ -205,7 +205,7 @@ namespace GameStatsApp.Controllers
 
                 if (file != null && userList != null)
                 {
-                    if (extensions.Contains(Path.GetExtension(file.FileName), StringComparer.OrdinalIgnoreCase))
+                    if (!extensions.Contains(Path.GetExtension(file.FileName), StringComparer.OrdinalIgnoreCase))
                     {
                         errorMessages.Add("Error importing, incorrect file extension");
                     }
@@ -219,7 +219,7 @@ namespace GameStatsApp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "ImportGamesFromCSV");
+                _logger.Error(ex, "ImportGamesFromFile");
                 success = false;
                 errorMessages = new List<string>() { "Error importing games" };
             }            

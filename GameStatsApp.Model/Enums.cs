@@ -37,7 +37,7 @@ namespace GameStatsApp.Model
 
     public enum ImportType
     {
-        CSV = 1,
+        File = 1,
         Steam = 2,
         Xbox = 3
     }  

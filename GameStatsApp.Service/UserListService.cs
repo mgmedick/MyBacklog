@@ -189,28 +189,18 @@ namespace GameStatsApp.Service
         {
             var result = 0;
             var gameNames = new List<GameNameResult>();
-
-            using (var stream = file.OpenReadStream())
-            {
-                using (var reader = new StreamReader(stream))
-                {
-                    var fileContents = await reader.ReadToEndAsync();
-                    gameNames = fileContents.Split(new[] { Environment.NewLine }, StringSplitOptions.None)
-                                            .Where(i => !string.IsNullOrWhiteSpace(i))
-                                            .Select((i, index) => new GameNameResult() { Name = i,
-                                                                                        SantizedName = i.SanatizeGameName(),
-                                                                                        SortOrder = index })
-                                            .ToList();
-                }                   
-            } 
-
+            
+            var items = await file.ReadAsListAsync();
+            gameNames = items.Where(i => !string.IsNullOrWhiteSpace(i))
+                            .Select((i, index) => new GameNameResult() { Name = i, SantizedName = i.SanatizeGameName(), SortOrder = index })
+                            .ToList();
             if (gameNames.Any())
             {
                 result = ImportGames(userListID, gameNames);
             }
 
             return result;
-        }
+        }  
 
         public async Task<int> ImportGamesFromUserAccount(int userListID, UserAccountView userAccountVW)
         {

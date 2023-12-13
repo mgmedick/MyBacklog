@@ -12,7 +12,7 @@
                             <div class="mb-3">
                                 <div><strong>CSV</strong></div>
                                 <div class="mb-1">
-                                    Upload a CSV file where the first column contains your game names.
+                                    Upload a file (csv, xls, xlsx, txt) where your game names are listed on each new line/row (for spreadsheets use the first column).
                                 </div>
                             </div>
                             <div>
@@ -51,8 +51,8 @@
                 <div class="row g-2 justify-content-center mb-3">
                     <div>
                         <label class="btn btn-primary d-flex justify-content-center align-items-center" :disabled="importingTypeIDs.indexOf(1) > -1">
-                            <font-awesome-icon icon="fa-solid fa-file-csv" size="xl"/>
-                            <div class="mx-auto"><span style="margin-right:30px;">Import from <strong>CSV File</strong></span></div><input ref="fileinput" type="file" @change="onFileChange" accept=".csv" class="form-control form-control-sm" hidden>
+                            <font-awesome-icon icon="fa-solid fa-file-import" size="xl"/>
+                            <div class="mx-auto"><span style="margin-right:30px;">Import from <strong data-bs-toggle="tooltip" data-bs-title="csv, xls, xlsx, txt">File</strong></span></div><input ref="fileinput" type="file" @change="onFileChange" accept=".rtf, .txt, .csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="form-control form-control-sm" hidden>
                             <font-awesome-icon v-if="importingTypeIDs.indexOf(1) > -1" icon="fa-solid fa-spinner" spin size="xl"/>
                         </label>
                     </div>
@@ -187,7 +187,7 @@
                     var form = { file: e.target.files[0], userListID: that.userlist.id };
                     var formData = getFormData(form);
                     var config = { headers: { 'RequestVerificationToken': that.getCsrfToken(), 'Content-Type': 'multipart/form-data' } };
-                    return axios.post('/UserList/ImportGamesFromCSV', formData, config)
+                    return axios.post('/UserList/ImportGamesFromFile', formData, config)
                         .then((res) => {
                             if (res.data.success) {
                                 successToast("Imported <strong>" + res.data.count + "</strong> games into <strong>" + that.userlist.name + "</strong>");

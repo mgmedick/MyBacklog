@@ -98,6 +98,12 @@ namespace GameStatsApp.Common.Extensions
             var valuesToTrim = new string[] { "_", "-", ":" };
             santizedGameName = santizedGameName.Replace(valuesToTrim, string.Empty);
 
+            var valuesToReplace = new List<Tuple<string,string>> { new Tuple<string, string>("&", "and") };
+            foreach (var valueToReplace in valuesToReplace)
+            {
+                santizedGameName = santizedGameName.Replace(valueToReplace.Item1, valueToReplace.Item2);
+            }
+            
             return santizedGameName;
         }
 
