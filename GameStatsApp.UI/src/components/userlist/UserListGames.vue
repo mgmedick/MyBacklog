@@ -3,7 +3,7 @@
         <div class="container-fluid m-0 p-0">
             <div class="d-flex align-items-end mb-3">
                 <div class="d-flex w-100"> 
-                    <button type="button" class="btn btn-info p-2" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Controls" data-bs-content="">
+                    <a href="#/" role="button" class="btn btn-info p-2" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Controls" data-bs-content="">
                         <font-awesome-icon icon="fa-solid fa-circle-info" size="xl"/>
                         <div class="d-none popover-content">
                             <ul class='list-group list-group-flush'>
@@ -15,7 +15,7 @@
                                 <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-eraser'/>&nbsp;&nbsp;Clear games</li>
                             </ul>
                         </div>
-                    </button>                        
+                    </a>                        
                     <div class="d-flex ms-auto">
                         <div class="btn-group me-1" role="group">
                             <button type="button" class="btn btn-secondary p-2" @click="onOrderByDescClick"><font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-arrow-up-wide-short" size="xl"/><font-awesome-icon v-else icon="fa-solid fa-arrow-down-wide-short" size="xl"/></button>

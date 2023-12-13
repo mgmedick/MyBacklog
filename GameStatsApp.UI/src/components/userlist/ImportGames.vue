@@ -5,20 +5,20 @@
                 <span style="margin-left: 40px;">Import games into <strong>{{ userlist?.name }}</strong>?</span>
             </div>
             <div>
-                <button type="button" class="btn btn-info p-2" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Instructions" data-bs-content="">
+                <a href="#/" role="button" class="btn btn-info p-2" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Instructions" data-bs-content="">
                     <font-awesome-icon icon="fa-solid fa-circle-info" size="xl"/>
                     <div class="d-none popover-content">
                         <div>
                             <div class="mb-3">
                                 <div><strong>CSV</strong></div>
                                 <div class="mb-1">
-                                    Upload a file (csv, xls, xlsx, txt) where your game names are listed on each new line/row (for spreadsheets use the first column).
+                                    Upload a file (csv, xls, xlsx, txt) with your game names listed on each row (for spreadsheets use the first column).
                                 </div>
                             </div>
                             <div>
                                 <div><strong>Steam & Xbox</strong></div>
                                 <div class="mb-1">
-                                    Login through the provider and your library ill be imported automatically.
+                                    Login through the provider and your library will be imported automatically.
                                 </div>
                                 <div class="alert alert-light">
                                     <span class='text-info me-1'>Note:</span>The <i>Profile</i> and <i>Game Details</i> sections under your <a href='https://help.steampowered.com/en/faqs/view/588C-C67D-0251-C276' target='_blank'>Steam Privacy Settings</a> must be Public to import Steam games.
@@ -26,7 +26,7 @@
                             </div>                            
                         </div>
                     </div>
-                </button> 
+                </a> 
             </div>             
         </div>
         <div style="max-width:400px;" class="mx-auto">         
@@ -49,14 +49,12 @@
                 </div>           
                 <div class="text-center"><small class="fw-bold">OR</small></div>                  -->
                 <div class="row g-2 justify-content-center mb-3">
-                    <div>
-                        <label class="btn btn-primary d-flex justify-content-center align-items-center" :disabled="importingTypeIDs.indexOf(1) > -1">
-                            <font-awesome-icon icon="fa-solid fa-file-import" size="xl"/>
-                            <div class="mx-auto"><span style="margin-right:30px;">Import from <strong data-bs-toggle="tooltip" data-bs-title="csv, xls, xlsx, txt">File</strong></span></div><input ref="fileinput" type="file" @change="onFileChange" accept=".rtf, .txt, .csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="form-control form-control-sm" hidden>
-                            <font-awesome-icon v-if="importingTypeIDs.indexOf(1) > -1" icon="fa-solid fa-spinner" spin size="xl"/>
-                        </label>
-                    </div>
-                    <div class="btn-group" role="group">
+                    <button class="btn btn-primary d-flex justify-content-center align-items-center" :disabled="importingTypeIDs.indexOf(1) > -1">
+                        <font-awesome-icon icon="fa-solid fa-file-import" size="xl"/>
+                        <div class="mx-auto"><span style="margin-right:30px;">Import from <strong data-bs-toggle="tooltip" data-bs-title="csv, xls, xlsx, txt">File</strong></span></div><input ref="fileinput" type="file" @change="onFileChange" accept=".rtf, .txt, .csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="form-control form-control-sm" hidden>
+                        <font-awesome-icon v-if="importingTypeIDs.indexOf(1) > -1" icon="fa-solid fa-spinner" spin size="xl"/>
+                    </button>
+                    <div class="btn-group p-0" role="group">
                         <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center" @click="onImportGamesFromUserAccountClick(2)" :disabled="importingTypeIDs.indexOf(2) > -1">
                             <font-awesome-icon icon="fa-brands fa-steam" size="xl"/>
                             <div class="mx-auto">
@@ -71,7 +69,7 @@
                             <li><a :href="importGamesVM.steamAuthUrl" class="dropdown-item" data-value="0">Re-authenticate</a></li>
                         </ul>                   
                     </div>  
-                    <div class="btn-group" role="group">
+                    <div class="btn-group p-0" role="group">
                         <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center" @click="onImportGamesFromUserAccountClick(3)" :disabled="importingTypeIDs.indexOf(3) > -1">
                             <font-awesome-icon icon="fa-brands fa-xbox" size="xl"/>
                             <div class="mx-auto">
