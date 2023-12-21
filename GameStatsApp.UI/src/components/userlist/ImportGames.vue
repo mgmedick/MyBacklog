@@ -12,7 +12,7 @@
                             <div class="mb-3">
                                 <div><strong>CSV</strong></div>
                                 <div class="mb-1">
-                                    Upload a file (csv, xls, xlsx, txt) with your game names listed on each row (for spreadsheets use the first column).
+                                    Upload a file (csv, xls, xlsx, txt) with your game names listed in the first column (new row per game).
                                 </div>
                             </div>
                             <div>

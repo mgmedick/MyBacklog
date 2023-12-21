@@ -2,7 +2,8 @@
     <div class="mx-auto">
         <h2 class="text-center mb-3">Welcome to mybacklog.io</h2>
         <div class="mx-auto" style="max-width:400px;">
-            <form @submit.prevent="submitForm">
+            <form @submit.prevent="onSubmit">
+                <div id="divrecaptcha"></div>
                 <div class="mb-3">
                     <label for="txtEmail" class="form-label">Email</label>
                     <input id="txtEmail" type="text" class="form-control" autocomplete="off" v-model.lazy="form.Email" @blur="v$.form.Email.$touch" aria-describedby="spnEmailErrors">
@@ -66,7 +67,8 @@
         data() {
             return {
                 form: {
-                    Email: ''
+                    Email: '',
+                    Token: ''
                 },
                 loading: false,
                 showSuccess: false,
@@ -100,7 +102,17 @@
                         version: that.signupvm.fbApiVer
                     });                                                         
                 };
-            });           
+            });  
+            
+            this.createGoogleRecaptchaScript().then(function() {
+                grecaptcha.ready(function() {
+                    grecaptcha.render('divrecaptcha', {
+                        'sitekey' : that.signupvm.recaptchaKey,
+                        'callback' : that.submitForm,
+                        'size' : 'invisible'
+                    });          
+                });      
+            });              
 
             window.addEventListener('resize', this.onResize); 
         },     
@@ -108,11 +120,18 @@
             window.removeEventListener('resize', this.onResize);     
         },            
         methods: {
-            async submitForm() {
-                const isValid = await this.v$.$validate()
-                if (!isValid) return
+            async onSubmit() {
+                const isValid = await this.v$.$validate();
 
+                if (!isValid) {
+                    return;
+                } else {
+                    grecaptcha.execute();
+                }
+            },             
+            submitForm(token) {
                 var that = this;
+                this.form.Token = token;
                 var formData = getFormData(this.form);
                 this.loading = true;
 
@@ -202,7 +221,22 @@
                         resolve();
                     }
                 });
-            },                   
+            },   
+            createGoogleRecaptchaScript() {
+                var that = this;
+
+                return new Promise((resolve, reject) => {
+                    let scriptHTML = document.createElement('script');
+                    scriptHTML.type = 'text/javascript';
+                    scriptHTML.async = true;
+                    scriptHTML.defer = true;
+                    scriptHTML.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
+                    document.getElementsByTagName('head')[0].appendChild(scriptHTML);
+                    scriptHTML.onload = function () {
+                        resolve();
+                    }
+                });
+            },                            
             renderGoogleButton() {
                 var btnwidth = document.getElementById("btnSignUp").offsetWidth;   
 
@@ -228,7 +262,7 @@
                         return res.data;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            }                                   
+            }                                                
         },
         validations() {
             return {

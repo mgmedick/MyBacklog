@@ -117,19 +117,26 @@ namespace GameStatsApp.Controllers
                 GClientID = _config.GetSection("Auth").GetSection("Google").GetSection("ClientID").Value,
                 FBClientID = _config.GetSection("Auth").GetSection("Facebook").GetSection("ClientID").Value,
                 FBApiVer = _config.GetSection("Auth").GetSection("Facebook").GetSection("ApiVersion").Value,
+                RecaptchaKey = _config.GetSection("Auth").GetSection("Google").GetSection("RecaptchaKey").Value
             };
 
             return View(loginVM);
         }
 
         [HttpPost]
-        public JsonResult Login(LoginViewModel loginVM)
+        public async Task<JsonResult> Login(LoginViewModel loginVM)
         {
             var success = false;
             List<string> errorMessages = null;
 
             try
             {
+                var result = await _authService.ValidateGoogleRecaptcha(loginVM.Token);
+                if (!result)
+                {
+                     ModelState.AddModelError("Login", "Invalid recaptcha");                   
+                }
+
                 if (!_userService.EmailExists(loginVM.Email, true))
                 {
                     ModelState.AddModelError("Login", "Email not found");
@@ -171,8 +178,12 @@ namespace GameStatsApp.Controllers
             try
             {
                 var result = await _authService.ValidateGoogleRecaptcha(token);
+                if (!result)
+                {
+                    ModelState.AddModelError("LoginDemo", "Invalid recaptcha");                   
+                }
 
-                if (result)
+                if (ModelState.IsValid)
                 {
                     var userID = _userService.CreateDemoUser();
                     var userVW = _userService.GetUserViews(i => i.UserID == userID).FirstOrDefault();
@@ -182,8 +193,9 @@ namespace GameStatsApp.Controllers
                 }
                 else
                 {
-                    errorMessages = new List<string>() { "Error logging demo user in." };
-                }      
+                    success = false;
+                    errorMessages = ModelState.Values.SelectMany(i => i.Errors).Select(i => i.ErrorMessage).ToList();
+                }   
             }
             catch (Exception ex)
             {
@@ -214,19 +226,26 @@ namespace GameStatsApp.Controllers
                 GClientID = _config.GetSection("Auth").GetSection("Google").GetSection("ClientID").Value,
                 FBClientID = _config.GetSection("Auth").GetSection("Facebook").GetSection("ClientID").Value,
                 FBApiVer = _config.GetSection("Auth").GetSection("Facebook").GetSection("ApiVersion").Value,
+                RecaptchaKey = _config.GetSection("Auth").GetSection("Google").GetSection("RecaptchaKey").Value
             };
 
             return View(signUpVM);
         }
 
         [HttpPost]
-        public JsonResult SignUp(SignUpViewModel signUpVM)
+        public async Task<JsonResult> SignUp(SignUpViewModel signUpVM)
         {
             var success = false;
             List<string> errorMessages = null;
 
             try
             {
+                var result = await _authService.ValidateGoogleRecaptcha(signUpVM.Token);
+                if (!result)
+                {
+                     ModelState.AddModelError("SignUp", "Invalid recaptcha");                   
+                }
+
                 if (_userService.EmailExists(signUpVM.Email, false))
                 {
                     ModelState.AddModelError("SignUp", "Email already exists for another user");

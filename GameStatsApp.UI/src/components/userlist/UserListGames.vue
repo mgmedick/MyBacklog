@@ -93,7 +93,7 @@
                     <div v-for="(game, gameIndex) in games" class="col-xl-auto col-md-3 col-6" :key="game.id">
                         <div class="position-relative game-image-container rounded d-flex" style="overflow: hidden; background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
                             <div v-if="game.coverImagePath?.indexOf('nocover.png') > -1" class="position-absolute text-center bottom-0 start-0 end-0 px-1" style="line-height: 20px; top: 10px; z-index: 1;">
-                                <small class="position-relative text-dark">{{ game.name }}</small>
+                                <div class="mt-2"><span class="position-relative text-muted">{{ game.name }}</span></div>
                             </div>                
                             <div class="delete-icon mt-2 position-absolute start-0 end-0 d-none" style="z-index: 1;">
                                 <div class="d-flex">

@@ -8,11 +8,10 @@
                 </div>
             </div>
             <div v-if="indexvm.isDemo" class="mx-auto" style="max-width: 400px;">
-                <form @submit.prevent="submitForm">
-                    <div id="divrecaptcha" class="d-flex justify-content-center"></div>
-                    <br>
+                <form @submit.prevent="onSubmit">
+                    <div id="divrecaptcha"></div>
                     <div class="row g-2">
-                        <button type="submit" class="btn btn-primary d-flex justify-content-center align-items-center" :disabled="!recaptchaToken">Start Demo</button>
+                        <button type="submit" class="btn btn-primary d-flex justify-content-center align-items-center">Start Demo</button>
                         <a :href="indexvm.returnUrl" class="btn btn-primary">Back to mybacklog.io</a>
                     </div>
                 </form>
@@ -104,8 +103,7 @@
             return {
                 indexImagePath: '',
                 importImagePath: '',
-                settingsImagePath: '',
-                recaptchaToken: ''
+                settingsImagePath: ''
             };
         },
         watch: {},           
@@ -116,12 +114,13 @@
             
             this.setDemoImages();
 
-            if(this.indexvm.isDemo) {
+            if(this.indexvm.isDemo && !this.indexvm.isAuth) {
                 this.createGoogleRecaptchaScript().then(function() {
                     grecaptcha.ready(function() {
                         grecaptcha.render('divrecaptcha', {
                             'sitekey' : that.indexvm.recaptchaKey,
-                            'callback' : that.onRecaptchaCallback
+                            'callback' : that.submitForm,
+                            'size' : 'invisible'
                         });          
                     });      
                 });  
@@ -137,12 +136,14 @@
             window.removeEventListener('resize', this.onResize);     
         },                  
         methods: {  
-            submitForm() {
+            onSubmit() {
+                grecaptcha.execute();
+            },          
+            submitForm(token) {
                 var that = this;
-              
                 new Modal(this.$refs.loadingmodal).show();
-                
-                axios.post('/Home/LoginDemo', null, { params: { token: this.recaptchaToken } })
+
+                axios.post('/Home/LoginDemo', null, { params: { token: token } })
                     .then((res) => {
                         if (res.data.success) {
                             location.href = '/';
@@ -153,11 +154,8 @@
                         }
                         Modal.getInstance(that.$refs.loadingmodal).hide();                                           
                     })
-                    .catch(err => { console.error(err); return Promise.reject(err); });                
-            },      
-            onRecaptchaCallback: function(response) {
-                this.recaptchaToken = response;
-            },            
+                    .catch(err => { console.error(err); return Promise.reject(err); });            
+            },               
             onResize: function() {
                 var that = this;
                 if (that.width != document.documentElement.clientWidth || that.height != document.documentElement.clientHeight) {     
