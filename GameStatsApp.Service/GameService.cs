@@ -10,6 +10,7 @@ using GameStatsApp.Model.Data;
 using GameStatsApp.Model.JSON;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using System.ComponentModel.DataAnnotations;
 
 namespace GameStatsApp.Service
 {
@@ -30,18 +31,34 @@ namespace GameStatsApp.Service
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
-                searchText = searchText.SanatizeGameName();                                                           
+                searchText = searchText.SanatizeGameName();
                 results = _cacheService.GetGameViews()
-                                       .Where(i => i.SantizedName.Contains(searchText, StringComparison.OrdinalIgnoreCase) || i.SantizedNameNoSpace.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-                                       .OrderByDescending(i => i.ReleaseDate)
-                                       .ThenBy(i => i.Name)
-                                       .Select(i => new SearchResult() { Value = i.ID.ToString(), Label = i.Name, LabelSecondary = i.ReleaseDate?.Year.ToString(), ImagePath = i.CoverImagePath })
-                                       .Take(20)
-                                       .ToList();
+                               .Where(i => i.SantizedName.Contains(searchText, StringComparison.OrdinalIgnoreCase) || i.SantizedNameNoSpace.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                               .GroupBy(g => new { g.Name, g.ReleaseDate?.Year })
+                               .Select(i => i.First())
+                               .Select(i => new { i.ID, i.Name, i.ReleaseDate, i.CoverImagePath, Priority = GetPriority(i.SantizedName, searchText) })
+                               .OrderBy(i => i.Priority)
+                               .ThenByDescending(i => i.ReleaseDate)
+                               .ThenBy(i => i.Name)
+                               .Select(i => new SearchResult() { Value = i.ID.ToString(), Label = i.Name, LabelSecondary = i.ReleaseDate?.Year.ToString(), ImagePath = i.CoverImagePath })
+                               .Take(20)
+                               .ToList();
             }
             
             return results;
-        }                
+        }
+
+        private int GetPriority(string name, string searchText)
+        {
+            var result = name.Length - searchText.Length;
+
+            if (!name.StartsWith(searchText, StringComparison.OrdinalIgnoreCase))
+            {
+                result = result * 1000;
+            }
+
+            return result;
+        }
 
         public async Task<List<GameNameResult>> GetSteamUserGameNames(string steamID)
         {

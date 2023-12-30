@@ -23,8 +23,6 @@
                                 <div class="col-2">
                                     <font-awesome-icon v-if="userList.defaultListID"
                                         :icon="getDefaultIconClass(userList.defaultListID)" size="lg" class="me-3" />
-                                    <font-awesome-icon v-else-if="userList.accountTypeID"
-                                        :icon="getAccountIconClass(userList.accountTypeID)" size="lg" class="me-3" />
                                     <font-awesome-icon v-else icon="fa-solid fa-list" size="lg" class="me-3" />
                                 </div>
                                 <div class="col">
@@ -55,8 +53,6 @@
                     <font-awesome-icon v-if="selectedItemID == 0" icon="fa-solid fa-layer-group" size="xl" />
                     <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.defaultListID"
                         :icon="getDefaultIconClass(userlists.find(i => i.id == selectedItemID)?.defaultListID)" size="xl" />
-                    <font-awesome-icon v-else-if="userlists.find(i => i.id == selectedItemID)?.accountTypeID"
-                        :icon="getAccountIconClass(userlists.find(i => i.id == selectedItemID)?.accountTypeID)" size="xl" />
                     <font-awesome-icon v-else icon="fa-solid fa-list" size="xl" />
                     <span class="mx-auto fs-6">{{ selectedItemID == 0 ? 'All' : userlists.find(i => i.id ==
                         selectedItemID)?.name }}</span>
@@ -134,20 +130,6 @@ export default {
                     break;
                 case 3:
                     iconClass = 'fa-solid fa-check';
-                    break;
-            }
-
-            return iconClass;
-        },
-        getAccountIconClass: function (id) {
-            var iconClass = '';
-
-            switch (id) {
-                case 1:
-                    iconClass = 'fa-brands fa-steam';
-                    break;
-                case 2:
-                    iconClass = 'fa-brands fa-xbox';
                     break;
             }
 

@@ -210,7 +210,6 @@ namespace GameStatsApp.Service
         {
             var userAccount = _userRepo.GetUserAccounts(i => i.UserID == userID && i.AccountTypeID == accountTypeID).FirstOrDefault();
             var userAccountTokens = new List<UserAccountToken>();
-            UserList userList = null;
 
             if (userAccount == null)
             {
@@ -220,14 +219,6 @@ namespace GameStatsApp.Service
                     AccountTypeID = accountTypeID,
                     AccountUserID = tokenResponse.AccountUserID,
                     AccountUserHash = tokenResponse.AccountUserHash,                   
-                    CreatedDate = DateTime.UtcNow
-                };
-
-                userList =  new UserList()
-                { 
-                    UserID = userID,
-                    Name = ((AccountType)userAccount.AccountTypeID).ToString(),
-                    Active = true,
                     CreatedDate = DateTime.UtcNow
                 };
             }
@@ -263,12 +254,6 @@ namespace GameStatsApp.Service
             if (userAccountTokens.Any())
             {
                 _userRepo.SaveUserAccountTokens(userAccount.ID, userAccountTokens);
-            }
-
-            if (userList != null)
-            {
-                userList.UserAccountID = userAccount.ID;
-                _userListRepo.SaveUserList(userList);
             }
         }
 

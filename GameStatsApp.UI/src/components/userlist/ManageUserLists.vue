@@ -58,7 +58,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary" @click="$refs.editlist.submitForm">Submit</button>
+                        <button type="submit" class="btn btn-primary" @click="$refs.editlist.submitForm">Save</button>
                     </div>                                     
                 </div>
             </div>

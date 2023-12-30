@@ -40,5 +40,23 @@ namespace GameStatsApp.Model
         File = 1,
         Steam = 2,
         Xbox = 3
-    }  
+    }
+    
+    public enum GameCategory
+    {
+        Main = 0,
+        DLC = 1,
+        Expansion = 2,
+        Bundle = 3,
+        StandaloneExpansion = 4,
+        Mod = 5,
+        Episode = 6,
+        Season = 7,
+        Remake = 9,
+        Expanded = 10,
+        Port = 11,
+        Fork = 12,
+        Pack = 13,
+        Update = 14
+    }      
 }

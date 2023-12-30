@@ -8,6 +8,7 @@ namespace GameStatsApp.Model.Data
         public string Name { get; set; }
         public DateTime? ReleaseDate { get; set; }
         public string CoverImagePath { get; set; }
+        public int GameCategoryID { get; set; }
         public string SantizedName { get; set; }
         public string SantizedNameNoSpace { get; set; }         
     }   
