@@ -120,12 +120,15 @@ namespace GameStatsApp.Common.Extensions
             return Regex.Replace(input, @"\s+", " ");
         }
 
-        public static string Replace(this string input, string[] separators, string newVal)
+        public static string Replace(this string input, string[] separators, string newVal, StringComparison? comparer = null)
         {
-            string[] temp;
+            var temp = input;
+            foreach(var separator in separators)
+            {
+                temp = temp.Replace(separator, newVal, (comparer ?? StringComparison.CurrentCulture));
+            }
 
-            temp = input.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-            return string.Join(newVal, temp);
+            return temp;
         }        
 
         public static string ReplaceRomanWithInt(this string input)
@@ -177,6 +180,6 @@ namespace GameStatsApp.Common.Extensions
             }
                 
             return number;
-        }                           
+        }                                   
     }
 }

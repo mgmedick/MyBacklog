@@ -25,6 +25,7 @@ namespace GameStatsApp.Service
             _cacheService = cacheService; 
         }
 
+        /*
         public IEnumerable<SearchResult> SearchGames(string searchText)
         {
             var results = new List<SearchResult>();
@@ -33,10 +34,10 @@ namespace GameStatsApp.Service
             {
                 searchText = searchText.SanatizeGameName();
                 results = _cacheService.GetGameViews()
-                               .Where(i => i.SantizedName.Contains(searchText, StringComparison.OrdinalIgnoreCase) || i.SantizedNameNoSpace.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                               .Where(i => i.SantizedName.Contains(searchText, StringComparison.OrdinalIgnoreCase))
                                .GroupBy(g => new { g.Name, g.ReleaseDate?.Year })
                                .Select(i => i.First())
-                               .Select(i => new { i.ID, i.Name, i.ReleaseDate, i.CoverImagePath, Priority = GetPriority(i.SantizedName, searchText) })
+                               .Select(i => new { i.ID, i.Name, i.ReleaseDate, i.CoverImagePath, Priority = i.SantizedName.Length - searchText.Length })
                                .OrderBy(i => i.Priority)
                                .ThenByDescending(i => i.ReleaseDate)
                                .ThenBy(i => i.Name)
@@ -47,17 +48,35 @@ namespace GameStatsApp.Service
             
             return results;
         }
+        */
 
-        private int GetPriority(string name, string searchText)
+        public IEnumerable<SearchResult> SearchGames(string searchText)
         {
-            var result = name.Length - searchText.Length;
+            var results = new List<SearchResult>();
 
-            if (!name.StartsWith(searchText, StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrWhiteSpace(searchText))
             {
-                result = result * 1000;
+                searchText = searchText.SanatizeGameName();
+                var searchItems = searchText.Split(' ');
+                results = _cacheService.GetGameViews()
+                               .Where(i => searchItems.Any(g => i.SantizedName.Contains(g, StringComparison.OrdinalIgnoreCase)))
+                               .GroupBy(g => new { g.Name, g.ReleaseDate?.Year })
+                               .Select(i => i.First())
+                               .Select(i => new { i.ID, i.Name, i.ReleaseDate, i.CoverImagePath, 
+                                    ContainsPriority = searchItems.Count(g => i.SantizedName.Contains(g, StringComparison.OrdinalIgnoreCase)),
+                                    MatchPriority = searchItems.Intersect(i.SantizedName.Split(' '), StringComparer.OrdinalIgnoreCase).Count(),
+                                    RemainderPriority = i.SantizedName.Replace(searchItems, string.Empty, StringComparison.OrdinalIgnoreCase).Length
+                               })
+                               .OrderByDescending(i => i.ContainsPriority)
+                               .ThenByDescending(i => i.MatchPriority)
+                               .ThenBy(i => i.RemainderPriority)   
+                               .ThenByDescending(i => i.ReleaseDate)
+                               .Select(i => new SearchResult() { Value = i.ID.ToString(), Label = i.Name, LabelSecondary = i.ReleaseDate?.Year.ToString(), ImagePath = i.CoverImagePath })
+                               .Take(20)
+                               .ToList();
             }
-
-            return result;
+            
+            return results;
         }
 
         public async Task<List<GameNameResult>> GetSteamUserGameNames(string steamID)
