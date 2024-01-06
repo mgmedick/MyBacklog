@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Http.Internal;
 
 namespace GameStatsApp.Common.Extensions
 {
@@ -181,10 +182,11 @@ namespace GameStatsApp.Common.Extensions
                 
             return number;
         }
-
+        
         public static string ReplaceTextWithNumber(this string input)
         {
-            var matches = Regex.Matches(input, @"((?:(zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion|trillion|quadrillion|quintillion)(?: +|$))+)", RegexOptions.IgnoreCase);
+            var pattern = @"((hundred|thousand|million|billion|trillion|quadrillion|quintillion)|(?!hundred|thousand|million|billion|trillion|quadrillion|quintillion)(?=.)(\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)\b( +|$)?(hundred|thousand|million|billion|trillion|quadrillion|quintillion)( +| $))?(\b(twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)\b( +|$))?(\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)\b(( +|$)))(hundred|thousand|million|billion|trillion|quadrillion|quintillion)?( and(?= .))?( +(((hundred)( +|$))?(((twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)( |$))?((one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen)( +|$))?)))?) *?";
+            var matches = Regex.Matches(input, pattern, RegexOptions.IgnoreCase);
             
             if (matches.Any()) 
             {
@@ -223,7 +225,7 @@ namespace GameStatsApp.Common.Extensions
                 .Select(m => m.Value.ToLowerInvariant())
                 .Where(v => numberTable.ContainsKey(v))
                 .Select(v => numberTable[v]);
-            long acc = 0,total = 0L;
+            long acc = 0,total = 0L;            
             foreach(var n in numbers)
             {
                 if(n >= 1000)
