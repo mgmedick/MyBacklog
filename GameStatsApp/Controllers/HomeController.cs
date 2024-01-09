@@ -351,7 +351,7 @@ namespace GameStatsApp.Controllers
             try
             {
                 var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
-                if (activateUserVM.Email.GetHMACSHA256Hash(hashKey) == activateUserVM.EmailToken)
+                if (activateUserVM.Email.GetHMACSHA256Hash(hashKey) != activateUserVM.EmailToken)
                 {
                     ModelState.AddModelError("Activate", "Email does not match registration");
                 }
@@ -450,7 +450,7 @@ namespace GameStatsApp.Controllers
             try
             {
                 var hashKey = _config.GetSection("SiteSettings").GetSection("HashKey").Value;
-                if (changePassVM.Email.GetHMACSHA256Hash(hashKey) == changePassVM.EmailToken)
+                if (changePassVM.Email.GetHMACSHA256Hash(hashKey) != changePassVM.EmailToken)
                 {
                     ModelState.AddModelError("ChangePassword", "Email does not match registration");
                 }
