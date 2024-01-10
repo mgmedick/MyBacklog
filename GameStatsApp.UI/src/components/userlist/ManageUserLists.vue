@@ -210,7 +210,7 @@
                 return axios.post('/UserList/UpdateUserListSortOrders', formData, config)
                     .then((res) => {
                         if (res.data.success) {
-                            successToast("Updated user lists");                           
+                            successToast("Updated user list sort orders");                           
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {
                                 errorToast(errorMsg);                           

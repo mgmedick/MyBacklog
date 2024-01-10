@@ -88,7 +88,7 @@ namespace GameStatsApp.Service
         public void UpdateUserListSortOrders(int userID, List<int> userListIDs)
         {
             var usersListIndexes = userListIDs.Select((i, index) => new { ID = i, index = index });
-            var userLists = _userListRepo.GetUserLists(i => userListIDs.Contains(i.ID))                                    
+            var userLists = _userListRepo.GetUserLists(i => userListIDs.Contains(i.ID) && i.UserID == userID)                                    
                                      .ToList();
             userLists = (from c in userLists
                         join uc in usersListIndexes
@@ -96,19 +96,19 @@ namespace GameStatsApp.Service
                         orderby uc.index
                         select c).ToList();
 
-            var count = 0;
-            foreach(var userList in userLists)
+            if (userLists.Any())
             {
-                userList.SortOrder = count + 1;
-                count++;
-            }
+                var count = 0;
+                foreach(var userList in userLists)
+                {
+                    userList.SortOrder = count + 1;
+                    count++;
+                }
 
-            if (userLists.Count(i => i.UserID == userID) == userLists.Count())
-            {
                 _userListRepo.SaveUserLists(userLists);
-            }          
+            }        
         }      
-
+    
         public void UpdateUserListActive(int userID, int userListID, bool active)
         {
             var userList = _userListRepo.GetUserLists(i => i.ID == userListID).FirstOrDefault();
@@ -127,7 +127,10 @@ namespace GameStatsApp.Service
 
         public IEnumerable<UserListGameViewModel> GetUserListGames (int userID, int userListID)
         { 
-            var gameVMs = _userListRepo.GetUserListGames(userID, userListID).Select(i => new UserListGameViewModel(i)).ToList();
+            var gameVMs = _userListRepo.GetUserListGames(userID, userListID)
+                                       .Select(i => new UserListGameViewModel(i))
+                                       .OrderBy(i => i.SortOrder ?? i.ID)
+                                       .ToList();
 
             return gameVMs;
         }
@@ -148,8 +151,8 @@ namespace GameStatsApp.Service
                 var userListGame = new UserListGame() { UserListID = userListID, GameID = gameID };
                 _userListRepo.SaveUserListGame(userListGame);
             }
-        }        
-
+        }
+             
         public void RemoveGameFromUserList(int userID, int userListID, int gameID)
         {         
             var gameIDs = _userListRepo.GetUserListGameViews(i => i.UserListID == userListID).Select(i => i.ID).ToList();
@@ -172,6 +175,30 @@ namespace GameStatsApp.Service
                 _userListRepo.DeleteUserListGame(userListID, gameID);
             }
         }
+
+        public void UpdateUserListGameSortOrders(int userID, int userListID, List<int> gameIDs)
+        {
+            var gameIndexes = gameIDs.Select((i, index) => new { ID = i, index = index });
+            var gameVWs = _userListRepo.GetUserListGameViews(i => i.UserID == userID && i.UserListID == userListID).ToList();
+            gameVWs = (from g in gameVWs
+                        join gc in gameIndexes
+                        on g.ID equals gc.ID
+                        orderby gc.index
+                        select g).ToList();
+
+            if (gameVWs.Any())
+            {
+                var count = 0;
+                foreach(var gameVW in gameVWs)
+                {
+                    gameVW.SortOrder = count + 1;
+                    count++;
+                }
+                
+                var games = gameVWs.Select(i => i.ConvertToUserListGame()).ToList();
+                _userListRepo.SaveUserListGames(games);
+            }      
+        }              
 
         public void RemoveAllGamesFromUserList(int userID, int userListID)
         {         

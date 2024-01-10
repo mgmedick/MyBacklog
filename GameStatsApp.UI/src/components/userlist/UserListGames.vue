@@ -23,7 +23,7 @@
                                 <span class="visually-hidden">Toggle Dropdown</span>
                             </button>                    
                             <ul class="dropdown-menu">
-                                <li><a href="#/" @click="onOrderByOptionClick($event, 0)" class="dropdown-item" :class="{ 'active' : orderByID == 0 }">Date Added</a></li>
+                                <li><a href="#/" @click="onOrderByOptionClick($event, 0)" class="dropdown-item" :class="{ 'active' : orderByID == 0 }">Default</a></li>
                                 <li><a href="#/" @click="onOrderByOptionClick($event, 1)" class="dropdown-item" :class="{ 'active' : orderByID == 1 }">Name</a></li>
                             </ul>
                         </div>
@@ -90,7 +90,7 @@
                             </svg>                        
                         </div>
                     </div>
-                    <div v-for="(game, gameIndex) in games" class="col-xl-auto col-md-3 col-6" :key="game.id">
+                    <div v-for="(game, gameIndex) in games" class="col-xl-auto col-md-3 col-6" :key="game.id" @drop.prevent="onGameImageDrop($event, gameIndex)" @dragenter.prevent @dragover.prevent>
                         <div class="position-relative game-image-container rounded d-flex" style="overflow: hidden; background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
                             <div v-if="game.coverImagePath?.indexOf('nocover.png') > -1" class="position-absolute text-center bottom-0 start-0 end-0 px-1" style="line-height: 20px; top: 10px; z-index: 1;">
                                 <div class="mt-2"><span class="position-relative text-muted">{{ game.name }}</span></div>
@@ -100,7 +100,7 @@
                                     <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="ms-auto me-2" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/> 
                                 </div>
                             </div>      
-                            <img :src="game.coverImagePath" class="img-fluid align-self-center" :style="[ game.coverImagePath?.indexOf('nocover.png') > -1 ? { opacity:'0.5' } : null ]" alt="Responsive image">
+                            <img :src="game.coverImagePath" class="img-fluid align-self-center" :style="[ game.coverImagePath?.indexOf('nocover.png') > -1 ? { opacity:'0.5' } : null ]" @dragstart="onGameImageDragStart($event, gameIndex)" alt="Responsive image">
                             <div class="gamelist-icons position-absolute start-0 end-0 d-none" style="bottom: 10px; width: 100%; z-index: 1;">
                                 <div class="btn-group btn-group-sm position-relative px-2" role="group" style="width: 100%;">
                                     <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID)" :key="userList.id" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
@@ -190,7 +190,7 @@
 <script>
     import axios from 'axios';
     import { Modal, Popover } from 'bootstrap';
-    import { successToast, errorToast } from '../../js/common.js';
+    import { getFormData, successToast, errorToast } from '../../js/common.js';
 
     export default {
         name: "UserListGames",
@@ -310,7 +310,20 @@
                 }
 
                 return iconClass;
-            },    
+            },  
+            onGameImageDragStart(e, dragIndex) {
+                e.dataTransfer.setData("dragIndex", dragIndex);
+            },
+            onGameImageDrop(e, dropIndex) {
+                var that = this;
+
+                var dragIndex = e.dataTransfer.getData("dragIndex");
+                if (dragIndex) {   
+                    that.games.splice(dropIndex, 0, that.games.splice(dragIndex, 1)[0]);
+                    that.allgames = that.games.slice();
+                    that.updateUserListGameSortOrders();                                 
+                }   
+            },
             onGameImageMouseOver(e) {
                 var container = e.target.closest('.game-image-container');              
                 container.querySelector('.gamelist-icons').classList.remove('d-none');
@@ -439,11 +452,11 @@
                 {
                     case '0':
                         if (this.orderByDesc) {
-                            this.games = this.games.sort((a, b) => { return b.userListGameID - a.userListGameID });
-                            this.allgames = this.allgames.sort((a, b) => { return b.userListGameID - a.userListGameID });
+                            this.games = this.games.sort((a, b) => { return b.sortOrder - a.sortOrder });
+                            this.allgames = this.allgames.sort((a, b) => { return b.sortOrder - a.sortOrder });
                         } else {
-                            this.games = this.games.sort((a, b) => { return a.userListGameID - b.userListGameID });
-                            this.allgames = this.allgames.sort((a, b) => { return a.userListGameID - b.userListGameID });
+                            this.games = this.games.sort((a, b) => { return a.sortOrder - b.sortOrder });
+                            this.allgames = this.allgames.sort((a, b) => { return a.sortOrder - b.sortOrder });
                         }
                         break;                    
                     case '1':
@@ -586,7 +599,29 @@
                         Modal.getInstance(that.$refs.clearmodal).hide();                                           
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });                
-            },            
+            },
+            updateUserListGameSortOrders() {
+                var that = this;
+                var games = that.games.slice();
+                if (that.orderByDesc) {
+                    games = games.reverse()
+                }                     
+                var gameIDs = games.map(i => { return i.id });
+                var formData = getFormData({ userListID: that.userlistid, gameIDs: gameIDs });
+                var config = { headers: { 'RequestVerificationToken': that.getCsrfToken() } };
+
+                return axios.post('/UserList/UpdateUserListGameSortOrders', formData, config)
+                    .then((res) => {
+                        if (res.data.success) {
+                            successToast("Updated game sort orders");                           
+                        } else {
+                            res.data.errorMessages.forEach(errorMsg => {
+                                errorToast(errorMsg);                           
+                            });                                
+                        }
+                    })
+                    .catch(err => { console.error(err); return Promise.reject(err); });
+            },                        
             resizeColumns() {
                 var that = this;
 

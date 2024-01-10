@@ -17,6 +17,7 @@ namespace GameStatsApp.Interfaces.Services
         void RemoveGameFromUserList(int userID, int userListID, int gameID);
         void RemoveGameFromAllUserLists(int userID, int gameID);
         void RemoveAllGamesFromUserList(int userID, int userListID);
+        void UpdateUserListGameSortOrders(int userID, int userListID, List<int> gameIDs);
         IEnumerable<UserListViewModel> GetUserLists (int userID);
         void SaveUserList(int userID, UserListViewModel userListVM);
         void DeleteUserList(int userID, int userListID);

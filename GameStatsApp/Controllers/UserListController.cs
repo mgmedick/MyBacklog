@@ -162,6 +162,29 @@ namespace GameStatsApp.Controllers
             return Json(new { success = success, errorMessages = errorMessages });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult UpdateUserListGameSortOrders(int userListID, List<int> gameIDs)
+        {
+            var success = false;
+            List<string> errorMessages = null;
+
+            try
+            {
+                var userID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                _userListService.UpdateUserListGameSortOrders(userID, userListID, gameIDs);
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "UpdateUserListGameSortOrders");
+                success = false;
+                errorMessages = new List<string>() { "Error updating game sort orders" };
+            }
+
+            return Json(new { success = success, errorMessages = errorMessages });
+        }        
+
         [HttpGet]
         public JsonResult ImportGames()
         {
@@ -429,7 +452,7 @@ namespace GameStatsApp.Controllers
             {
                 _logger.Error(ex, "UpdateUserListSortOrders");
                 success = false;
-                errorMessages = new List<string>() { "Error updating user list" };
+                errorMessages = new List<string>() { "Error updating user list sort orders" };
             }
 
             return Json(new { success = success, errorMessages = errorMessages });

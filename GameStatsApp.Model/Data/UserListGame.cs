@@ -9,5 +9,6 @@ namespace GameStatsApp.Model.Data
         public int ID { get; set; }
         public int UserListID { get; set; }
         public int GameID { get; set; }
+        public int SortOrder { get; set; }
     }
 } 

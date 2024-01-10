@@ -14,6 +14,7 @@ namespace GameStatsApp.Model.ViewModels
             CoverImagePath = userListGameVW.CoverImagePath;
             UserListIDs = userListGameVW.UserListIDs.Split(",").Select(i => Convert.ToInt32(i)).ToList();
             UserListGameID = userListGameVW.UserListGameID;
+            SortOrder = userListGameVW.SortOrder;
         }
 
         public int ID { get; set; }
@@ -21,6 +22,7 @@ namespace GameStatsApp.Model.ViewModels
         public string CoverImagePath { get; set; }
         public List<int> UserListIDs { get; set; }
         public int UserListGameID { get; set; }
+        public int? SortOrder { get; set; }
     }
 }
 
