@@ -7,12 +7,20 @@
                         <font-awesome-icon icon="fa-solid fa-circle-info" size="xl"/>
                         <div class="d-none popover-content">
                             <ul class='list-group list-group-flush'>
-                                <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-plus'/>&nbsp;&nbsp;Add game</li>
-                                <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-inbox'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-play'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-check'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-ellipsis'/>&nbsp;&nbsp;Move games</li>
-                                <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-arrow-down-wide-short'/>&nbsp;&nbsp;Sort games</li>                                    
-                                <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-cloud-arrow-down'/>&nbsp;&nbsp;Import games</li>
-                                <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-filter'/>&nbsp;&nbsp;Filter games</li>
-                                <li class='list-group-item'><font-awesome-icon icon='fa-solid fa-eraser'/>&nbsp;&nbsp;Clear games</li>
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-plus'/>&nbsp;&nbsp;Add game</li>
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-inbox'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-play'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-check'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-ellipsis'/>&nbsp;&nbsp;Move games</li>
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-arrow-down-wide-short'/>&nbsp;&nbsp;Sort games                                       
+                                    <ul class='list-group list-group-flush'>
+                                        <li class='list-group-item px-2'>
+                                            <div class="alert alert-light mb-0">
+                                                <span class='text-info me-1'>Note:</span>Use <i>Custom</i> sort to re-order (drag/drop) your games
+                                            </div>
+                                        </li>
+                                    </ul>       
+                                </li>                          
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-cloud-arrow-down'/>&nbsp;&nbsp;Import games</li>
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-filter'/>&nbsp;&nbsp;Filter games</li>
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-eraser'/>&nbsp;&nbsp;Clear games</li>
                             </ul>
                         </div>
                     </a>                        
@@ -23,7 +31,7 @@
                                 <span class="visually-hidden">Toggle Dropdown</span>
                             </button>                    
                             <ul class="dropdown-menu">
-                                <li><a href="#/" @click="onOrderByOptionClick($event, 0)" class="dropdown-item" :class="{ 'active' : orderByID == 0 }">Default</a></li>
+                                <li><a href="#/" @click="onOrderByOptionClick($event, 0)" class="dropdown-item" :class="{ 'active' : orderByID == 0 }">Custom</a></li>
                                 <li><a href="#/" @click="onOrderByOptionClick($event, 1)" class="dropdown-item" :class="{ 'active' : orderByID == 1 }">Name</a></li>
                             </ul>
                         </div>
@@ -45,7 +53,7 @@
             <div v-if="loading">
                 <div class="row g-3">
                     <div class="col-xl-auto col-md-3 col-6">
-                        <div class="position-relative add-game-container" role="button">
+                        <div class="position-relative add-game-container shadow-sm" role="button">
                             <div class="position-absolute top-0 bottom-0 start-0 end-0">
                                 <div class="d-flex" style="width: 100%; height: 100%;">
                                     <div class="mx-auto align-self-center" style="text-align:center;">
@@ -74,7 +82,7 @@
                 </div>   
                 <div v-else class="row g-3">        
                     <div class="col-xl-auto col-md-3 col-6">
-                        <div class="position-relative add-game-container" role="button" @click="onSearchGamesClick">
+                        <div class="position-relative add-game-container shadow-sm" role="button" @click="onSearchGamesClick">
                             <div class="position-absolute top-0 bottom-0 start-0 end-0">
                                 <div class="d-flex" style="width: 100%; height: 100%;">
                                     <div class="mx-auto align-self-center" style="text-align:center;">
@@ -91,7 +99,7 @@
                         </div>
                     </div>
                     <div v-for="(game, gameIndex) in games" class="col-xl-auto col-md-3 col-6" :key="game.id" @drop.prevent="onGameImageDrop($event, gameIndex)" @dragenter.prevent @dragover.prevent>
-                        <div class="position-relative game-image-container rounded d-flex" style="overflow: hidden; background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
+                        <div class="position-relative game-image-container rounded d-flex shadow-sm" style="overflow: hidden; background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
                             <div v-if="game.coverImagePath?.indexOf('nocover.png') > -1" class="position-absolute text-center bottom-0 start-0 end-0 px-1" style="line-height: 20px; top: 10px; z-index: 1;">
                                 <div class="mt-2"><span class="position-relative text-muted">{{ game.name }}</span></div>
                             </div>                
@@ -100,7 +108,7 @@
                                     <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="ms-auto me-2" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/> 
                                 </div>
                             </div>      
-                            <img :src="game.coverImagePath" class="img-fluid align-self-center" :style="[ game.coverImagePath?.indexOf('nocover.png') > -1 ? { opacity:'0.5' } : null ]" @dragstart="onGameImageDragStart($event, gameIndex)" alt="Responsive image">
+                            <img :src="game.coverImagePath" class="img-fluid align-self-center" :class="{ 'cursor-grab': orderByID == 0 && userlistid != 0 }" :style="[ game.coverImagePath?.indexOf('nocover.png') > -1 ? { opacity:'0.5' } : null ]" @dragstart="onGameImageDragStart($event, gameIndex)" :draggable="orderByID == 0 && userlistid != 0 ? 'true' : 'false'" alt="Responsive image">
                             <div class="gamelist-icons position-absolute start-0 end-0 d-none" style="bottom: 10px; width: 100%; z-index: 1;">
                                 <div class="btn-group btn-group-sm position-relative px-2" role="group" style="width: 100%;">
                                     <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID)" :key="userList.id" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
@@ -318,7 +326,7 @@
                 var that = this;
 
                 var dragIndex = e.dataTransfer.getData("dragIndex");
-                if (dragIndex) {   
+                if (dragIndex != dropIndex) {   
                     that.games.splice(dropIndex, 0, that.games.splice(dragIndex, 1)[0]);
                     that.allgames = that.games.slice();
                     that.updateUserListGameSortOrders();                                 

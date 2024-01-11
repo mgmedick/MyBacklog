@@ -52,6 +52,9 @@
     pointer-events: none;
 }
 
+.cursor-grab {
+    cursor: grab;
+}
 
 /* .stretchy-wrapper {
     width: 100%;

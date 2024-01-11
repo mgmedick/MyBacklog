@@ -35,7 +35,7 @@ namespace GameStatsApp.Service
         { 
             var userLists = _userListRepo.GetUserListViews(i => i.UserID == userID)
                                     .Select(i => new UserListViewModel(i))
-                                    .OrderBy(i => i.SortOrder ?? i.ID)
+                                    .OrderBy(i => i.SortOrder)
                                     .ToList();
 
             return userLists;
@@ -129,7 +129,7 @@ namespace GameStatsApp.Service
         { 
             var gameVMs = _userListRepo.GetUserListGames(userID, userListID)
                                        .Select(i => new UserListGameViewModel(i))
-                                       .OrderBy(i => i.SortOrder ?? i.ID)
+                                       .OrderBy(i => i.SortOrder)
                                        .ToList();
 
             return gameVMs;
