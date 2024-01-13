@@ -7,20 +7,24 @@
                         <font-awesome-icon icon="fa-solid fa-circle-info" size="xl"/>
                         <div class="d-none popover-content">
                             <ul class='list-group list-group-flush'>
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-plus'/>&nbsp;&nbsp;Add game</li>
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-inbox'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-play'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-check'/>&nbsp;&nbsp;<font-awesome-icon icon='fa-solid fa-ellipsis'/>&nbsp;&nbsp;Move games</li>
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-arrow-down-wide-short'/>&nbsp;&nbsp;Sort games                                       
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-plus'/>&nbsp;&nbsp;<small>Add game</small></li>
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-inbox'/>&nbsp;&nbsp;<small>Add/Remove from Backlog</small></li>
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-play'/>&nbsp;&nbsp;<small>Add/Remove from Playing</small></li>
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-check'/>&nbsp;&nbsp;<small>Add/Remove from Completed</small></li>
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-ellipsis'/>&nbsp;&nbsp;<small>Add/Remove from Custom</small></li>                                
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-lock'/>&nbsp;&nbsp;<small>Unlock games to be moved</small>
                                     <ul class='list-group list-group-flush'>
-                                        <li class='list-group-item px-2'>
+                                        <li class='list-group-item'>
                                             <div class="alert alert-light mb-0">
-                                                <span class='text-info me-1'>Note:</span>Use <i>Custom</i> sort to re-order (drag/drop) your games
+                                                <small><span class='text-info me-1'>Note:</span>Only available for <i>Custom</i> sort</small>
                                             </div>
                                         </li>
-                                    </ul>       
-                                </li>                          
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-cloud-arrow-down'/>&nbsp;&nbsp;Import games</li>
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-filter'/>&nbsp;&nbsp;Filter games</li>
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-eraser'/>&nbsp;&nbsp;Clear games</li>
+                                    </ul>                                   
+                                </li>
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-arrow-down-wide-short'/>&nbsp;&nbsp;<small>Sort games</small></li>                             
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-cloud-arrow-down'/>&nbsp;&nbsp;<small>Import games</small></li>
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-filter'/>&nbsp;&nbsp;<small>Filter games</small></li>
+                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-eraser'/>&nbsp;&nbsp;<small>Clear games</small></li>
                             </ul>
                         </div>
                     </a>                        
@@ -35,10 +39,14 @@
                                 <li><a href="#/" @click="onOrderByOptionClick($event, 1)" class="dropdown-item" :class="{ 'active' : orderByID == 1 }">Name</a></li>
                             </ul>
                         </div>
+                        <button class="btn btn-secondary p-2 me-1" :disabled="userlistid == 0 || orderByID != 0" tabindex="-1" role="button" @click="isDraggable = !isDraggable">
+                            <font-awesome-icon v-if="isDraggable" icon="fa-solid fa-unlock" class="align-self-center" size="xl"/>  
+                            <font-awesome-icon v-else icon="fa-solid fa-lock" class="align-self-center" size="xl"/>  
+                        </button>                          
                         <div class="btn-group me-1">
                             <button type="button" class="btn btn-secondary p-2" @click="onShowFilterTextClick"><font-awesome-icon icon="fa-solid fa-filter" size="xl"/></button> 
                             <input v-if="showFilterText" v-model="filterText" type="search" class="form-control" placeholder="Filter games">
-                        </div>
+                        </div>                       
                         <div v-if="userlistid != 0" class="btn btn-secondary p-2 d-flex me-1" tabindex="-1" role="button" @click="onImportClick">
                             <font-awesome-layers v-if="isImporting" class="fa-xl align-self-center" style="width: 26px; z-index: 0;">
                                 <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-4" style="color: #adb5bd;"/>
@@ -98,17 +106,17 @@
                             </svg>                        
                         </div>
                     </div>
-                    <div v-for="(game, gameIndex) in games" class="col-xl-auto col-md-3 col-6" :key="game.id" @drop.prevent="onGameImageDrop($event, gameIndex)" @dragenter.prevent @dragover.prevent>
-                        <div class="position-relative game-image-container rounded d-flex shadow-sm" style="overflow: hidden; background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
+                    <div v-for="(game, gameIndex) in games" :key="gameIndex" class="col-xl-auto col-md-3 col-6" @drop.prevent="onGameImageDrop($event, gameIndex)" @dragenter.prevent @dragover.prevent>
+                        <div class="position-relative game-image-container rounded d-flex" :class="{ 'shadow-lg cursor-grab': isDraggable, 'shadow-sm': !isDraggable }" style="overflow: hidden; background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
                             <div v-if="game.coverImagePath?.indexOf('nocover.png') > -1" class="position-absolute text-center bottom-0 start-0 end-0 px-1" style="line-height: 20px; top: 10px; z-index: 1;">
                                 <div class="mt-2"><span class="position-relative text-muted">{{ game.name }}</span></div>
                             </div>                
-                            <div class="delete-icon mt-2 position-absolute start-0 end-0 d-none" style="z-index: 1;">
-                                <div class="d-flex">
-                                    <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="ms-auto me-2" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/> 
+                            <div class="top-icons mt-2 position-absolute start-0 end-0 d-none" style="z-index: 1;">
+                                <div class="d-flex mx-2 align-items-center">
+                                    <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="ms-auto" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/> 
                                 </div>
                             </div>      
-                            <img :src="game.coverImagePath" class="img-fluid align-self-center" :class="{ 'cursor-grab': orderByID == 0 && userlistid != 0 }" :style="[ game.coverImagePath?.indexOf('nocover.png') > -1 ? { opacity:'0.5' } : null ]" @dragstart="onGameImageDragStart($event, gameIndex)" :draggable="orderByID == 0 && userlistid != 0 ? 'true' : 'false'" alt="Responsive image">
+                            <img :src="game.coverImagePath" class="img-fluid align-self-center" :style="[ game.coverImagePath?.indexOf('nocover.png') > -1 ? { opacity:'0.5' } : null ]" @dragstart="onGameImageDragStart($event, gameIndex)" :draggable="isDraggable" alt="Responsive image">
                             <div class="gamelist-icons position-absolute start-0 end-0 d-none" style="bottom: 10px; width: 100%; z-index: 1;">
                                 <div class="btn-group btn-group-sm position-relative px-2" role="group" style="width: 100%;">
                                     <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID)" :key="userList.id" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
@@ -199,6 +207,7 @@
     import axios from 'axios';
     import { Modal, Popover } from 'bootstrap';
     import { getFormData, successToast, errorToast } from '../../js/common.js';
+    import 'drag-drop-touch';
 
     export default {
         name: "UserListGames",
@@ -212,6 +221,7 @@
                 games: [],
                 allgames: [],
                 game: {},
+                isDraggable: false,
                 loading: false,
                 searchText: null,
                 searchResults: [],
@@ -227,7 +237,7 @@
                 imgHeight: 276
             };
         },  
-        computed: {     
+        computed: {  
         },             
         watch: {
             userlistid: function (val, oldVal) {
@@ -318,30 +328,30 @@
                 }
 
                 return iconClass;
-            },  
+            },
             onGameImageDragStart(e, dragIndex) {
                 e.dataTransfer.setData("dragIndex", dragIndex);
-            },
+            },     
             onGameImageDrop(e, dropIndex) {
                 var that = this;
 
                 var dragIndex = e.dataTransfer.getData("dragIndex");
-                if (dragIndex != dropIndex) {   
+                if (dragIndex != null && dropIndex != null && dragIndex != dropIndex) {
                     that.games.splice(dropIndex, 0, that.games.splice(dragIndex, 1)[0]);
                     that.allgames = that.games.slice();
-                    that.updateUserListGameSortOrders();                                 
+                    that.updateUserListGameSortOrders();                          
                 }   
             },
             onGameImageMouseOver(e) {
                 var container = e.target.closest('.game-image-container');              
                 container.querySelector('.gamelist-icons').classList.remove('d-none');
-                container.querySelector('.delete-icon').classList.remove('d-none');
+                container.querySelector('.top-icons').classList.remove('d-none');
             },     
             onGameImageMouseLeave(e) {
                 var container = e.target.closest('.game-image-container');
                 if (!container.classList.contains('active')) {
                     container.querySelector('.gamelist-icons').classList.add('d-none');
-                    container.querySelector('.delete-icon').classList.add('d-none');
+                    container.querySelector('.top-icons').classList.add('d-none');
                 }
             }, 
             onGameImageClick(e) {
@@ -349,11 +359,11 @@
                 var gamelisticons = e.target.closest('.gamelist-icons');
                 if (!container.classList.contains('active')) {
                     container.querySelector('.gamelist-icons').classList.remove('d-none');
-                    container.querySelector('.delete-icon').classList.remove('d-none');
+                    container.querySelector('.top-icons').classList.remove('d-none');
                     container.classList.add('active');
                 } else if (!gamelisticons) {
                     container.querySelector('.gamelist-icons').classList.add('d-none');
-                    container.querySelector('.delete-icon').classList.add('d-none');
+                    container.querySelector('.top-icons').classList.add('d-none');
                     container.classList.remove('active');                    
                 }
             },  
@@ -364,7 +374,7 @@
                 var that = this;
                 var el = e.target;
                 
-                if (!el.closest('.delete-icon').classList.contains('d-none')){
+                if (!el.closest('.top-icons').classList.contains('d-none')){
                     that.game = game;
                     new Modal(that.$refs.removemodal).show();
                 }
@@ -621,6 +631,7 @@
                 return axios.post('/UserList/UpdateUserListGameSortOrders', formData, config)
                     .then((res) => {
                         if (res.data.success) {
+                            games.forEach((x, index) => x.sortOrder = index + 1);
                             successToast("Updated game sort orders");                           
                         } else {
                             res.data.errorMessages.forEach(errorMsg => {

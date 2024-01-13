@@ -53,7 +53,7 @@
 }
 
 .cursor-grab {
-    cursor: grab;
+    cursor: grab !important;
 }
 
 /* .stretchy-wrapper {
