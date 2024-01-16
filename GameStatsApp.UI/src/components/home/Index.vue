@@ -130,10 +130,10 @@
                 new Modal(that.$refs.welcomemodal).show();
             }  
 
-            window.addEventListener('resize', this.onResize);
+            //window.addEventListener('resize', this.onResize);
         },  
         destroyed() {
-            window.removeEventListener('resize', this.onResize);     
+            //window.removeEventListener('resize', this.onResize);     
         },                  
         methods: {  
             onSubmit() {

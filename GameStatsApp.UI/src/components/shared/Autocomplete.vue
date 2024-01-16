@@ -4,10 +4,10 @@
             <input type="search" class="form-control" :value="model" @input="model = $event.target.value" @click="onClick" @focus="onFocus" @keydown.down="onArrowDown" @keydown.up="onArrowUp" @keydown.enter="onEnter($event)" :placeholder="placeholder" />
         </div>
         <div v-if="isimgresults" class="container p-0">           
-            <div class="row g-2 mt-3">
+            <div class="row g-3 mt-3">
                 <div class="col-lg-2 col-md-3 col-4 d-none">
                     <div class="position-relative default-image-container" role="button">               
-                        <svg :width="imgWidth" :height="imgHeight" class="img-fluid">
+                        <svg :width="imgWidth" :height="imgHeight" class="img-fluid default-image">
                             <rect :width="imgWidth" :height="imgHeight" style="fill: none;" />
                         </svg>                        
                     </div>
@@ -191,14 +191,14 @@
                 var that = this;
                 document.querySelector('.default-image-container').parentElement.classList.remove('d-none');
 
-                var defaultheight = document.querySelector('.default-image-container .img-fluid')?.clientHeight;
+                var defaultheight = document.querySelector('.default-image-container .default-image')?.clientHeight;
                 if (defaultheight > 0) {
                     document.querySelectorAll('.image-container').forEach(item => {
                         item.style.height = defaultheight + 'px';
                     });
                 }
 
-                var defaultwidth = document.querySelector('.default-image-container .img-fluid')?.clientWidth;
+                var defaultwidth = document.querySelector('.default-image-container .default-image')?.clientWidth;
                 if (defaultwidth > 0) {
                     document.querySelectorAll('.image-container').forEach(item => {
                         item.style.width = defaultwidth + 'px';

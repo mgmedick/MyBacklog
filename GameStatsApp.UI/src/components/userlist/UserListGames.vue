@@ -57,31 +57,12 @@
                         <button v-if="userlistid != 0" type="button" class="btn btn-secondary p-2 me-1" @click="onClearListClick"><font-awesome-icon icon="fa-solid fa-eraser" size="xl"/></button>                                                                            
                     </div>
                 </div>              
-            </div>            
-            <div v-if="loading">
-                <div class="row g-3">
-                    <div class="col-xl-auto col-md-3 col-6">
-                        <div class="position-relative add-game-container shadow-sm" role="button">
-                            <div class="position-absolute top-0 bottom-0 start-0 end-0">
-                                <div class="d-flex" style="width: 100%; height: 100%;">
-                                    <div class="mx-auto align-self-center" style="text-align:center;">
-                                        <font-awesome-icon icon="fa-solid fa-plus" size="2xl" style="font-size: 50px;"/>
-                                        <div class="mt-2 text-xs">
-                                            <span>Add Game</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>                  
-                            <svg :width="imgWidth" :height="imgHeight" class="img-fluid">
-                                <rect :width="imgWidth" :height="imgHeight" style="fill: #f8f9fb;" />
-                            </svg>                              
-                        </div>
-                    </div>
-                </div>   
+            </div>
+            <div v-if="loading">                         
                 <div class="center" style="font-size: 25px;">       
                     <font-awesome-icon icon="fa-solid fa-spinner" spin size="2xl"/>
                 </div>
-            </div>
+            </div>            
             <div v-else>
                 <div v-if="games.length == 0 && userlistid == 0" class="center text-center">
                     <div class="text-muted lead">
@@ -89,10 +70,10 @@
                     </div>
                 </div>   
                 <div v-else class="row g-3">        
-                    <div class="col-xl-auto col-md-3 col-6">
-                        <div class="position-relative add-game-container shadow-sm" role="button" @click="onSearchGamesClick">
+                    <div class="col-xl-auto col-md-3 col-sm-4 col-6">
+                        <div class="position-relative add-game-container shadow-sm mx-auto" role="button" @click="onSearchGamesClick">
                             <div class="position-absolute top-0 bottom-0 start-0 end-0">
-                                <div class="d-flex" style="width: 100%; height: 100%;">
+                                <div class="d-flex" style="height: 100%;">
                                     <div class="mx-auto align-self-center" style="text-align:center;">
                                         <font-awesome-icon icon="fa-solid fa-plus" size="2xl" style="font-size: 50px;"/>
                                         <div class="mt-2 text-xs">
@@ -101,13 +82,13 @@
                                     </div>
                                 </div>
                             </div>                  
-                            <svg :width="imgWidth" :height="imgHeight" class="img-fluid">
+                            <svg :width="imgWidth" :height="imgHeight" class="img-fluid add-game-image">
                                 <rect :width="imgWidth" :height="imgHeight" style="fill: #f8f9fb;" />
                             </svg>                        
                         </div>
                     </div>
-                    <div v-for="(game, gameIndex) in games" :key="gameIndex" class="col-xl-auto col-md-3 col-6" @drop.prevent="onGameImageDrop($event, gameIndex)" @dragenter.prevent @dragover.prevent>
-                        <div class="position-relative game-image-container rounded d-flex" :class="{ 'shadow-lg cursor-grab': isDraggable, 'shadow-sm': !isDraggable }" style="overflow: hidden; background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
+                    <div v-for="(game, gameIndex) in games" :key="gameIndex" class="col-xl-auto col-md-3 col-sm-4 col-6" @drop.prevent="onGameImageDrop($event, gameIndex)" @dragenter.prevent @dragover.prevent>
+                        <div class="position-relative game-image-container rounded d-flex mx-auto" :class="{ 'shadow-lg cursor-grab': isDraggable, 'shadow-sm': !isDraggable }" style="overflow: hidden; background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
                             <div v-if="game.coverImagePath?.indexOf('nocover.png') > -1" class="position-absolute text-center bottom-0 start-0 end-0 px-1" style="line-height: 20px; top: 10px; z-index: 1;">
                                 <div class="mt-2"><span class="position-relative text-muted">{{ game.name }}</span></div>
                             </div>                
@@ -234,7 +215,7 @@
                 width: document.documentElement.clientWidth,
                 height: document.documentElement.clientHeight,
                 imgWidth: 207,
-                imgHeight: 276
+                imgHeight: 276                
             };
         },  
         computed: {  
@@ -282,16 +263,7 @@
         },  
         destroyed() {
             window.removeEventListener('resize', this.onResize);     
-        },           
-        updated: function() {
-            var that = this;
-            
-            that.$nextTick(function() {
-                if (that.userlistid == 0) {
-                    document.querySelector('.add-game-container')?.parentElement.classList.add('d-none');
-                }
-            });
-        },
+        },               
         methods: {
             loadData: function () {
                 var that = this;
@@ -306,8 +278,12 @@
 
                         that.$nextTick(function() {
                             that.resizeColumns();
+                            
+                            if (that.userlistid == 0) {
+                                document.querySelector('.add-game-container')?.parentElement.classList.add('d-none');
+                            }                            
                         });
-
+                        
                         return res;
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
@@ -644,15 +620,17 @@
             resizeColumns() {
                 var that = this;
 
-                var defaultheight = document.querySelector('.add-game-container .img-fluid')?.clientHeight;
+                var defaultheight = document.querySelector('.add-game-container .add-game-image')?.clientHeight;
                 if (defaultheight > 0) {
+                    document.querySelector('.add-game-container').style.height = defaultheight + 'px';
                     document.querySelectorAll('.game-image-container').forEach(item => {
                         item.style.height = defaultheight + 'px';
                     });
                 }
 
-                var defaultwidth = document.querySelector('.add-game-container .img-fluid')?.clientWidth;
+                var defaultwidth = document.querySelector('.add-game-container .add-game-image')?.clientWidth;
                 if (defaultwidth > 0) {
+                    document.querySelector('.add-game-container').style.width = defaultwidth + 'px';
                     document.querySelectorAll('.game-image-container').forEach(item => {
                         item.style.width = defaultwidth + 'px';
                     });
