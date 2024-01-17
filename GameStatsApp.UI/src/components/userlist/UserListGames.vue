@@ -1,8 +1,9 @@
 ﻿<template>
     <div class="games-container">
         <div class="container-fluid m-0 p-0">
-            <div class="d-flex align-items-end mb-3">
-                <div class="d-flex w-100"> 
+            <div id="divcontrols">
+                <div class="row align-items-end py-2" style="background-color: #fff;">
+                    <div class="d-flex w-100"> 
                     <a href="#/" role="button" class="btn btn-info p-2" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Controls" data-bs-content="">
                         <font-awesome-icon icon="fa-solid fa-circle-info" size="xl"/>
                         <div class="d-none popover-content">
@@ -56,7 +57,8 @@
                         </div>                            
                         <button v-if="userlistid != 0" type="button" class="btn btn-secondary p-2 me-1" @click="onClearListClick"><font-awesome-icon icon="fa-solid fa-eraser" size="xl"/></button>                                                                            
                     </div>
-                </div>              
+                </div> 
+            </div>             
             </div>
             <div v-if="loading">                         
                 <div class="center" style="font-size: 25px;">       
@@ -69,7 +71,14 @@
                         <span>Add <font-awesome-icon icon="fa-solid fa-plus"/> or import <font-awesome-icon icon="fa-solid fa-cloud-arrow-down"/> games to your lists to get started</span>
                     </div>
                 </div>   
-                <div v-else class="row g-3">        
+                <div v-else class="row g-3">   
+                    <div class="col-xl-auto col-md-3 col-sm-4 col-6 d-none">
+                        <div class="position-relative default-game-image-container">              
+                            <svg :width="imgWidth" :height="imgHeight" class="img-fluid default-game-image">
+                                <rect :width="imgWidth" :height="imgHeight" style="fill: #f8f9fb;" />
+                            </svg>                        
+                        </div>
+                    </div>                         
                     <div class="col-xl-auto col-md-3 col-sm-4 col-6">
                         <div class="position-relative add-game-container shadow-sm mx-auto" role="button" @click="onSearchGamesClick">
                             <div class="position-absolute top-0 bottom-0 start-0 end-0">
@@ -82,7 +91,7 @@
                                     </div>
                                 </div>
                             </div>                  
-                            <svg :width="imgWidth" :height="imgHeight" class="img-fluid add-game-image">
+                            <svg :width="imgWidth" :height="imgHeight" class="img-fluid">
                                 <rect :width="imgWidth" :height="imgHeight" style="fill: #f8f9fb;" />
                             </svg>                        
                         </div>
@@ -187,7 +196,7 @@
 <script>
     import axios from 'axios';
     import { Modal, Popover } from 'bootstrap';
-    import { getFormData, successToast, errorToast } from '../../js/common.js';
+    import { getFormData, stickHeader, successToast, errorToast } from '../../js/common.js';
     import 'drag-drop-touch';
 
     export default {
@@ -215,7 +224,7 @@
                 width: document.documentElement.clientWidth,
                 height: document.documentElement.clientHeight,
                 imgWidth: 207,
-                imgHeight: 276                
+                imgHeight: 276
             };
         },  
         computed: {  
@@ -257,13 +266,15 @@
 
             window.addEventListener('resize', that.onResize);
             
+            stickHeader(document.getElementById('divcontrols'));
+
             if (that.showimport) {
                 new Modal(that.$refs.importmodal).show();
             }
-        },  
+        },
         destroyed() {
             window.removeEventListener('resize', this.onResize);     
-        },               
+        },                  
         methods: {
             loadData: function () {
                 var that = this;
@@ -431,7 +442,8 @@
 
                     that.$nextTick(function() {
                         that.resizeColumns();
-                    });
+                        stickHeader(document.getElementById('divcontrols'));                        
+                    });                   
                 }
             }, 
             onIsImportingUpdate(e) {
@@ -616,26 +628,31 @@
                         }
                     })
                     .catch(err => { console.error(err); return Promise.reject(err); });
-            },                        
+            },
             resizeColumns() {
                 var that = this;
+                document.querySelector('.default-game-image-container').parentElement.classList.remove('d-none');
 
-                var defaultheight = document.querySelector('.add-game-container .add-game-image')?.clientHeight;
+                var defaultheight = document.querySelector('.default-game-image-container .default-game-image')?.clientHeight;
                 if (defaultheight > 0) {
-                    document.querySelector('.add-game-container').style.height = defaultheight + 'px';
+                    document.querySelector('.add-game-container').style.width = defaultwidth + 'px';
                     document.querySelectorAll('.game-image-container').forEach(item => {
                         item.style.height = defaultheight + 'px';
                     });
                 }
 
-                var defaultwidth = document.querySelector('.add-game-container .add-game-image')?.clientWidth;
+                var defaultwidth = document.querySelector('.default-game-image-container .default-game-image')?.clientWidth;
                 if (defaultwidth > 0) {
                     document.querySelector('.add-game-container').style.width = defaultwidth + 'px';
                     document.querySelectorAll('.game-image-container').forEach(item => {
                         item.style.width = defaultwidth + 'px';
                     });
                 }
-            }                                                                                          
+
+                if (defaultheight > 0 && defaultwidth > 0) {
+                    document.querySelector('.default-game-image-container').parentElement.classList.add('d-none');
+                }
+            }                                                                                                      
         },
     };
 </script>
