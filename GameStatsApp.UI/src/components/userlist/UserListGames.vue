@@ -1,64 +1,65 @@
 ﻿<template>
     <div class="games-container">
         <div class="container-fluid m-0 p-0">
+            <div id="divcontrolsplaceholder" class="d-none"></div>
             <div id="divcontrols">
                 <div class="row align-items-end py-2" style="background-color: #fff;">
                     <div class="d-flex w-100"> 
-                    <a href="#/" role="button" class="btn btn-info p-2" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Controls" data-bs-content="">
-                        <font-awesome-icon icon="fa-solid fa-circle-info" size="xl"/>
-                        <div class="d-none popover-content">
-                            <ul class='list-group list-group-flush'>
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-plus'/>&nbsp;&nbsp;<small>Add game</small></li>
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-inbox'/>&nbsp;&nbsp;<small>Add/Remove from Backlog</small></li>
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-play'/>&nbsp;&nbsp;<small>Add/Remove from Playing</small></li>
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-check'/>&nbsp;&nbsp;<small>Add/Remove from Completed</small></li>
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-ellipsis'/>&nbsp;&nbsp;<small>Add/Remove from Custom</small></li>                                
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-lock'/>&nbsp;&nbsp;<small>Unlock games to be moved</small>
-                                    <ul class='list-group list-group-flush'>
-                                        <li class='list-group-item'>
-                                            <div class="alert alert-light mb-0">
-                                                <small><span class='text-info me-1'>Note:</span>Only available for <i>Custom</i> sort</small>
-                                            </div>
-                                        </li>
-                                    </ul>                                   
-                                </li>
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-arrow-down-wide-short'/>&nbsp;&nbsp;<small>Sort games</small></li>                             
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-cloud-arrow-down'/>&nbsp;&nbsp;<small>Import games</small></li>
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-filter'/>&nbsp;&nbsp;<small>Filter games</small></li>
-                                <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-eraser'/>&nbsp;&nbsp;<small>Clear games</small></li>
-                            </ul>
+                        <a href="#/" role="button" class="btn btn-info p-2" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="Controls" data-bs-content="">
+                            <font-awesome-icon icon="fa-solid fa-circle-info" size="xl"/>
+                            <div class="d-none popover-content">
+                                <ul class='list-group list-group-flush'>
+                                    <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-plus'/>&nbsp;&nbsp;<small>Add game</small></li>
+                                    <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-inbox'/>&nbsp;&nbsp;<small>Add/Remove from Backlog</small></li>
+                                    <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-play'/>&nbsp;&nbsp;<small>Add/Remove from Playing</small></li>
+                                    <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-check'/>&nbsp;&nbsp;<small>Add/Remove from Completed</small></li>
+                                    <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-ellipsis'/>&nbsp;&nbsp;<small>Add/Remove from Custom</small></li>                                
+                                    <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-lock'/>&nbsp;&nbsp;<small>Unlock games to be moved</small>
+                                        <ul class='list-group list-group-flush'>
+                                            <li class='list-group-item'>
+                                                <div class="alert alert-light mb-0">
+                                                    <small><span class='text-info me-1'>Note:</span>Only available for <i>Custom</i> sort</small>
+                                                </div>
+                                            </li>
+                                        </ul>                                   
+                                    </li>
+                                    <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-arrow-down-wide-short'/>&nbsp;&nbsp;<small>Sort games</small></li>                             
+                                    <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-cloud-arrow-down'/>&nbsp;&nbsp;<small>Import games</small></li>
+                                    <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-filter'/>&nbsp;&nbsp;<small>Filter games</small></li>
+                                    <li class='list-group-item px-2'><font-awesome-icon icon='fa-solid fa-eraser'/>&nbsp;&nbsp;<small>Clear games</small></li>
+                                </ul>
+                            </div>
+                        </a>                        
+                        <div class="d-flex ms-auto">
+                            <div class="btn-group me-1" role="group">
+                                <button type="button" class="btn btn-secondary p-2" @click="onOrderByDescClick"><font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-arrow-up-wide-short" size="xl"/><font-awesome-icon v-else icon="fa-solid fa-arrow-down-wide-short" size="xl"/></button>
+                                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split p-2" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="visually-hidden">Toggle Dropdown</span>
+                                </button>                    
+                                <ul class="dropdown-menu">
+                                    <li><a href="#/" @click="onOrderByOptionClick($event, 0)" class="dropdown-item" :class="{ 'active' : orderByID == 0 }">Custom</a></li>
+                                    <li><a href="#/" @click="onOrderByOptionClick($event, 1)" class="dropdown-item" :class="{ 'active' : orderByID == 1 }">Name</a></li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-secondary p-2 me-1" :disabled="userlistid == 0 || orderByID != 0" tabindex="-1" role="button" @click="isDraggable = !isDraggable">
+                                <font-awesome-icon v-if="isDraggable" icon="fa-solid fa-unlock" class="align-self-center" size="xl"/>  
+                                <font-awesome-icon v-else icon="fa-solid fa-lock" class="align-self-center" size="xl"/>  
+                            </button>                          
+                            <div class="btn-group me-1">
+                                <button type="button" class="btn btn-secondary p-2" @click="onShowFilterTextClick"><font-awesome-icon icon="fa-solid fa-filter" size="xl"/></button> 
+                                <input v-if="showFilterText" v-model="filterText" type="search" class="form-control" placeholder="Filter games">
+                            </div>                       
+                            <div v-if="userlistid != 0" class="btn btn-secondary p-2 d-flex me-1" tabindex="-1" role="button" @click="onImportClick">
+                                <font-awesome-layers v-if="isImporting" class="fa-xl align-self-center" style="width: 26px; z-index: 0;">
+                                    <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-4" style="color: #adb5bd;"/>
+                                    <font-awesome-icon icon="fa-solid fa-cloud" style="z-index: -1;"/>
+                                </font-awesome-layers>
+                                <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" class="align-self-center" size="xl"/>  
+                            </div>                            
+                            <button v-if="userlistid != 0" type="button" class="btn btn-secondary p-2 me-1" @click="onClearListClick"><font-awesome-icon icon="fa-solid fa-eraser" size="xl"/></button>                                                                            
                         </div>
-                    </a>                        
-                    <div class="d-flex ms-auto">
-                        <div class="btn-group me-1" role="group">
-                            <button type="button" class="btn btn-secondary p-2" @click="onOrderByDescClick"><font-awesome-icon v-if="orderByDesc" icon="fa-solid fa-arrow-up-wide-short" size="xl"/><font-awesome-icon v-else icon="fa-solid fa-arrow-down-wide-short" size="xl"/></button>
-                            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split p-2" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span class="visually-hidden">Toggle Dropdown</span>
-                            </button>                    
-                            <ul class="dropdown-menu">
-                                <li><a href="#/" @click="onOrderByOptionClick($event, 0)" class="dropdown-item" :class="{ 'active' : orderByID == 0 }">Custom</a></li>
-                                <li><a href="#/" @click="onOrderByOptionClick($event, 1)" class="dropdown-item" :class="{ 'active' : orderByID == 1 }">Name</a></li>
-                            </ul>
-                        </div>
-                        <button class="btn btn-secondary p-2 me-1" :disabled="userlistid == 0 || orderByID != 0" tabindex="-1" role="button" @click="isDraggable = !isDraggable">
-                            <font-awesome-icon v-if="isDraggable" icon="fa-solid fa-unlock" class="align-self-center" size="xl"/>  
-                            <font-awesome-icon v-else icon="fa-solid fa-lock" class="align-self-center" size="xl"/>  
-                        </button>                          
-                        <div class="btn-group me-1">
-                            <button type="button" class="btn btn-secondary p-2" @click="onShowFilterTextClick"><font-awesome-icon icon="fa-solid fa-filter" size="xl"/></button> 
-                            <input v-if="showFilterText" v-model="filterText" type="search" class="form-control" placeholder="Filter games">
-                        </div>                       
-                        <div v-if="userlistid != 0" class="btn btn-secondary p-2 d-flex me-1" tabindex="-1" role="button" @click="onImportClick">
-                            <font-awesome-layers v-if="isImporting" class="fa-xl align-self-center" style="width: 26px; z-index: 0;">
-                                <font-awesome-icon icon="fa-solid fa-spinner" spin transform="shrink-4" style="color: #adb5bd;"/>
-                                <font-awesome-icon icon="fa-solid fa-cloud" style="z-index: -1;"/>
-                            </font-awesome-layers>
-                            <font-awesome-icon v-else icon="fa-solid fa-cloud-arrow-down" class="align-self-center" size="xl"/>  
-                        </div>                            
-                        <button v-if="userlistid != 0" type="button" class="btn btn-secondary p-2 me-1" @click="onClearListClick"><font-awesome-icon icon="fa-solid fa-eraser" size="xl"/></button>                                                                            
-                    </div>
-                </div> 
-            </div>             
+                    </div> 
+                </div>             
             </div>
             <div v-if="loading">                         
                 <div class="center" style="font-size: 25px;">       
@@ -274,7 +275,10 @@
             window.addEventListener('resize', that.onResize);
 
             var div = document.getElementById('divcontrols');
+            var divplaceholder = document.getElementById('divcontrolsplaceholder');
+            divplaceholder.style.height = div.offsetHeight + 'px';
             that.headerOffset = { top: div.offsetTop, left: div.offsetLeft, width: div.offsetWidth, initLeft: div.style.left, initWidth: div.style.width };
+
             window.addEventListener('scroll', that.onScroll);          
             
             if (that.showimport) {
@@ -454,9 +458,11 @@
                         that.resizeColumns();
 
                         var div = document.getElementById('divcontrols');
+                        var divplaceholder = document.getElementById('divcontrolsplaceholder');
                         div.style.left = that.headerOffset.initLeft;
                         div.style.width = that.headerOffset.initWidth;
-                        div.classList.remove('fixed-header');    
+                        div.classList.remove('fixed-header'); 
+                        divplaceholder.classList.add('d-none');   
                         that.headerOffset = { top: div.offsetTop, left: div.offsetLeft, width: div.offsetWidth, initWidth: div.style.width, initLeft: div.style.left };
                         that.onScroll();    
                     });                   
@@ -464,17 +470,20 @@
             }, 
             onScroll: function() {
                 var div = document.getElementById('divcontrols');
-                
+                var divplaceholder = document.getElementById('divcontrolsplaceholder');
+
                 if (window.scrollY > this.headerOffset.top) {
                     if (!div.classList.contains('fixed-header')) {
                         div.style.width = this.headerOffset.width + 'px';
                         div.style.left = this.headerOffset.left - window.scrollLeft + 'px';
                         div.classList.add('fixed-header');
+                        divplaceholder.classList.remove('d-none');
                     }
                 } else {
                     div.style.left = this.headerOffset.initLeft;
                     div.style.width = this.headerOffset.initWidth;
-                    div.classList.remove('fixed-header');                     
+                    div.classList.remove('fixed-header');
+                    divplaceholder.classList.add('d-none');
                 }
             },            
             onIsImportingUpdate(e) {
