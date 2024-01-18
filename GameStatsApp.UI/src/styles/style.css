@@ -56,6 +56,12 @@
     cursor: grab !important;
 }
 
+.fixed-header {
+    position: fixed;
+    z-index: 999;
+    top: 0px;
+}
+
 /* .stretchy-wrapper {
     width: 100%;
     padding-bottom: 75%;

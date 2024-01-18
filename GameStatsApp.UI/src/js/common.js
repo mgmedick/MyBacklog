@@ -166,42 +166,7 @@ const errorToast = (errorMsg) => {
     new Toast(el).show();
 }
 
-const stickHeader = (header) => {
-    var offset = header.getBoundingClientRect();
-    var headerClone = header.cloneNode(true); 
-  
-    var divID = 'div-' + header.id; 
-    var div = document.getElementById(divID);
-    if (div) {
-        div.remove();
-    }
- 
-    div = document.createElement('div');
-    div.id = divID;
-    div.style.position = 'fixed';
-    div.style.top = '0px';
-    div.style.left = offset.left + 'px';
-    div.style.width = offset.width + 'px';
-    div.style.zIndex = '999';
-    div.classList.add('d-none');
-    div.appendChild(headerClone);
-    document.body.appendChild(div);
- 
-    window.addEventListener('scroll', function() {
-        if (window.scrollY > offset.top) {
-            if (!header.classList.contains('d-none')) {
-                div.style.left = offset.left - window.scrollLeft + 'px';
-                div.classList.remove('d-none');
-            } else {
-                div.classList.add('d-none');            
-            }
-        } else {
-            div.classList.add('d-none');                     
-        }
-    });
-}
-
-export { getFormData, getIntOrdinalString, getDateDiffList, formatTime, getDateTimeLocalString, isValidDate, escapeHtml, formatFileName, setCookie, getCookie, deleteCookie, listenCookieChange, stickHeader, successToast, errorToast }
+export { getFormData, getIntOrdinalString, getDateDiffList, formatTime, getDateTimeLocalString, isValidDate, escapeHtml, formatFileName, setCookie, getCookie, deleteCookie, listenCookieChange, successToast, errorToast }
 
 
 

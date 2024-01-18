@@ -196,7 +196,7 @@
 <script>
     import axios from 'axios';
     import { Modal, Popover } from 'bootstrap';
-    import { getFormData, stickHeader, successToast, errorToast } from '../../js/common.js';
+    import { getFormData, successToast, errorToast } from '../../js/common.js';
     import 'drag-drop-touch';
 
     export default {
@@ -224,7 +224,14 @@
                 width: document.documentElement.clientWidth,
                 height: document.documentElement.clientHeight,
                 imgWidth: 207,
-                imgHeight: 276
+                imgHeight: 276,
+                headerOffset: {
+                    top: 0,
+                    left: 0,
+                    width: 0,
+                    initLeft: 0,
+                    initWidth: 0
+                }
             };
         },  
         computed: {  
@@ -239,7 +246,7 @@
                     that.filterResults(val);
                 }
             }                      
-        },  
+        },        
         created: function () {
             this.loadData();
         },
@@ -265,16 +272,19 @@
             });            
 
             window.addEventListener('resize', that.onResize);
-            
-            stickHeader(document.getElementById('divcontrols'));
 
+            var div = document.getElementById('divcontrols');
+            that.headerOffset = { top: div.offsetTop, left: div.offsetLeft, width: div.offsetWidth, initLeft: div.style.left, initWidth: div.style.width };
+            window.addEventListener('scroll', that.onScroll);          
+            
             if (that.showimport) {
                 new Modal(that.$refs.importmodal).show();
             }
         },
         destroyed() {
-            window.removeEventListener('resize', this.onResize);     
-        },                  
+            window.removeEventListener('resize', this.onResize);    
+            window.removeEventListener('scroll', this.onScroll);     
+        },          
         methods: {
             loadData: function () {
                 var that = this;
@@ -421,12 +431,12 @@
             onOrderByDescClick(e){
                 this.orderByDesc = !this.orderByDesc;
                 sessionStorage.setItem('orderByDesc', this.orderByDesc.toString());
-                this.sortGames();                
+                this.sortGames();
             },            
             onOrderByOptionClick(e, val){
                 this.orderByID = val;
                 sessionStorage.setItem('orderByID', this.orderByID.toString());
-                this.sortGames();                
+                this.sortGames();                          
             },
             onShowFilterTextClick(e) {
                 this.showFilterText = !this.showFilterText;
@@ -442,17 +452,38 @@
 
                     that.$nextTick(function() {
                         that.resizeColumns();
-                        stickHeader(document.getElementById('divcontrols'));                        
+
+                        var div = document.getElementById('divcontrols');
+                        div.style.left = that.headerOffset.initLeft;
+                        div.style.width = that.headerOffset.initWidth;
+                        div.classList.remove('fixed-header');    
+                        that.headerOffset = { top: div.offsetTop, left: div.offsetLeft, width: div.offsetWidth, initWidth: div.style.width, initLeft: div.style.left };
+                        that.onScroll();    
                     });                   
                 }
             }, 
+            onScroll: function() {
+                var div = document.getElementById('divcontrols');
+                
+                if (window.scrollY > this.headerOffset.top) {
+                    if (!div.classList.contains('fixed-header')) {
+                        div.style.width = this.headerOffset.width + 'px';
+                        div.style.left = this.headerOffset.left - window.scrollLeft + 'px';
+                        div.classList.add('fixed-header');
+                    }
+                } else {
+                    div.style.left = this.headerOffset.initLeft;
+                    div.style.width = this.headerOffset.initWidth;
+                    div.classList.remove('fixed-header');                     
+                }
+            },            
             onIsImportingUpdate(e) {
                 this.isImporting = e;
 
                 if (!this.isImporting) {
                     this.loadData();
                 }
-            },     
+            },  
             sortGames() {
                 switch (this.orderByID.toString())
                 {
