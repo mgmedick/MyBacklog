@@ -19,16 +19,25 @@ namespace GameStatsApp.Service
     {
         public IMemoryCache _cache { get; set; }
         public IGameRepository _gameRepo { get; set; }
+        public ILogger _logger { get; set; }
 
-        public CacheService(IMemoryCache cache, IGameRepository gameRepo)
+        public CacheService(IMemoryCache cache, IGameRepository gameRepo, ILogger logger)
         {
             _cache = cache;
             _gameRepo = gameRepo;
+            _logger = logger;
         }
 
         public void RefreshCache()
         {
-            GetGameViews(true);
+            try
+            {
+                GetGameViews(true);
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex, "RefreshCache");              
+            }
         }
 
         public IEnumerable<GameView> GetGameViews(bool refresh = false)

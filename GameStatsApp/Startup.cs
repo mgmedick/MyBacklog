@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using GameStatsApp.Repository.Configuration;
 using System;
 using System.Text.Json;
+using GameStatsApp.Service;
 
 namespace GameStatsApp
 {
@@ -90,6 +91,9 @@ namespace GameStatsApp
             app.UseSession();
             app.UseAuthentication();
             app.UseAuthorization();
+
+            var _cacheService = app.ApplicationServices.GetRequiredService<CacheService>();
+            _cacheService.RefreshCache();
 
             app.UseEndpoints(endpoints =>
             {
