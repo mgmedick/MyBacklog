@@ -98,7 +98,7 @@
                         </div>
                     </div>
                     <div v-for="(game, gameIndex) in games" :key="gameIndex" class="col-xl-auto col-md-3 col-sm-4 col-6" @drop.prevent="onGameImageDrop($event, gameIndex)" @dragenter.prevent @dragover.prevent>
-                        <div class="position-relative game-image-container rounded d-flex mx-auto" :class="{ 'shadow-lg cursor-grab': isDraggable, 'shadow-sm': !isDraggable }" style="overflow: hidden; background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
+                        <div class="position-relative game-image-container rounded d-flex mx-auto" :class="{ 'shadow-lg cursor-grab': isDraggable, 'shadow-sm': !isDraggable }" style="background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
                             <div v-if="game.coverImagePath?.indexOf('nocover.png') > -1" class="position-absolute text-center bottom-0 start-0 end-0 px-1" style="line-height: 20px; top: 10px; z-index: 1;">
                                 <div class="mt-2"><span class="position-relative text-muted">{{ game.name }}</span></div>
                             </div>                
@@ -107,7 +107,7 @@
                                     <font-awesome-icon icon="fa-solid fa-circle-xmark" size="xl" class="ms-auto" style="color: #d9534f; background: radial-gradient(#fff 50%, transparent 50%); cursor: pointer;" @click="onDeleteClick($event, game)"/> 
                                 </div>
                             </div>      
-                            <img :src="game.coverImagePath" class="img-fluid align-self-center" :style="[ game.coverImagePath?.indexOf('nocover.png') > -1 ? { opacity:'0.5' } : null ]" @dragstart="onGameImageDragStart($event, gameIndex)" :draggable="isDraggable" alt="Responsive image">
+                            <img :src="game.coverImagePath" class="img-fluid align-self-center rounded" :style="[ game.coverImagePath?.indexOf('nocover.png') > -1 ? { opacity:'0.5' } : null ]" @dragstart="onGameImageDragStart($event, gameIndex)" :draggable="isDraggable" alt="Responsive image">
                             <div class="gamelist-icons position-absolute start-0 end-0 d-none" style="bottom: 10px; width: 100%; z-index: 1;">
                                 <div class="btn-group btn-group-sm position-relative px-2" role="group" style="width: 100%;">
                                     <button v-for="(userList, userListIndex) in userlists.filter(i => i.defaultListID)" :key="userList.id" @click="onUserListClick($event, userList, game)" type="button" class="btn btn-light btn-sm gamelist-item" :class="{ 'active' : game.userListIDs.indexOf(userList.id) > -1 }" :data-val="userList.id">
