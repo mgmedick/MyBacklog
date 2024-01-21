@@ -63,13 +63,13 @@ namespace GameStatsApp.Service
                                .GroupBy(g => new { g.Name, g.ReleaseDate?.Year })
                                .Select(i => i.First())
                                .Select(i => new { i.ID, i.Name, i.ReleaseDate, i.CoverImagePath, 
-                                    ContainsPriority = searchItems.Count(g => i.SantizedName.Contains(g, StringComparison.OrdinalIgnoreCase)),
-                                    MatchPriority = searchItems.Intersect(i.SantizedName.Split(' '), StringComparer.OrdinalIgnoreCase).Count(),
+                                    ContainsPriority = searchItems.Count() - searchItems.Count(g => i.SantizedName.Contains(g, StringComparison.OrdinalIgnoreCase)),
+                                    MatchPriority = searchItems.Count() - searchItems.Intersect(i.SantizedName.Split(' '), StringComparer.OrdinalIgnoreCase).Count(),
                                     RemainderPriority = i.SantizedName.Replace(searchItems, string.Empty, StringComparison.OrdinalIgnoreCase).Length
                                })
-                               .OrderByDescending(i => i.ContainsPriority)
-                               .ThenByDescending(i => i.MatchPriority)
-                               .ThenBy(i => i.RemainderPriority)   
+                               .OrderBy(i => i.ContainsPriority)
+                               .ThenBy(i => i.MatchPriority)
+                               .ThenBy(i => i.RemainderPriority) 
                                .ThenByDescending(i => i.ReleaseDate)
                                .Select(i => new SearchResult() { Value = i.ID.ToString(), Label = i.Name, LabelSecondary = i.ReleaseDate?.Year.ToString(), ImagePath = i.CoverImagePath })
                                .Take(20)

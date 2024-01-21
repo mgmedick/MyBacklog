@@ -540,10 +540,12 @@
                                 that.games.push(result);
                                 that.allgames.push({...result});
                                 that.sortGames();
+                                that.$nextTick(function() {
+                                    that.resizeColumns();
+                                });
                             }
                             
                             Modal.getInstance(that.$refs.searchmodal).hide();
-
                             var userList = that.userlists.find(i => i.id == userListID);
                             successToast("Added <strong>" + result.name + "</strong> to <strong>" + userList.name + "</strong>");
                         } else {       
