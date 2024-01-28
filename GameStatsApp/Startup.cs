@@ -93,8 +93,8 @@ namespace GameStatsApp
             app.UseAuthorization();
 
             var _cacheService = app.ApplicationServices.GetRequiredService<CacheService>();
-            _cacheService.RefreshCache();
-
+            _ =_cacheService.RefreshCache();
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute("Welcome", "Welcome", new { controller = "User", action = "Welcome" });

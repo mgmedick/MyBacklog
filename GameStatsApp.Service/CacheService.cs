@@ -28,11 +28,11 @@ namespace GameStatsApp.Service
             _logger = logger;
         }
 
-        public void RefreshCache()
+        public async Task RefreshCache()
         {
             try
             {
-                GetGameViews(true);
+                await Task.Run(() => GetGameViews(true));
             }
             catch(Exception ex)
             {

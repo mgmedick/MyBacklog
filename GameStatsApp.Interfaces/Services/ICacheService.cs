@@ -9,7 +9,7 @@ namespace GameStatsApp.Interfaces.Services
 {
     public interface ICacheService
     {
-        void RefreshCache();
+        Task RefreshCache();
         IEnumerable<GameView> GetGameViews(bool refresh = false);
     }
 }
