@@ -45,8 +45,6 @@
     <Content Include="src\components\user\ResetPassword.vue" />
     <Content Include="src\components\user\SignUp.vue" />
     <Content Include="src\components\user\UserDetails.vue" /> 
-      <SubType>Code</SubType>
-    </Content>
     <Content Include="src\fonts\banner1.svg" />
     <Content Include="src\fonts\banner2.svg" />
     <Content Include="src\fonts\banner3.svg" />
