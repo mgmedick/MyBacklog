@@ -41,7 +41,7 @@
                                     <li><a href="#/" @click="onOrderByOptionClick($event, 1)" class="dropdown-item" :class="{ 'active' : orderByID == 1 }">Name</a></li>
                                 </ul>
                             </div>
-                            <button class="btn btn-secondary p-2 me-1" :disabled="userlistid == 0 || orderByID != 0" tabindex="-1" role="button" @click="isDraggable = !isDraggable">
+                            <button class="btn btn-secondary p-2 me-1" :class="{ 'active' : isDraggable }" :disabled="userlistid == 0 || orderByID != 0" tabindex="-1" role="button" @click="isDraggable = !isDraggable">
                                 <font-awesome-icon v-if="isDraggable" icon="fa-solid fa-unlock" class="align-self-center" size="xl"/>  
                                 <font-awesome-icon v-else icon="fa-solid fa-lock" class="align-self-center" size="xl"/>  
                             </button>                          
