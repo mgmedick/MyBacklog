@@ -38,22 +38,12 @@
                 </div>
             </div>
             <div v-else>
-                <!-- <div class="text-center">
-                    <label for="formFile" class="form-label"><small class="fw-bold">Import from File</small></label>
-                    <div class="btn-group" role="group">
-                        <input id="formFile" type="file" v-model.lazy="form.Password" class="form-control form-control-sm" >
-                        <button type="button" class="btn btn-primary btn-sm p-1" data-bs-toggle="dropdown" aria-expanded="false">
-                            <font-awesome-icon icon="fa-solid fa-file-import" size="xl"/>
-                        </button> 
-                    </div>
-                </div>           
-                <div class="text-center"><small class="fw-bold">OR</small></div>                  -->
                 <div class="row g-2 justify-content-center mb-3">
-                    <button class="btn btn-primary d-flex justify-content-center align-items-center" :disabled="importingTypeIDs.indexOf(1) > -1">
+                    <label for="btnFileUpload" class="btn btn-primary d-flex justify-content-center align-items-center" :disabled="importingTypeIDs.indexOf(1) > -1">
                         <font-awesome-icon icon="fa-solid fa-file-import" size="xl"/>
-                        <div class="mx-auto"><span style="margin-right:30px;">Import from <strong data-bs-toggle="tooltip" data-bs-title="csv, xls, xlsx, txt">File</strong></span></div><input ref="fileinput" type="file" @change="onFileChange" accept=".rtf, .txt, .csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="form-control form-control-sm" hidden>
+                        <div class="mx-auto"><span style="margin-right:30px;">Import from <strong data-bs-toggle="tooltip" data-bs-title="csv, xls, xlsx, txt">File</strong></span></div><input id="btnFileUpload" ref="fileinput" type="file" @change="onFileChange" accept=".rtf, .txt, .csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="form-control form-control-sm d-none">
                         <font-awesome-icon v-if="importingTypeIDs.indexOf(1) > -1" icon="fa-solid fa-spinner" spin size="xl"/>
-                    </button>
+                    </label>
                     <div class="btn-group p-0" role="group">
                         <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center" @click="onImportGamesFromUserAccountClick(2)" :disabled="importingTypeIDs.indexOf(2) > -1">
                             <font-awesome-icon icon="fa-brands fa-steam" size="xl"/>

@@ -98,7 +98,7 @@
                         </div>
                     </div>
                     <div v-for="(game, gameIndex) in games" :key="gameIndex" class="col-xl-auto col-md-3 col-sm-4 col-6" @drop.prevent="onGameImageDrop($event, gameIndex)" @dragenter.prevent @dragover.prevent>
-                        <div class="position-relative game-image-container rounded d-flex mx-auto" :class="{ 'shadow-lg cursor-grab': isDraggable, 'shadow-sm': !isDraggable }" style="background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
+                        <div class="position-relative game-image-container rounded d-flex mx-auto overflow-hidden" :class="{ 'shadow-lg cursor-grab': isDraggable, 'shadow-sm': !isDraggable }" style="background: linear-gradient(45deg,#dbdde3,#fff);" @mouseover="onGameImageMouseOver" @mouseleave="onGameImageMouseLeave" @click="onGameImageClick">
                             <div v-if="game.coverImagePath?.indexOf('nocover.png') > -1" class="position-absolute text-center bottom-0 start-0 end-0 px-1" style="line-height: 20px; top: 10px; z-index: 1;">
                                 <div class="mt-2"><span class="position-relative text-muted">{{ game.name }}</span></div>
                             </div>                
